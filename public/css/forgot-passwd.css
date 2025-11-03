@@ -1,0 +1,112 @@
+/* Reset básico e fonte padrão */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Container geral ocupa toda a tela */
+.geral-container {
+  width: 100%;
+  height: 100vh;
+  display: flex; 
+}
+
+/* Seção da imagem */
+.imagem {
+  width: 50%;
+  height: 100vh;
+  background-color: #006060;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Container da imagem de senha */
+.img-senha {
+  width: 100%;
+  height: 70%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imagem .img-senha img {
+  width: 90%;
+  height: 90%;
+}
+.texts{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.passo1{
+    width: 90%;
+    height: 90%;
+    display: flex;
+    padding-top: 5%;
+    flex-direction: column;
+    align-items: center;
+}
+
+.titulo{
+    height: 15%;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.titulo p {
+    font-size: 40px;
+    font-weight: 600;
+}
+
+.linha{
+    width: 90px;
+    height: 5px;
+    background-color: #006060;
+    margin-top: -1.5%;
+}
+
+.input{
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    height: 30%;
+    justify-content: space-evenly;
+    margin-top: 15%;
+   
+}
+
+.input input{
+    width: 90%;
+    align-self: center;
+    height: 30px;
+    background-color: transparent;
+    border: #006060 3px solid;
+    border-radius: 15px; 
+    outline: none;
+    padding: 2%;
+}
+
+.input label{
+    margin-left: 5%;
+    font-size: large;
+    font-weight: 500;
+}
+
+.btn_send_code{
+    width: 30%;
+    align-self: center;
+    border-radius: 8px;
+    color: white;
+    background-color: #006060;
+    padding: 1.5%;
+    outline: none;
+    border: none;
+    font-weight: 500
+}
