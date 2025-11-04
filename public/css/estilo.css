@@ -101,8 +101,11 @@ body {
     }
 
     .forgot-link {
-      text-align: left;
+      justify-content: center;
       margin-bottom: 30px;
+      width: 100%;
+      display: flex;
+      margin-top: 2%;
     }
 
 .forgot-link a {

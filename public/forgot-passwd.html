@@ -7,21 +7,25 @@
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Orbitron:wght@400..900&family=Permanent+Marker&family=Pixelify+Sans:wght@400..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Special+Gothic+Expanded+One&display=swap"
     rel="stylesheet">
     <link rel="stylesheet" href="./css/forgot-passwd.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <title>Esqueci minha senha | InfraFlow</title>
 </head>
 <body>
     <div class="geral-container">
         <div class="imagem">
+            <div class="btn-sair">
+                <a href="./login.html" class="btn-exit"><i class="bi bi-arrow-left-circle-fill"></i></a>
+            </div>
             <div class="img-senha">
-                <img src="./assets/Forgot password-pana.svg" alt="">
+                <img src="./assets/Forgot password-pana (1).svg" alt="">
             </div>
             <div class="img-logo">
                 <img src="./assets/Infra-all-white.svg" alt="">
             </div>
         </div>
         <div class="texts">
-            <div class="passo1">
+            <div class="passo1" id="passo1">
                 <div class="titulo">
                     <p>Redefinir Senha</p>
                     <div class="linha"></div>
@@ -29,10 +33,23 @@
                 <div class="input">
                     <label for="email_user">Insira seu e-mail</label>
                     <input type="text" id="email_user">
-                    <button class="btn_send_code">Enviar Código</button>
+                    <button class="btn_send_code" id="send_code" onclick="send_code()">Enviar Código</button>
                 </div>
             </div>
         </div>
     </div>
 </body>
 </html>
+
+<script>
+
+    function send_code(){
+        if (email_user.value == ""){
+            alert("Insira um e-mail válido.") 
+        }
+
+        style.d
+
+    }
+
+</script>

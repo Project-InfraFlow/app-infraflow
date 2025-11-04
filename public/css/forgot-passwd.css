@@ -4,6 +4,7 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
+  overflow-y: hidden;
 }
 
 /* Container geral ocupa toda a tela */
@@ -17,10 +18,11 @@
 .imagem {
   width: 50%;
   height: 100vh;
-  background-color: #006060;
+  background-color: #178589;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-top: 2%;
 }
 
 /* Container da imagem de senha */
@@ -68,7 +70,7 @@
 .linha{
     width: 90px;
     height: 5px;
-    background-color: #006060;
+    background-color: #178589;
     margin-top: -1.5%;
 }
 
@@ -87,7 +89,7 @@
     align-self: center;
     height: 30px;
     background-color: transparent;
-    border: #006060 3px solid;
+    border: #178589 3px solid;
     border-radius: 15px; 
     outline: none;
     padding: 2%;
@@ -104,9 +106,29 @@
     align-self: center;
     border-radius: 8px;
     color: white;
-    background-color: #006060;
+    background-color: #178589;
     padding: 1.5%;
     outline: none;
     border: none;
     font-weight: 500
+}
+
+.btn_send_code button:hover{
+    background-color: #006060;
+}
+
+.bi{
+    color: white;
+    font-size: 30px;
+}
+
+.btn-sair{
+    color: white;
+    align-self: self-start;
+    margin-left: 3%;
+}
+
+.btn-exit{
+    background-color: transparent;
+    border: none;
 }
