@@ -19,8 +19,12 @@
 </head>
 
 <body>
+
   <div class="container">
     <div class="login-box">
+
+      <a href="index.html" style="display:block; margin-bottom:10px; color:#00c57a; font-weight:bold; text-decoration:none; font-size:16px;">← Home</a>
+
       <h1>Entrar</h1>
       <div class="box-green"></div>
 
@@ -88,7 +92,6 @@
         setInterval(sumirMensagem, 5000);
       }
 
-      // ===== BYPASS ADMIN (opcional para demo) =====
       const admins = [
         "nicollyter@infraflow.com",
         "edsonfel@infraflow.com",
@@ -100,23 +103,21 @@
         finalizarAguardar?.();
         sessionStorage.EMAIL_USUARIO = emailVar;
         sessionStorage.NOME_USUARIO = "Administrador";
-        sessionStorage.ID_USUARIO = "1";      // demo
-        sessionStorage.ID_EMPRESA = "1";      // demo
+        sessionStorage.ID_USUARIO = "1";
+        sessionStorage.ID_EMPRESA = "1";
         sessionStorage.TOKEN_EMPRESA = tokenVar || "";
         localStorage.setItem("TOKEN_EMPRESA", tokenVar || "");
         window.location = "./cadastro-acesso-adm.html";
         return false;
       }
-      // ===== /BYPASS ADMIN =====
 
-      // Fluxo normal: envia também o token
       fetch("/usuarios/autenticar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: emailVar,
           senha: senhaVar,
-          token: tokenVar   // <=== importante
+          token: tokenVar
         })
       })
         .then(function (resposta) {
@@ -126,13 +127,6 @@
           return resposta.json();
         })
         .then(function (json) {
-          // contrato esperado do backend:
-          // {
-          //   id_usuario, fk_empresa, nome, email,
-          //   empresa: { id_empresa, razao_social },
-          //   token: { valor, ativo, data_expiracao }
-          // }
-
           var idUsuario = json.id_usuario ?? json.usuario?.id_usuario;
           var idEmpresa = json.fk_empresa ?? json.usuario?.fk_empresa ?? json.empresa?.id_empresa;
           var nomeUser = json.nome ?? json.usuario?.nome ?? "Usuário";
