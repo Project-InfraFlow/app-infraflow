@@ -1,149 +1,61 @@
-const estadoApp = { usuarioLogado: false };
+document.addEventListener("DOMContentLoaded", () => {
+    carregarGraficos();
+    carregarLogsFake();
+});
 
-class SistemaLogin {
-    constructor() {
-        this.usuarios = {
-            admin: 'admin123',
-            operador: 'op123',
-            monitor: 'mon123'
-        };
-    }
+/* ▪▪▪ GRÁFICO 1 — Alertas 24h ▪▪▪ */
+function carregarGraficos() {
+    const ctx1 = document.getElementById("chart24h");
 
-    validarCredenciais(usuario, senha) {
-        return this.usuarios[usuario] === senha;
-    }
+    new Chart(ctx1, {
+        type: "line",
+        data: {
+            labels: ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"],
+            datasets: [
+                { label: "Série 1", data: [10, 30, 25, 40, 50] },
+                { label: "Série 2", data: [5, 15, 22, 33, 38] },
+                { label: "Série 3", data: [8, 18, 28, 35, 29] }
+            ]
+        },
+        options: { responsive: true }
+    });
 
-    realizarLogin(usuario, senha) {
-        if (this.validarCredenciais(usuario, senha)) {
-            estadoApp.usuarioLogado = true;
-            localStorage.setItem('infraflow_user', usuario);
-            this.mostrarDashboard();
-            return true;
+    /* ▪▪▪ GRÁFICO 2 — Tipo de Usuário ▪▪▪ */
+    const ctx2 = document.getElementById("chartUsuarios");
+
+    new Chart(ctx2, {
+        type: "bar",
+        data: {
+            labels: ["Item 1", "Item 2", "Item 3", "Item 4"],
+            datasets: [
+                { label: "Item 1", data: [12, 8, 5, 2] },
+                { label: "Item 2", data: [7, 10, 3, 1] },
+                { label: "Item 3", data: [14, 4, 6, 3] }
+            ]
+        },
+        options: {
+            indexAxis: "y",
+            responsive: true
         }
-        return false;
-    }
-
-    realizarLogout() {
-        estadoApp.usuarioLogado = false;
-        localStorage.removeItem('infraflow_user');
-        this.mostrarLogin();
-        pararMockTempoReal();
-    }
-
-    verificarSessao() {
-        const usuarioSalvo = localStorage.getItem('infraflow_user');
-        if (usuarioSalvo && this.usuarios[usuarioSalvo]) {
-            estadoApp.usuarioLogado = true;
-            this.mostrarDashboard();
-            return true;
-        }
-        return false;
-    }
-
-    mostrarLogin() {
-        const login = document.getElementById('loginScreen');
-        const dash = document.getElementById('dashboard');
-        if (login) login.classList.remove('hidden');
-        if (dash) dash.classList.add('hidden');
-    }
-
-    mostrarDashboard() {
-        const login = document.getElementById('loginScreen');
-        const dash = document.getElementById('dashboard');
-        if (login) login.classList.add('hidden');
-        if (dash) dash.classList.remove('hidden');
-    }
+    });
 }
 
-function pararMockTempoReal() {}
+/* Logs temporários até integrar backend */
+function carregarLogsFake() {
+    const logs = [
+        "[AUTH] LOGIN_SUCCESS admin – 2025-11-19 13:42",
+        "[AUTH] LOGIN_FAIL userjoao – origem 187.55.34.201",
+        "[FIREWALL] BLOCK SSH brute force – 185.244.25.77",
+        "[API] GET /usuarios/102 – 182ms",
+        "[SECURITY] ALERT SQL INJECTION IP 45.93.21.122",
+        "[FIREWALL] ALLOW https 10.0.0.4",
+        "[AUTH] PASSWORD_CHANGE usuario: financeiro",
+        "[DISK] Uso crítico 92%",
+        "[APP] ERROR checkout: Null payment ID",
+        "[API] POST /eventos/create – 512ms",
+        "[SECURITY] MFA_SUCCESS IP 187.2.43.180",
+    ];
 
-function cadastrarUser() {}
-
-function edit_user() {}
-
-function delete_user() {}
-
-document.addEventListener('DOMContentLoaded', function () {
-    const sistemaLogin = new SistemaLogin();
-
-    const storedUser = localStorage.getItem('infraflow_user');
-    const sidebarUser = document.getElementById('sidebarUser');
-    if (storedUser && sidebarUser) {
-        sidebarUser.textContent = storedUser;
-    }
-
-    const navItems = Array.from(document.querySelectorAll('.nav-item'));
-    const views = Array.from(document.querySelectorAll('.view'));
-
-    navItems.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const view = btn.getAttribute('data-view');
-            navItems.forEach(function (b) { b.classList.remove('active'); });
-            btn.classList.add('active');
-            views.forEach(function (v) { v.classList.remove('active'); });
-            const target = document.getElementById('view-' + view);
-            if (target) target.classList.add('active');
-        });
-    });
-
-    const tabBtns = Array.from(document.querySelectorAll('.cadastro-tabs .tab-btn'));
-    const tabs = Array.from(document.querySelectorAll('.cadastro-content .tab-content'));
-
-    tabBtns.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const tab = btn.getAttribute('data-tab');
-            tabBtns.forEach(function (b) { b.classList.remove('active'); });
-            btn.classList.add('active');
-            tabs.forEach(function (t) { t.classList.remove('active'); });
-            const target = document.getElementById('tab-' + tab);
-            if (target) target.classList.add('active');
-        });
-    });
-
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function () {
-            try {
-                sessionStorage.clear();
-                localStorage.removeItem('infraflow_user');
-            } catch (e) {}
-            window.location.replace('../login.html');
-        });
-    }
-
-    const usuarioForm = document.getElementById('usuarioForm');
-    if (usuarioForm) {
-        usuarioForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-        });
-    }
-
-    const maquinaForm = document.getElementById('maquinaForm');
-    if (maquinaForm) {
-        maquinaForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-        });
-    }
-
-    const edgeSelector = document.getElementById('edgeSelector');
-    const monitorSelecionado = document.getElementById('monitor-selecionado');
-    if (edgeSelector && monitorSelecionado) {
-        monitorSelecionado.textContent = edgeSelector.value;
-        edgeSelector.addEventListener('change', function () {
-            monitorSelecionado.textContent = edgeSelector.value;
-        });
-    }
-
-    const lastUpdateTime = document.getElementById('lastUpdateTime');
-    if (lastUpdateTime) {
-        function atualizarHora() {
-            const agora = new Date();
-            const h = String(agora.getHours()).padStart(2, '0');
-            const m = String(agora.getMinutes()).padStart(2, '0');
-            const s = String(agora.getSeconds()).padStart(2, '0');
-            lastUpdateTime.textContent = h + ':' + m + ':' + s;
-        }
-        atualizarHora();
-        setInterval(atualizarHora, 1000);
-    }
-});
+    const box = document.getElementById("logsBox");
+    box.innerText = logs.join("\n\n");
+}
