@@ -96,6 +96,15 @@
                         <i class="fas fa-clock-rotate-left"></i>
                         Visão analítica de alertas
                     </h1>
+                    <div class="filtrar">
+                        <p>Periodo</p>
+                        <p>-</p>
+                        <select name="" id="" class="select_periodo">
+                            <option value="1">Últimas 24 horas</option>
+                            <option value="2">Última Semana</option>
+                            <option value="3">Mensal</option>
+                        </select>
+                    </div>
 
                 </div>
 
@@ -137,8 +146,35 @@
                                 </div>
                             </div>
 
-                            <div class="alertas-atencao" style="background-color: #ffd437;"></div>
-                            <div class="alertas-critico" style="background-color: #a51900;"></div>
+                            <div class="alertas-atencao" style="background-color: #ffd437;">
+                                    <div class="dado"></div>
+                                    <div class="desc">
+                                        <p>Atenção</p>
+                                    </div>
+                            </div>
+                            <div class="alertas-critico" style="background-color: #de2808;">
+                                    <div class="dado"></div>
+                                    <div class="desc">
+                                        <p>Critíco</p>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="kpi">
+                            <div class="legenda-kpi">
+                                <div class="legenda">
+                                    <p>Atendimentos realizados dentro do SLA</p>
+                                </div>
+                                <div class="icon-info">
+                                    <i class="bi bi-info-circle-fill"></i>
+
+                                    <div class="tooltip-legenda">
+                                        <p>testestestesteste</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="indicador-kpi">
+
+                            </div>
                         </div>
 
                         <div class="kpi">
@@ -159,27 +195,29 @@
                             </div>
                         </div>
 
-                        <div class="kpi">
-                            <div class="legenda-kpi">
-                                <div class="legenda">
-                                    <p>Atendimentos realizados dentro do SLA</p>
-                                </div>
+                        
+                    </div>
+
+                    <div class="heatmap">
+                        <div class="titulo-grafico">
+                                <p>Distribuição de alertas por hora e componente</p>
+
+                            
                                 <div class="icon-info">
+
+                                    
+
                                     <i class="bi bi-info-circle-fill"></i>
 
                                     <div class="tooltip-legenda">
                                         <p>testestestesteste</p>
                                     </div>
+
+                                    
                                 </div>
+                                
                             </div>
-                            <div class="indicador-kpi">
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="heatmap">
-                        
+                        <div id="chart-heatmap" class="chart-heatmap"></div>
                     </div>
 
 
@@ -187,9 +225,10 @@
                         <div class="grafico-componentes">
                             <div class="titulo-grafico">
                                 <p>Quantidade de alertas por componentes</p>
+                                
                             </div>
                             <div class="grafico">
-                                <canvas id="myChart"></canvas>
+                                <canvas id="myChart" class="barplot"></canvas>
                             </div>
                         </div>
                         <div class="ocorrencias">
@@ -228,5 +267,6 @@
 </html>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="./js/alertas.js"></script>
 
