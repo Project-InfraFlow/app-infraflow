@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InfraFlow - Sistema de Monitoramento</title>
+  <link rel="stylesheet" href="../public/css/dashboard-alertas.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+  <div id="dashboard" class="dashboard">
+    <aside class="sidebar">
+
+      <nav class="nav">
+        <button data-view="overview" class="nav-item active">
+          <i class="fas fa-gauge"></i>
+          <span>Painel</span>
+        </button>
+        <button data-view="monitor" class="nav-item">
+          <i class="fas fa-chart-line"></i>
+          <span>Monitoramento</span>
+        </button>
+        <button data-view="cadastro" class="nav-item">
+          <i class="fas fa-pen-to-square"></i>
+          <span>Cadastro</span>
+        </button>
+        <button data-view="historico" class="nav-item">
+          <i class="fas fa-clock-rotate-left"></i>
+          <span>Histórico de Alertas</span>
+        </button>
+      </nav>
+
+      <div class="divider"></div>
+
+      <div class="user-section">
+        <div class="user-info">
+          <i class="fas fa-user-circle"></i>
+          <span id="sidebarUser">Admin</span>
+        </div>
+        <button class="logout-btn" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </aside>
+
+    <sec class="content">
+      <header class="topbar">
+        <div class="brand">
+          <img src="../assets/infra-parafundobranco.png" alt="">
+        </div>
+        <div class="topbar-left">
+          <div class="machine-select">
+            <i class="fas fa-server"></i>
+            <label for="edgeSelector" style="display:block; font-size:14px; margin-bottom:4px; color: gray;">
+              Selecione um pórtico FreeFlow:
+            </label>
+            <select id="edgeSelector">
+              <option value="INFRA-EDGE-01-Itápolis (SP-333)">INFRA-EDGE-01-Itápolis (SP-333)</option>
+              <option value="INFRA-EDGE-02-Jaboticabal (SP-333)">INFRA-EDGE-02-Jaboticabal (SP-333)</option>
+              <option value="INFRA-EDGE-03-São José dos Campos (SP-099)">INFRA-EDGE-03-São José dos Campos (SP-099)
+              </option>
+              <option value="INFRA-EDGE-04-Itaguaí (Km 414)">INFRA-EDGE-04-Itaguaí (Km 414)</option>
+            </select>
+          </div>
+          <div class="os-info">
+            <i class="fab fa-ubuntu"></i>
+            <span>Ubuntu 22.04 LTS</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>Online</span>
+          </div>
+          <div class="last-update">
+            <span class="update-label">Última atualização:</span>
+            <span class="update-time" id="lastUpdateTime">--:--:--</span>
+          </div>
+        </div>
+      </header>
+
+      <section id="view-overview" class="view active">
+
+    
+        <div class="view-header">
+          <h1 class="view-title">
+            <i class="fas fa-clock-rotate-left"></i>
+            Visão analítica de alertas
+          </h1>
+
+        </div>
+
+
+
+        <div class="filters-section">
+          <div class="kpis">
+
+            <div class="kpi">
+              <div class="legenda-kpi">
+                <div class="legenda">
+                  <p>Quantidade de alertas (Geral)</p>
+                </div>
+                <div class="icon-info">
+                  <i class="bi bi-info-circle-fill"></i>
+
+                  <div class="tooltip-legenda">
+                    <p>testestestesteste</p>
+                  </div>
+                </div>
+              </div>
+              <div class="indicador-kpi">
+                <p>12</p>
+              </div>
+            </div>
+
+            <div class="kpi-alerta">
+
+              <div class="legenda-kpi">
+                <div class="legenda">
+                  <p>Tipos dos alertas</p>
+                </div>
+                <div class="icon-info">
+                  <i class="bi bi-info-circle-fill"></i>
+
+                  <div class="tooltip-legenda">
+                    <p>testestestesteste</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="alertas-atencao" style="background-color: #ffd437;"></div>
+              <div class="alertas-critico" style="background-color: #a51900;"></div>
+            </div>
+
+            <div class="kpi">
+              <div class="legenda-kpi">
+                <div class="legenda">
+                  <p>Status de andamento de alertas</p>
+                </div>
+                <div class="icon-info">
+                  <i class="bi bi-info-circle-fill"></i>
+
+                  <div class="tooltip-legenda">
+                    <p>testestestesteste</p>
+                  </div>
+                </div>
+              </div>
+              <div class="indicador-kpi">
+
+              </div>
+            </div>
+
+            <div class="kpi">
+              <div class="legenda-kpi">
+                <div class="legenda">
+                  <p>Atendimentos realizados dentro do SLA</p>
+                </div>
+                <div class="icon-info">
+                  <i class="bi bi-info-circle-fill"></i>
+
+                  <div class="tooltip-legenda">
+                    <p>testestestesteste</p>
+                  </div>
+                </div>
+              </div>
+              <div class="indicador-kpi">
+
+              </div>
+            </div>
+
+
+          </div>
+
+          <div class="graficos">
+            <div class="grafico-componentes">
+              <div class="titulo-grafico">
+                <p>Quantidade de alertas por componentes</p>
+              </div>
+              <div>
+                <canvas id="myChart"></canvas>
+              </div>
+            </div>
+            <div class="ocorrencias">
+                
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="../js/seguranca.js"></script>
+</body>
+
+</html>
