@@ -235,7 +235,7 @@
         </div> -->
         <!-- Bloco combinado: Status + Legenda lado a lado -->
 
-       
+
         <div class="status-and-legend">
           <div class="status-card">
             <h3 class="status-title">
@@ -503,139 +503,221 @@
 
           </div>
 
-        <div id="tab-maquina" class="tab-content">
+          <div id="tab-maquina" class="tab-content">
 
-  <!-- Formulário de cadastro -->
-  <form class="cadastro-form" id="maquinaForm">
-    <div class="form-row">
-      <div class="form-group">
-        <label for="maquinaNome">Nome</label>
-        <input type="text" id="maquinaNome" required>
-      </div>
-      <div class="form-group">
-        <label for="maquinaSo">Sistema Operacional</label>
-        <input type="text" id="maquinaSo" required>
-      </div>
-    </div>
+            <!-- Formulário de cadastro -->
+            <form class="cadastro-form" id="maquinaForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="maquinaNome">Nome</label>
+                  <input type="text" id="maquinaNome" required>
+                </div>
+                <div class="form-group">
+                  <label for="maquinaSo">Sistema Operacional</label>
+                  <input type="text" id="maquinaSo" required>
+                </div>
+              </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label for="maquinaLocalizacao">Localização</label>
-        <input type="text" id="maquinaLocalizacao" required>
-      </div>
-      <div class="form-group">
-        <label for="maquinaKm">KM</label>
-        <input type="number" id="maquinaKm" step="0.1">
-      </div>
-    </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="maquinaLocalizacao">Localização</label>
+                  <input type="text" id="maquinaLocalizacao" required>
+                </div>
+                <div class="form-group">
+                  <label for="maquinaKm">KM</label>
+                  <input type="number" id="maquinaKm" step="0.1">
+                </div>
+              </div>
 
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">
-        <i class="fas fa-save"></i>
-        Salvar
-      </button>
-      <button type="reset" class="btn btn-secondary">
-        <i class="fas fa-times"></i>
-        Cancelar
-      </button>
-    </div>
-  </form>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i>
+                  Salvar
+                </button>
+                <button type="reset" class="btn btn-secondary">
+                  <i class="fas fa-times"></i>
+                  Cancelar
+                </button>
+              </div>
+            </form>
 
-  <!-- Listagem de máquinas -->
-  <div class="listar-maquinas">
+            <!-- Listagem de máquinas -->
+            <div class="listar-maquinas">
 
-    <div class="titulo">
-      <i class="bi bi-hdd-stack controlador"></i>
-      <h1>Pórticos Cadastrados</h1>
-    </div>
+              <div class="titulo">
+                <i class="bi bi-hdd-stack controlador"></i>
+                <h1>Pórticos Cadastrados</h1>
+              </div>
 
-    <div class="barra-infos-maq">
-      <p>ID</p>
-      <p>Nome</p>
-      <p>Sistema Op.</p>
-      <p>Localização</p>
-      <p>KM</p>
-      <p>Ações</p>
-    </div>
+              <div class="barra-infos-maq">
+                <p>ID</p>
+                <p>Nome</p>
+                <p>Sistema Op.</p>
+                <p>Localização</p>
+                <p>KM</p>
+                <p>Ações</p>
+              </div>
 
-    <!-- Registros -->
-    <div class="infos-maquina">
-      <p>1</p>
-      <p>INFRA-EDGE-01-Itápolis</p>
-      <p>Ubuntu 22.04</p>
-      <p>SP-333</p>
-      <p>101</p>
-      <div class="acoes">
-        <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-        <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-      </div>
-    </div>
+              <!-- Registros -->
+              <div class="infos-maquina">
+                <p>1</p>
+                <p>INFRA-EDGE-01-Itápolis</p>
+                <p>Ubuntu 22.04</p>
+                <p>SP-333</p>
+                <p>101</p>
+                <div class="acoes">
+                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
+                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
+                </div>
+              </div>
 
-    <div class="infos-maquina">
-      <p>2</p>
-      <p>INFRA-EDGE-02-Jaboticabal</p>
-      <p>Ubuntu 22.04</p>
-      <p>SP-099</p>
-      <p>15</p>
-      <div class="acoes">
-        <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-        <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-      </div>
-    </div>
+              <div class="infos-maquina">
+                <p>2</p>
+                <p>INFRA-EDGE-02-Jaboticabal</p>
+                <p>Ubuntu 22.04</p>
+                <p>SP-099</p>
+                <p>15</p>
+                <div class="acoes">
+                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
+                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
+                </div>
+              </div>
 
-    <div class="infos-maquina">
-      <p>3</p>
-      <p>INFRA-EDGE-03-São José dos Santos</p>
-      <p>Ubuntu 22.04</p>
-      <p>KM-414</p>
-      <p>414</p>
-      <div class="acoes">
-        <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-        <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-      </div>
-    </div>
+              <div class="infos-maquina">
+                <p>3</p>
+                <p>INFRA-EDGE-03-São José dos Santos</p>
+                <p>Ubuntu 22.04</p>
+                <p>KM-414</p>
+                <p>414</p>
+                <div class="acoes">
+                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
+                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
+                </div>
+              </div>
 
-    <div class="infos-maquina">
-      <p>4</p>
-      <p>INFRA-EDGE-04-Itaguaí</p>
-      <p>Ubuntu 22.04</p>
-      <p>SP-050</p>
-      <p>221</p>
-      <div class="acoes">
-        <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-        <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-      </div>
-    </div>
+              <div class="infos-maquina">
+                <p>4</p>
+                <p>INFRA-EDGE-04-Itaguaí</p>
+                <p>Ubuntu 22.04</p>
+                <p>SP-050</p>
+                <p>221</p>
+                <div class="acoes">
+                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
+                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
+                </div>
+              </div>
 
-  </div>
-</div>
+            </div>
+          </div>
 
-  </div>
-  </section>
+        </div>
+      </section>
 
-   <!-- ---------------------INICIANDO DASH DE ALERTAS AQUI --------------------->
+      <!-- ---------------------INICIANDO DASH DE ALERTAS AQUI --------------------->
 
-  <section id="view-historico" class="view">
-    <div class="view-header">
-      <h1 class="view-title">
-        <i class="fas fa-clock-rotate-left"></i>
-        Visão analítica de alertas
-      </h1>
+      <section id="view-historico" class="view" >
+        <div class="view-header">
+          <h1 class="view-title">
+            <i class="fas fa-clock-rotate-left"></i>
+            Visão analítica de alertas
+          </h1>
 
-    </div>
+        </div>
 
 
 
-    <div class="filters-section">
-      <div class="kpis">
-        <div class="kpi"></div>
-        <div class="kpi"></div>
-        <div class="kpi"></div>
-        <div class="kpi"></div>
-      </div>
-    </div>
-  </section>
-  </main>
+        <div class="filters-section" >
+          <div class="kpis">
+
+            <div class="kpi">
+              <div class="legenda-kpi">
+                <div class="legenda">
+                  <p>Quantidade de alertas (Geral)</p>
+                </div>
+                <div class="icon-info">
+                  <i class="bi bi-info-circle-fill"></i>
+
+                  <div class="tooltip-legenda">
+                    <p>testestestesteste</p>
+                  </div>
+                </div>
+              </div>
+              <div class="indicador-kpi">
+                <p>12</p>
+              </div>
+            </div>
+
+            <div class="kpi-alerta">
+
+              <div class="legenda-kpi">
+                <div class="legenda">
+                  <p>Tipos dos alertas</p>
+                </div>
+                <div class="icon-info">
+                  <i class="bi bi-info-circle-fill"></i>
+
+                  <div class="tooltip-legenda">
+                    <p>testestestesteste</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="alertas-atencao" style="background-color: #ffd437;"></div>
+              <div class="alertas-critico" style="background-color: #a51900;"></div>
+            </div>
+
+            <div class="kpi">
+              <div class="legenda-kpi">
+                <div class="legenda">
+                  <p>Status de andamento de alertas</p>
+                </div>
+                <div class="icon-info">
+                  <i class="bi bi-info-circle-fill"></i>
+
+                  <div class="tooltip-legenda">
+                    <p>testestestesteste</p>
+                  </div>
+                </div>
+              </div>
+              <div class="indicador-kpi">
+
+              </div>
+            </div>
+
+            <div class="kpi">
+              <div class="legenda-kpi">
+                <div class="legenda">
+                  <p>Atendimentos realizados dentro do SLA</p>
+                </div>
+                <div class="icon-info">
+                  <i class="bi bi-info-circle-fill"></i>
+
+                  <div class="tooltip-legenda">
+                    <p>testestestesteste</p>
+                  </div>
+                </div>
+              </div>
+              <div class="indicador-kpi">
+
+              </div>
+            </div>
+
+
+          </div>
+
+          <div class="graficos">
+            <div class="grafico-componentes">
+              <div class="titulo-grafico">
+                <p>Quantidade de alertas por componentes</p>
+              </div>
+            </div>
+            <div class="heatmap">
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
   <script src="../js/dash.js"></script>

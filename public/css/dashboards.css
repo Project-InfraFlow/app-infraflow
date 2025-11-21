@@ -1459,16 +1459,14 @@ input:checked+.slider:before {
 
 /* Histórico */
 .filters-section {
-    background: white;
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     margin-bottom: 2rem;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--gray-200);
     display: flex;
     align-items: end;
     gap: 1.5rem;
     flex-wrap: wrap;
+    margin-top: -3%;
 }
 
 .filter-group {
@@ -2045,7 +2043,8 @@ input:checked+.slider:before {
 
 /* ====== CABEÇALHO ====== */
 .barra-infos-maq {
-    background-color: #006060; /* azul suave */
+    background-color: #006060;
+    /* azul suave */
     color: #fff;
     font-weight: 600;
     display: grid;
@@ -2103,6 +2102,7 @@ input:checked+.slider:before {
     color: #fff;
     font-size: 16px;
 }
+
 .titulo {
     width: 95%;
     height: 45px;
@@ -2116,4 +2116,130 @@ input:checked+.slider:before {
     font-size: 35px;
     margin-right: 2%;
     color: #006060;
+}
+
+
+/* DASHBOARD NICOLLY CSS ALERTAS */
+
+.kpis {
+    width: 100%;
+    height: 170px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.kpi {
+    width: 22%;
+    height: 100%;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+    transition: var(--transition-normal);
+
+
+}
+
+.kpi-alerta {
+    width: 22%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-top: 1%;
+}
+
+.legenda-kpi {
+    width: 100%;
+    height: 30%;
+    display: flex;
+}
+
+.legenda {
+    width: 85%;
+    height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    color: rgb(26, 26, 26);
+}
+
+.icon-info {
+    width: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: large;
+    position: relative;
+    cursor: pointer;
+}
+
+.icon-info i {
+    color: rgb(158, 158, 158);
+}
+
+
+.tooltip-legenda {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    width: 190px;
+    background-color: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.15s ease-in-out;
+    z-index: 10;
+}
+
+
+.icon-info:hover .tooltip-legenda {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.alertas-atencao,
+.alertas-critico {
+    width: 98%;
+    height: 43%;
+
+    margin: 2%;
+    border-radius: 10px;
+    margin-left: 2px;
+
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.indicador-kpi {
+    height: 70%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.graficos {
+    width: 100%;
+    height: 290px;
+    background-color: #008080;
+    display: flex;
+}
+
+.grafico-componentes {
+    width: 50%;
+    height: 100%;
+    background-color: #7c3aed;
+}
+
+.titulo-grafico{
+    width: 100%; 
+    height: 10%;
+    background-color: #059669;
+    align-items: center;
+    display: flex;
+    font-weight: 600;
+    color: rgb(26, 26, 26);
 }
