@@ -93,11 +93,12 @@
                     <h1 class="view-title">
                         <i class="fas fa-microchip"></i>
                         CPU <span id="monitor-selecionado"></span>
+
+                        <span class="slack-icon" id="btnSlack">
+                            <img src="../assets/icon/Slack_icon.png">
+                        </span>
                     </h1>
 
-                    <span class="slack-icon">
-                        <i class="fab fa-slack"></i>
-                    </span>
                 </div>
 
                 <div class="kpis-grid">
@@ -670,6 +671,18 @@
                     </div>
                 </div>
             </section>
+
+            <div class="slack-painel" id="slackpainel">
+                <div class="slack-painel-header">
+                    <h4>Alertas Ativos (Todos os Pórticos)</h4>
+                    <button id="closeSlack" class="close-slack">×</button>
+                </div>
+
+                <div class="slack-painel-body">
+                    <!-- Aqui você coloca sua lista de alertas -->
+                    <p>Carregando alertas CPU...</p>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -691,6 +704,18 @@
         select.addEventListener("change", atualizarMonitor);
 
         atualizarMonitor();
+
+        const slackBtn = document.getElementById("btnSlack");
+        const slackpainel = document.getElementById("slackpainel");
+        const closeSlack = document.getElementById("closeSlack");
+
+        slackBtn.addEventListener("click", () => {
+            slackpainel.classList.add("open");
+        });
+
+        closeSlack.addEventListener("click", () => {
+            slackpainel.classList.remove("open");
+        });
     </script>
 </body>
 

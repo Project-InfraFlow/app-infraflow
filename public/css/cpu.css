@@ -476,6 +476,19 @@ body {
     padding-top: calc(var(--topbar-height) - 8px);
 }
 
+/* Dashboard normal */
+#contentWrapper {
+    transition: 0.35s ease;
+    transform-origin: left center; /* diminui para o lado certo */
+}
+
+/* Quando o Slack abrir → dashboard fica MENOR */
+body.slack-open #contentWrapper {
+    transform: scale(0.85);   /* ajuste o tamanho aqui */
+    filter: blur(1px);        /* opcional, fica bonito */
+    opacity: 0.95;            /* opcional */
+}
+
 .view {
     display: none;
     flex: 1;
@@ -599,6 +612,67 @@ body {
 
 .view-header {
     margin-bottom: 1rem;
+}
+
+.slack-icon {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    cursor: pointer;
+    margin-left: 28%;
+    transition: 0.2s;
+}
+
+.slack-icon img {
+    width: 30px;
+    height: 30px;
+}
+
+.slack-painel {
+    position: fixed;
+    top: 70px;
+    right: -400px; 
+    width: 360px;
+    height: 90vh;
+    background: #fff;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+    transition: 0.35s ease;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    border-left: 1px solid #eee;
+}
+
+.slack-painel.open {
+    right: 0;
+}
+
+.slack-painel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+.close-slack {
+    background: transparent;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    color: #444;
+}
+
+.slack-painel-body {
+    margin-top: 15px;
+    overflow-y: auto;
+    height: calc(100vh - 100px);
+    padding-right: 6px;
 }
 
 .view-title {
