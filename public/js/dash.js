@@ -83,6 +83,14 @@ async function buscarDadosDB() {
             }
             
             atualizarTabelaMonitoramento();
+
+            try {
+                    const ultimo = dadosTempoReal[dadosTempoReal.length - 1];
+                    const fonte = document.getElementById('edgeSelector')?.value || 'Pórtico';
+                    window.evaluatePoint(ultimo, fonte);
+            } catch (err) {
+                console.error("Erro ao avaliar alertas:", err);
+            }
         }
     } catch (error) {
         console.error('Erro no polling:', error);
@@ -774,19 +782,87 @@ body.has-fixed-topbar{padding-top:64px}
     }
 
     const lastCross = { cpu: false, memoria: false, disco: false, rede: false };
-    function evaluatePoint(ponto, fonte) {
-        const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        function cross(key, cond, level, msg) {
-            if (cond && !lastCross[key]) {
-                prependAlertCard({ id: Date.now() + '-' + key, time: hora, level, source: fonte, msg });
-            }
-            lastCross[key] = cond;
+    function evaluatePoint(ponto, fonte = "Sistema") {
+    if (!ponto) return;
+    
+    const hora = new Date().toLocaleTimeString("pt-BR");
+    const last = window._lastCrossState || {};
+    window._lastCrossState = last;
+
+    function cross(key, cond, level, msg) {
+        if (cond && !last[key]) {
+            pushAlert({
+                id: Date.now() + "-" + key,
+                time: hora,
+                level: level,
+                source: fonte,
+                msg: msg
+            });
         }
-        cross('cpu', ponto.cpu > 85, 'CRITICO', `CPU em ${ponto.cpu.toFixed(1)}% - Acima do limite crítico`);
-        cross('memoria', ponto.memoria > 85, 'CRITICO', `Memória em ${ponto.memoria.toFixed(1)}% - Acima do limite crítico`);
-        cross('disco', ponto.disco > 85, 'ATENCAO', `Disco em ${ponto.disco.toFixed(1)}% - Alto uso de disco`);
-        cross('rede', ponto.rede > 180, 'ATENCAO', `Rede em ${ponto.rede.toFixed(1)} Mbps - Próximo da saturação`);
+        last[key] = cond;
     }
+
+    // CPU
+    cross(
+        "cpu_crit",
+        ponto.cpu >= 85,
+        "CRITICO",
+        `CPU em ${ponto.cpu.toFixed(1)}% — Acima do limite crítico`
+    );
+
+    cross(
+        "cpu_warn",
+        ponto.cpu >= 70 && ponto.cpu < 85,
+        "ATENCAO",
+        `CPU em ${ponto.cpu.toFixed(1)}% — Utilização elevada`
+    );
+
+    // MEMÓRIA
+    cross(
+        "mem_crit",
+        ponto.memoria >= 85,
+        "CRITICO",
+        `Memória em ${ponto.memoria.toFixed(1)}% — Acima do limite crítico`
+    );
+
+    cross(
+        "mem_warn",
+        ponto.memoria >= 70 && ponto.memoria < 85,
+        "ATENCAO",
+        `Memória em ${ponto.memoria.toFixed(1)}% — Utilização elevada`
+    );
+
+    // DISCO
+    cross(
+        "disk_crit",
+        ponto.disco >= 90,
+        "CRITICO",
+        `Disco em ${ponto.disco.toFixed(1)}% — Acima do limite crítico (risco de travamento)`
+    );
+
+    cross(
+        "disk_warn",
+        ponto.disco >= 80 && ponto.disco < 90,
+        "ATENCAO",
+        `Disco em ${ponto.disco.toFixed(1)}% — Utilização elevada`
+    );
+
+    // REDE (exemplo: acima de 180 Mbps saturação)
+    cross(
+        "network_crit",
+        ponto.rede >= 180,
+        "CRITICO",
+        `Rede em ${ponto.rede.toFixed(1)} Mbps — Saturação crítica detectada`
+    );
+
+    cross(
+        "network_warn",
+        ponto.rede >= 120 && ponto.rede < 180,
+        "ATENCAO",
+        `Rede em ${ponto.rede.toFixed(1)} Mbps — Tráfego muito alto`
+    );
+}
+window.evaluatePoint = evaluatePoint;
 
     const patchAlerts = () => {
         if (!window.gerenciadorInterface) return;
