@@ -3,7 +3,6 @@ const router = express.Router();
 var database = require("../database/config");
 
 router.get('/', function (req, res) {
-    console.log('Rota /api/leituras chamada');
     
     const maquinaId = req.query.maquinaId || 1;
     const limite = req.query.limite || 50;

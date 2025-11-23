@@ -32,6 +32,30 @@ app.use("/empresas", empresasRouter);
 
 app.use("/api/leituras", leiturasRouter);
 
+app.get("/dashboard/dashboard_CPU", function(req, res) {
+    res.sendFile(path.join(__dirname, "public/dashboard_CPU.html"));
+});
+
+app.get("/dashboard/memoria.html", function(req, res) {
+    res.sendFile(path.join(__dirname, "public/memoria.html"));
+});
+
+app.get("/dashboard/disco", function(req, res) {
+    res.sendFile(path.join(__dirname, "public/disco.html"));
+});
+
+app.get("/dashboard/dashbord_rede", function(req, res) {
+    res.sendFile(path.join(__dirname, "public/dashbord_rede.html"));
+});
+
+app.get("/dashboard/seguranca", function(req, res) {
+    res.sendFile(path.join(__dirname, "public/seguranca.html"));
+});
+
+app.get("/dashboard/dashboard-alertas", function(req, res) {
+    res.sendFile(path.join(__dirname, "public/dashboard-alertas.html"));
+});
+
 var PORTA_APP = process.env.APP_PORT;
 var HOST_APP = process.env.APP_HOST;
 
