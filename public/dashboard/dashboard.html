@@ -237,76 +237,76 @@
 
 
         <div class="status-and-legend">
-          <div class="status-card">
-            <h3 class="status-title">
-              <i class="fas fa-heartbeat"></i>
-              Status do Sistema
-            </h3>
-            <div class="status-badge" id="systemStatus">Normal</div>
-            <div class="status-description" id="statusDescription">
-              Todos os componentes operando dentro dos parâmetros normais
-            </div>
-            <div class="status-metrics">
-              <div class="metric">
-                <span class="metric-label">Uptime:</span>
-                <span class="metric-value" id="systemUptime">15d 8h 32m</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Alertas Ativos:</span>
-                <span class="metric-value" id="alertCount">0</span>
-              </div>
-            </div>
-          </div>
+  <div class="status-card">
+    <h3 class="status-title">
+      <i class="fas fa-heartbeat"></i>
+      Status do Sistema
+    </h3>
+    <div class="status-badge normal" id="systemStatus">Normal</div>
+    <div class="status-description" id="statusDescription">
+      Todos os componentes operando dentro dos parâmetros normais
+    </div>
+    <div class="status-metrics">
+      <div class="metric">
+        <span class="metric-label">Uptime:</span>
+        <span class="metric-value" id="systemUptime">0d 0h 0m</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Alertas Ativos:</span>
+        <span class="metric-value" id="alertCount">0</span>
+      </div>
+    </div>
+  </div>
 
-          <div class="legend-card">
-            <h3 class="legend-title">
-              <i class="fas fa-info-circle"></i>
-              Legenda (Níveis de Monitoramento)
-            </h3>
+  <div class="legend-card">
+    <h3 class="legend-title">
+      <i class="fas fa-info-circle"></i>
+      Legenda (Níveis de Monitoramento)
+    </h3>
 
-            <div class="legend-table-wrap">
-              <table class="legend-table">
-                <thead>
-                  <tr>
-                    <th>Componente</th>
-                    <th>Utilização saudável</th>
-                    <th>Alta utilização <small>(monitorar)*</small></th>
-                    <th>Saturação <small>(crítico)</small></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>CPU (%)</td>
-                    <td>20% – 45%</td>
-                    <td><span class="pill warn">45% – 85%</span></td>
-                    <td><span class="pill crit">&gt; 85%</span></td>
-                  </tr>
-                  <tr>
-                    <td>Memória RAM (%)</td>
-                    <td>40% – 53%</td>
-                    <td><span class="pill warn">54% – 83%</span></td>
-                    <td><span class="pill crit">&gt; 84%</span></td>
-                  </tr>
-                  <tr>
-                    <td>Disco (%)</td>
-                    <td>≤ 60%</td>
-                    <td><span class="pill warn">80% – 90%</span></td>
-                    <td><span class="pill crit">&gt; 90%</span></td>
-                  </tr>
-                  <tr>
-                    <td>Rede (%)</td>
-                    <td>≤ 50%</td>
-                    <td><span class="pill warn">50% – 74%</span></td>
-                    <td><span class="pill crit">&gt; ≥75%</span></td>
-                  </tr>
-                </tbody>
-              </table>
-              <div class="legend-note">
-                * a partir de “Alta utilização” os alertas são ativados.
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="legend-table-wrap">
+      <table class="legend-table">
+        <thead>
+          <tr>
+            <th>Componente</th>
+            <th>Utilização saudável</th>
+            <th>Alta utilização <small>(monitorar)*</small></th>
+            <th>Saturação <small>(crítico)</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CPU (%)</td>
+            <td>20% – 45%</td>
+            <td><span class="pill warn">45% – 85%</span></td>
+            <td><span class="pill crit">&gt; 85%</span></td>
+          </tr>
+          <tr>
+            <td>Memória RAM (%)</td>
+            <td>40% – 53%</td>
+            <td><span class="pill warn">54% – 83%</span></td>
+            <td><span class="pill crit">&gt; 84%</span></td>
+          </tr>
+          <tr>
+            <td>Disco (%)</td>
+            <td>≤ 60%</td>
+            <td><span class="pill warn">80% – 90%</span></td>
+            <td><span class="pill crit">&gt; 90%</span></td>
+          </tr>
+          <tr>
+            <td>Rede (%)</td>
+            <td>≤ 50%</td>
+            <td><span class="pill warn">50% – 74%</span></td>
+            <td><span class="pill crit">&gt; ≥75%</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="legend-note">
+        * a partir de "Alta utilização" os alertas são ativados.
+      </div>
+    </div>
+  </div>
+</div>
 
       </section>
 

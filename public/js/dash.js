@@ -117,7 +117,6 @@ async function buscarDadosDB() {
 
             gerenciadorInterface.atualizarInformacoesSistema();
             gerenciadorInterface.atualizarKPIs();
-            gerenciadorInterface.atualizarStatusSistema();
 
             if (graficos.tempoReal) {
                 atualizarGraficoTempoReal();
@@ -1026,4 +1025,206 @@ document.addEventListener('click', (e) => {
             floatingBtn = null;
         }
     }
+});
+
+// === STATUS DO SISTEMA (UPTIME + ALERTAS) ===
+
+// Armazena o início do uptime
+let uptimeStart = new Date();
+
+// Contador para a tela
+function formatarUptime(ms) {
+    const totalSeg = Math.floor(ms / 1000);
+    const dias = Math.floor(totalSeg / 86400);
+    const horas = Math.floor((totalSeg % 86400) / 3600);
+    const min = Math.floor((totalSeg % 3600) / 60);
+    return `${dias}d ${horas}h ${min}m`;
+}
+
+// Checa se algum valor está crítico
+function componenteCritico(cpu, ram, disco, rede) {
+    if (cpu > 85) return true;
+    if (ram > 84) return true;
+    if (disco > 90) return true;
+    if (rede >= 75) return true;
+    return false;
+}
+
+// Pega alertas ativos do dia
+async function contarAlertasHoje() {
+    try {
+        const resp = await fetch("/api/alertas/dia");
+        const json = await resp.json();
+        return json.total || 0;
+    } catch (e) {
+        console.error("Erro ao buscar alertas diários:", e);
+        return 0;
+    }
+}
+
+// Atualiza Status do Sistema
+async function atualizarStatusSistema(leitura) {
+    const { cpu, ram, disco, rede } = leitura;
+
+    const alertasHoje = await contarAlertasHoje();
+    document.getElementById("alertCount").innerText = alertasHoje;
+
+    const houveCritico = componenteCritico(cpu, ram, disco, rede);
+
+    if (houveCritico) {
+        uptimeStart = new Date(); // zera uptime
+        document.getElementById("systemStatus").innerText = "Crítico";
+        document.getElementById("systemStatus").classList.add("critico");
+        document.getElementById("statusDescription").innerText = "Um ou mais componentes estão acima do limite seguro";
+    } else {
+        document.getElementById("systemStatus").innerText = "Normal";
+        document.getElementById("systemStatus").classList.remove("critico");
+        document.getElementById("statusDescription").innerText = "Todos os componentes operando dentro dos parâmetros normais";
+    }
+
+    const agora = new Date();
+    const uptimeMs = agora - uptimeStart;
+
+    document.getElementById("systemUptime").innerText = formatarUptime(uptimeMs);
+}
+
+// ajustes
+
+// Adicione estas variáveis globais no início do seu script
+let systemStartTime = new Date(); // Tempo de início do serviço
+let lastAlertTime = null; // Último tempo em que houve alerta
+let currentUptime = 0; // Uptime acumulado em segundos
+let isSystemNormal = true; // Status atual do sistema
+let alertCount = 0; // Contador de alertas ativos
+
+// Função para formatar o tempo em dias, horas e minutos
+function formatUptime(seconds) {
+    const days = Math.floor(seconds / (24 * 60 * 60));
+    const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
+    const minutes = Math.floor((seconds % (60 * 60)) / 60);
+
+    return `${days}d ${hours}h ${minutes}m`;
+}
+
+// Função para atualizar o status do sistema
+function updateSystemStatus() {
+    const systemStatusElement = document.getElementById('systemStatus');
+    const statusDescriptionElement = document.getElementById('statusDescription');
+    const systemUptimeElement = document.getElementById('systemUptime');
+    const alertCountElement = document.getElementById('alertCount');
+
+    // Atualiza o uptime apenas se o sistema estiver normal
+    if (isSystemNormal) {
+        currentUptime++;
+        systemUptimeElement.textContent = formatUptime(currentUptime);
+    }
+
+    // Atualiza contador de alertas
+    alertCountElement.textContent = alertCount;
+}
+
+// Função para verificar se há alertas críticos
+function checkForCriticalAlerts() {
+    // Esta função deve ser integrada com sua lógica de monitoramento
+    // Por enquanto, vamos simular a verificação
+
+    const cpuValue = parseInt(document.getElementById('kpiCpuValue').textContent) || 0;
+    const memoriaValue = parseInt(document.getElementById('kpiMemoriaValue').textContent) || 0;
+    const discoValue = parseInt(document.getElementById('kpiDiscoValue').textContent) || 0;
+    const redeValue = parseInt(document.getElementById('kpiRedeValue').textContent) || 0;
+
+    // Verifica se algum componente está em estado crítico (baseado na sua legenda)
+    const hasCriticalAlert =
+        cpuValue > 85 ||
+        memoriaValue > 84 ||
+        discoValue > 90 ||
+        redeValue > 74;
+
+    return hasCriticalAlert;
+}
+
+
+function updateStatusSystem() {
+    const hasCriticalAlerts = checkForCriticalAlerts();
+
+    if (hasCriticalAlerts) {
+        if (isSystemNormal) {
+            isSystemNormal = false;
+            currentUptime = 0;
+            lastAlertTime = new Date();
+            alertCount++;
+
+            document.getElementById('systemStatus').textContent = 'Crítico';
+            document.getElementById('systemStatus').className = 'status-badge critical';
+            document.getElementById('statusDescription').textContent = 'Um ou mais componentes necessitam de atenção imediata';
+            document.getElementById('systemUptime').textContent = formatUptime(0);
+        }
+    } else {
+        if (!isSystemNormal) {
+            isSystemNormal = true;
+            alertCount = Math.max(0, alertCount - 1);
+        }
+
+        document.getElementById('systemStatus').textContent = 'Normal';
+        document.getElementById('systemStatus').className = 'status-badge normal';
+        document.getElementById('statusDescription').textContent = 'Todos os componentes operando dentro dos parâmetros normais';
+
+        updateSystemStatus();
+    }
+}
+
+function updateSystemStatus() {
+    if (isSystemNormal) {
+        currentUptime++;
+        document.getElementById('systemUptime').textContent = formatUptime(currentUptime);
+    }
+
+    document.getElementById('alertCount').textContent = alertCount;
+}
+
+function updateSystemStatus() {
+    if (isSystemNormal) {
+        currentUptime++;
+        document.getElementById('systemUptime').textContent = formatUptime(currentUptime);
+    }
+
+    document.getElementById('alertCount').textContent = alertCount;
+}
+
+function initializeStatusSystem() {
+    systemStartTime = new Date();
+    lastAlertTime = null;
+    currentUptime = 0;
+    isSystemNormal = true;
+    alertCount = 0;
+
+    document.getElementById('systemUptime').textContent = formatUptime(0);
+    document.getElementById('alertCount').textContent = '0';
+
+    setInterval(updateStatusSystem, 1000);
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    .status-badge.normal {
+        background-color: #10b981;
+        color: white;
+    }
+    .status-badge.critical {
+        background-color: #ef4444;
+        color: white;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+`;
+document.head.appendChild(style);
+
+document.addEventListener('DOMContentLoaded', function () {
+    initializeStatusSystem();
+
+    setInterval(updateSystemStatus, 1000);
 });
