@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CyberFlow - Painel de Segurança</title>
-  <link rel="stylesheet" href="../public/css/seguranca.css">
+  <link rel="stylesheet" href="../css/seguranca.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
   <header class="topbar">
     <div class="topbar-brand">
-      <img src="../public/assets/infra-parafundobranco.png" alt="InfraFlow" class="brand-logo">
+      <a href="dashboard.html">
+        <img src="../assets/infra-parafundobranco.png" alt="InfraFlow" class="brand-logo">
+      </a>
     </div>
 
     <div class="topbar-center">
@@ -22,9 +26,6 @@
           <label for="edgeSelector">Pórtico FreeFlow</label>
           <select id="edgeSelector">
             <option>INFRA-EDGE-01-Itápolis (SP-333)</option>
-            <!-- <option>INFRA-EDGE-02-Jaboticabal (SP-333)</option>
-            <option>INFRA-EDGE-03-São José dos Campos (SP-099)</option>
-            <option>INFRA-EDGE-04-Itaguaí (Km 414)</option> -->
           </select>
         </div>
       </div>
@@ -48,6 +49,14 @@
 
   <main class="cyber-container">
     <aside class="sidebar-left">
+      <!-- Link para voltar à home -->
+      <div class="sidebar-card">
+        <a href="dashboard.html" class="home-link">
+          <i class="fas fa-arrow-left"></i>
+          <span>Voltar para Home</span>
+        </a>
+      </div>
+
       <div class="sidebar-card">
         <h3>Ações Rápidas</h3>
         <ul>
@@ -56,7 +65,18 @@
           <li><i class="fas fa-sync"></i> Reiniciar monitoramento</li>
           <li><i class="fas fa-phone"></i> Acionar supervisor</li>
           <li><i class="fas fa-file-alt"></i> Registrar evento</li>
-        </ul>`
+        </ul>
+      </div>
+
+      <!-- Informações do usuário logado -->
+      <div class="user-section">
+        <div class="user-info">
+          <i class="fas fa-user-circle"></i>
+          <span id="sidebarUser">Admin</span>
+        </div>
+        <button class="logout-btn" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
       </div>
     </aside>
 
@@ -113,14 +133,17 @@
       <div class="content-grid">
         <article class="card large">
           <h3>Resumo Situação Atual</h3>
-          <p id="texto-bob">Monitoramento ativo dos acessos lógicos e físicos. Não há incidentes críticos em aberto. A equipe de vigilância é acionada apenas em caso de abertura de gabinete ou presença não reconhecida no perímetro.</p>
+          <p id="texto-bob">Monitoramento ativo dos acessos lógicos e físicos. Não há incidentes críticos em aberto. A
+            equipe de vigilância é acionada apenas em caso de abertura de gabinete ou presença não reconhecida no
+            perímetro.</p>
         </article>
 
         <article class="card">
           <h3>Câmera Ao Vivo</h3>
           <div class="camera-placeholder">
-            <i class="fas fa-video"></i>
-            <p>Feed da câmera</p>
+            <img src="https://via.placeholder.com/640x360/006060/ffffff?text=CÂMERA+PORTA+PRINCIPAL"
+              alt="Câmera ao vivo - Porta do Pórtico" style="width: 100%; border-radius: 8px;">
+            <p>Monitoramento em tempo real - Pórtico FreeFlow</p>
           </div>
         </article>
 
@@ -153,5 +176,23 @@
   </main>
 
   <script src="../js/seguranca.js"></script>
+
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', function () {
+      try {
+        sessionStorage.clear();
+        localStorage.removeItem('login_email');
+      } catch (e) { }
+      window.location.replace('../login.html');
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const userEmail = localStorage.getItem('login_email');
+      if (userEmail) {
+        document.getElementById('sidebarUser').textContent = userEmail.split('@')[0];
+      }
+    });
+  </script>
 </body>
+
 </html>

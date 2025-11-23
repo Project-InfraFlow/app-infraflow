@@ -15,6 +15,8 @@ var avisosRouter = require("./src/routes/avisos");
 var medidasRouter = require("./src/routes/medidas");
 var aquariosRouter = require("./src/routes/aquarios");
 var empresasRouter = require("./src/routes/empresas");
+var segurancaRouter = require("./src/routes/segurancaRoutes");
+var memoriaRouter = require("./src/routes/memoria");
 
 var app = express();
 app.use(express.json());
@@ -29,6 +31,9 @@ app.use("/avisos", avisosRouter);
 app.use("/medidas", medidasRouter);
 app.use("/aquarios", aquariosRouter);
 app.use("/empresas", empresasRouter);
+app.use("/api/seguranca", segurancaRouter);
+app.use("/api/memoria", memoriaRouter);
+
 
 app.use("/api/leituras", leiturasRouter);
 

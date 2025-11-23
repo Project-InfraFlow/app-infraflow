@@ -1,61 +1,224 @@
 document.addEventListener("DOMContentLoaded", () => {
-    carregarGraficos();
-    carregarLogsFake();
+    inicializarSeguranca();
 });
 
-/* ▪▪▪ GRÁFICO 1 — Alertas 24h ▪▪▪ */
-function carregarGraficos() {
-    const ctx1 = document.getElementById("chart24h");
+function inicializarSeguranca() {
+    carregarDadosReais();
+    setInterval(carregarDadosReais, 10000); 
 
-    new Chart(ctx1, {
+async function carregarDadosReais() {
+    try {
+        await Promise.all([
+            carregarStatusOperacao(),
+            carregarUsuariosLogados(),
+            carregarTentativasAtaque(),
+            carregarStatusAcessoFisico(),
+            carregarLogsSeguranca(),
+            carregarGraficosReais(),
+            atualizarResumoSituacao()
+        ]);
+        atualizarHora();
+    } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+    }
+}
+
+async function carregarStatusOperacao() {
+    try {
+        const response = await fetch('/api/seguranca/status-operacao');
+        const data = await response.json();
+        
+        document.getElementById('status-operacao').textContent = data.status;
+        const statusElement = document.getElementById('status-operacao');
+        statusElement.className = 'kpi-value';
+        
+        if (data.status === 'Atenção') {
+            statusElement.classList.add('warning');
+        } else if (data.status === 'Crítico') {
+            statusElement.classList.add('critical');
+        }
+    } catch (error) {
+        document.getElementById('status-operacao').textContent = 'Erro';
+    }
+}
+
+async function carregarUsuariosLogados() {
+    try {
+        const response = await fetch('/api/seguranca/usuarios-logados');
+        const data = await response.json();
+        document.getElementById('usuarios-logados').textContent = data.total;
+    } catch (error) {
+        document.getElementById('usuarios-logados').textContent = '0';
+    }
+}
+
+async function carregarTentativasAtaque() {
+    try {
+        const response = await fetch('/api/seguranca/tentativas-ataque');
+        const data = await response.json();
+        document.getElementById('tentativas-ataque').textContent = data.total;
+    } catch (error) {
+        document.getElementById('tentativas-ataque').textContent = '0';
+    }
+}
+
+async function carregarStatusAcessoFisico() {
+    try {
+        const response = await fetch('/api/seguranca/acesso-fisico');
+        const data = await response.json();
+        document.getElementById('acesso-gabinete').textContent = data.status === 'fechado' ? 'Fechada' : 'Aberta';
+    } catch (error) {
+        document.getElementById('acesso-gabinete').textContent = 'Erro';
+    }
+}
+
+async function carregarLogsSeguranca() {
+    try {
+        const response = await fetch('/api/seguranca/logs');
+        const logs = await response.json();
+        
+        const logsContainer = document.getElementById("cyberLogs");
+        logsContainer.innerHTML = '';
+        
+        logs.forEach(log => {
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item';
+            
+            // Define cor baseada na severidade
+            if (log.severidade === 'critical') {
+                logItem.style.borderLeftColor = '#ef4444';
+            } else if (log.severidade === 'warning') {
+                logItem.style.borderLeftColor = '#f59e0b';
+            } else {
+                logItem.style.borderLeftColor = '#10b981';
+            }
+            
+            logItem.innerHTML = `
+                <div class="log-time">${new Date(log.data_hora).toLocaleTimeString()}</div>
+                <div class="log-desc">${log.descricao}</div>
+                ${log.ip_origem ? `<div class="log-ip">IP: ${log.ip_origem}</div>` : ''}
+            `;
+            
+            logsContainer.appendChild(logItem);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar logs:', error);
+    }
+}
+
+async function carregarGraficosReais() {
+    try {
+        const [alertasResponse, acessosResponse] = await Promise.all([
+            fetch('/api/seguranca/alertas-24h'),
+            fetch('/api/seguranca/acessos-tipo')
+        ]);
+        
+        const alertasData = await alertasResponse.json();
+        const acessosData = await acessosResponse.json();
+        
+        criarGraficoAlertas(alertasData);
+        criarGraficoAcessos(acessosData);
+    } catch (error) {
+        console.error('Erro ao carregar gráficos:', error);
+    }
+}
+
+function criarGraficoAlertas(dados) {
+    const ctx = document.getElementById("cyberAlertsChart");
+    
+    if (window.alertaChart) {
+        window.alertaChart.destroy();
+    }
+    
+    window.alertaChart = new Chart(ctx, {
         type: "line",
         data: {
-            labels: ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"],
+            labels: dados.horas,
             datasets: [
-                { label: "Série 1", data: [10, 30, 25, 40, 50] },
-                { label: "Série 2", data: [5, 15, 22, 33, 38] },
-                { label: "Série 3", data: [8, 18, 28, 35, 29] }
+                { 
+                    label: "Tentativas de Ataque", 
+                    data: dados.tentativas_ataque,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4
+                },
+                { 
+                    label: "Alertas de Segurança", 
+                    data: dados.alertas_seguranca,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4
+                }
             ]
         },
-        options: { responsive: true }
-    });
-
-    /* ▪▪▪ GRÁFICO 2 — Tipo de Usuário ▪▪▪ */
-    const ctx2 = document.getElementById("chartUsuarios");
-
-    new Chart(ctx2, {
-        type: "bar",
-        data: {
-            labels: ["Item 1", "Item 2", "Item 3", "Item 4"],
-            datasets: [
-                { label: "Item 1", data: [12, 8, 5, 2] },
-                { label: "Item 2", data: [7, 10, 3, 1] },
-                { label: "Item 3", data: [14, 4, 6, 3] }
-            ]
-        },
-        options: {
-            indexAxis: "y",
-            responsive: true
+        options: { 
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Alertas de Segurança - Últimas 24h'
+                }
+            }
         }
     });
 }
 
-/* Logs temporários até integrar backend */
-function carregarLogsFake() {
-    const logs = [
-        "[AUTH] LOGIN_SUCCESS admin – 2025-11-19 13:42",
-        "[AUTH] LOGIN_FAIL userjoao – origem 187.55.34.201",
-        "[FIREWALL] BLOCK SSH brute force – 185.244.25.77",
-        "[API] GET /usuarios/102 – 182ms",
-        "[SECURITY] ALERT SQL INJECTION IP 45.93.21.122",
-        "[FIREWALL] ALLOW https 10.0.0.4",
-        "[AUTH] PASSWORD_CHANGE usuario: financeiro",
-        "[DISK] Uso crítico 92%",
-        "[APP] ERROR checkout: Null payment ID",
-        "[API] POST /eventos/create – 512ms",
-        "[SECURITY] MFA_SUCCESS IP 187.2.43.180",
-    ];
+function criarGraficoAcessos(dados) {
+    const ctx = document.getElementById("cyberAccessChart");
+    
+    if (window.acessoChart) {
+        window.acessoChart.destroy();
+    }
+    
+    window.acessoChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: dados.tipos,
+            datasets: [{
+                data: dados.quantidades,
+                backgroundColor: [
+                    '#3b82f6',
+                    '#10b981',
+                    '#f59e0b',
+                    '#8b5cf6',
+                    '#ef4444'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Distribuição de Acessos por Tipo de Usuário'
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
 
-    const box = document.getElementById("logsBox");
-    box.innerText = logs.join("\n\n");
+async function atualizarResumoSituacao() {
+    try {
+        const response = await fetch('/api/seguranca/resumo-situacao');
+        const resumo = await response.json();
+        document.getElementById('texto-bob').textContent = resumo.texto;
+    } catch (error) {
+        document.getElementById('texto-bob').textContent = 'Erro ao carregar resumo.';
+    }
+}
+
+function atualizarHora() {
+    const agora = new Date();
+    document.getElementById('lastUpdateTime').textContent = 
+        agora.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
 }

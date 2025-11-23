@@ -1017,3 +1017,135 @@ body {
         grid-template-columns: 20% 30% 30% 20%; /* ID, SO, Localização, Ações (Remove Status) */
     }
 }
+
+/* Status colors for KPIs */
+.status-normal { border-left-color: #10b981 !important; }
+.status-warning { border-left-color: #f59e0b !important; }
+.status-critical { border-left-color: #ef4444 !important; }
+
+.progress-bar.status-normal { background-color: #10b981 !important; }
+.progress-bar.status-warning { background-color: #f59e0b !important; }
+.progress-bar.status-critical { background-color: #ef4444 !important; }
+
+/* Specs grid styles */
+.specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.specs-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 4px solid #3b82f6;
+}
+
+.specs-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.specs-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+}
+
+.specs-header i {
+    font-size: 1.5rem;
+    color: #3b82f6;
+    margin-right: 10px;
+}
+
+.specs-header h3 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.2rem;
+}
+
+.spec-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 5px 0;
+}
+
+.spec-label {
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.spec-value {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.memory-usage-info, .alert-policies {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.usage-category h4, .policy-category h4 {
+    color: #374151;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.usage-category ul, .policy-category ul {
+    list-style: none;
+    padding: 0;
+}
+
+.usage-category li, .policy-category li {
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.usage-category li:before, .policy-category li:before {
+    content: "•";
+    color: #3b82f6;
+    position: absolute;
+    left: 0;
+}
+
+.policy-levels {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.policy-level {
+    flex: 1;
+    min-width: 200px;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.policy-level.normal { background-color: #d1fae5; border: 2px solid #10b981; }
+.policy-level.warning { background-color: #fef3c7; border: 2px solid #f59e0b; }
+.policy-level.critical { background-color: #fee2e2; border: 2px solid #ef4444; }
+
+.level-name {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.level-range {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.level-action {
+    display: block;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
