@@ -30,27 +30,68 @@ async function fetchLeiturasDB(params = { maquinaId: 1, limite: 50 }) {
     try {
         const qs = new URLSearchParams(params).toString();
         const resp = await fetch(`/api/leituras?${qs}`);
-        
+
         if (!resp.ok) {
             throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
         }
-        
+
         const arr = await resp.json();
-        
+        console.log("API /api/leituras → exemplo recebido:", arr[0]);
+
+
         if (!Array.isArray(arr)) {
             throw new Error('Resposta da API não é um array');
         }
 
-        const parsed = arr.map(r => ({
-            ts: r.horario,
-            timestamp: new Date(r.horario),
-            cpu: Number(r.cpu ?? 0),
-            memoria: Number(r.ram ?? 0),
-            disco: Number(r.disco ?? 0),
-            rede: Number(r.rede ?? 0),
-            nucleos: []
-        }));
-        
+        if (arr.length) {
+            console.log('Exemplo de leitura da API:', arr[0]);
+        }
+
+        const parsed = arr.map(r => {
+            const tsBruto = r.horario || r.data_hora_captura || r.timestamp;
+
+            const cpu = Number(
+                r.cpu ??
+                r.cpu_percent ??
+                r.cpuPercent ??
+                0
+            );
+
+            const memoria = Number(
+                r.memoria ??
+                r.memoria_percent ??
+                r.ram ??              // mantém compat com a versão antiga
+                r.memoriaPercent ??
+                0
+            );
+
+            const disco = Number(
+                r.disco ??
+                r.disco_percent ??
+                r.discoPercent ??
+                0
+            );
+
+            const rede = Number(
+                r.rede ??
+                r.rede_mbps ??
+                r.rede_percent ??
+                r.redePercent ??
+                0
+            );
+
+            return {
+                ts: tsBruto,
+                timestamp: tsBruto ? new Date(tsBruto) : new Date(),
+                cpu,
+                memoria,
+                disco,
+                rede,
+                nucleos: r.nucleos || []
+            };
+        });
+
+
         return parsed;
     } catch (error) {
         console.error('Erro ao buscar leituras:', error);
@@ -60,16 +101,16 @@ async function fetchLeiturasDB(params = { maquinaId: 1, limite: 50 }) {
 
 function iniciarPollingDB() {
     pararPollingDB();
-    
+
     buscarDadosDB();
-    
+
     timerDB = setInterval(buscarDadosDB, 2000);
 }
 
 async function buscarDadosDB() {
     try {
         const dados = await fetchLeiturasDB({ maquinaId: 1, limite: 50 });
-        
+
         if (dados && dados.length > 0) {
             dadosTempoReal = dados.slice(-50);
             estadoApp.dadosCompletos = dados;
@@ -77,17 +118,17 @@ async function buscarDadosDB() {
             gerenciadorInterface.atualizarInformacoesSistema();
             gerenciadorInterface.atualizarKPIs();
             gerenciadorInterface.atualizarStatusSistema();
-            
+
             if (graficos.tempoReal) {
                 atualizarGraficoTempoReal();
             }
-            
+
             atualizarTabelaMonitoramento();
 
             try {
-                    const ultimo = dadosTempoReal[dadosTempoReal.length - 1];
-                    const fonte = document.getElementById('edgeSelector')?.value || 'Pórtico';
-                    window.evaluatePoint(ultimo, fonte);
+                const ultimo = dadosTempoReal[dadosTempoReal.length - 1];
+                const fonte = document.getElementById('edgeSelector')?.value || 'Pórtico';
+                window.evaluatePoint(ultimo, fonte);
             } catch (err) {
                 console.error("Erro ao avaliar alertas:", err);
             }
@@ -107,15 +148,15 @@ function pararPollingDB() {
 class GerenciadorInterface {
     atualizarInformacoesSistema() {
         const agora = new Date();
-        const dt = agora.toLocaleString('pt-BR', { 
-            day: '2-digit', 
-            month: '2-digit', 
-            year: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
+        const dt = agora.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
         });
-        
+
         const el = document.getElementById('lastUpdateTime');
         if (el) el.textContent = dt;
     }
@@ -130,41 +171,41 @@ class GerenciadorInterface {
         const redePct = toRedePct(ultimoDado.rede);
 
         const comps = [
-            { 
-                key: 'cpu', 
-                valor: ultimoDado.cpu, 
-                maxSaudavel: 45, 
-                maxCritico: 85, 
-                cardId: 'kpiCpu', 
-                valueId: 'kpiCpuValue', 
-                progressId: 'cpuProgress' 
+            {
+                key: 'cpu',
+                valor: ultimoDado.cpu,
+                maxSaudavel: 45,
+                maxCritico: 85,
+                cardId: 'kpiCpu',
+                valueId: 'kpiCpuValue',
+                progressId: 'cpuProgress'
             },
-            { 
-                key: 'memoria', 
-                valor: ultimoDado.memoria, 
-                maxSaudavel: 53, 
-                maxCritico: 84, 
-                cardId: 'kpiMemoria', 
-                valueId: 'kpiMemoriaValue', 
-                progressId: 'memoriaProgress' 
+            {
+                key: 'memoria',
+                valor: ultimoDado.memoria,
+                maxSaudavel: 53,
+                maxCritico: 84,
+                cardId: 'kpiMemoria',
+                valueId: 'kpiMemoriaValue',
+                progressId: 'memoriaProgress'
             },
-            { 
-                key: 'disco', 
-                valor: ultimoDado.disco, 
-                maxSaudavel: 60, 
-                maxCritico: 90, 
-                cardId: 'kpiDisco', 
-                valueId: 'kpiDiscoValue', 
-                progressId: 'discoProgress' 
+            {
+                key: 'disco',
+                valor: ultimoDado.disco,
+                maxSaudavel: 60,
+                maxCritico: 90,
+                cardId: 'kpiDisco',
+                valueId: 'kpiDiscoValue',
+                progressId: 'discoProgress'
             },
-            { 
-                key: 'rede', 
-                valor: redePct, 
-                maxSaudavel: 50, 
-                maxCritico: 75, 
-                cardId: 'kpiRede', 
-                valueId: 'kpiRedeValue', 
-                progressId: 'redeProgress' 
+            {
+                key: 'rede',
+                valor: redePct,
+                maxSaudavel: 50,
+                maxCritico: 75,
+                cardId: 'kpiRede',
+                valueId: 'kpiRedeValue',
+                progressId: 'redeProgress'
             }
         ];
 
@@ -181,18 +222,18 @@ class GerenciadorInterface {
                     valEl.textContent = `${v.toFixed(1)}%`;
                 }
             }
-            
+
             if (progEl) progEl.style.width = `${v}%`;
 
             let estado = 'Saudável';
             let cor = '#22c55e';
-            
-            if (v > c.maxSaudavel && v <= c.maxCritico) { 
-                estado = 'Alta Utilização'; 
-                cor = '#facc15'; 
-            } else if (v > c.maxCritico) { 
-                estado = 'Saturação'; 
-                cor = '#ef4444'; 
+
+            if (v > c.maxSaudavel && v <= c.maxCritico) {
+                estado = 'Alta Utilização';
+                cor = '#facc15';
+            } else if (v > c.maxCritico) {
+                estado = 'Saturação';
+                cor = '#ef4444';
             }
 
             if (card) {
@@ -230,7 +271,7 @@ class GerenciadorInterface {
         kpis.forEach(kpi => {
             const valEl = document.getElementById(kpi.valueId);
             const progEl = document.getElementById(kpi.progressId);
-            
+
             if (valEl) valEl.textContent = kpi.valueId.includes('Rede') ? '0 Mbps' : '0%';
             if (progEl) progEl.style.width = '0%';
         });
@@ -280,7 +321,7 @@ class GerenciadorInterface {
 
         const uptimeEl = document.getElementById('systemUptime');
         const alertCountEl = document.getElementById('alertCount');
-        
+
         if (uptimeEl) uptimeEl.textContent = this.calcularUptime();
         if (alertCountEl) alertCountEl.textContent = '0';
     }
@@ -298,7 +339,7 @@ const gerenciadorInterface = new GerenciadorInterface();
 
 function inicializarGraficos() {
     console.log('Inicializando gráficos...');
-    
+
     const ctx1 = document.getElementById('realTimeChart');
     if (!ctx1) {
         console.error('Canvas realTimeChart não encontrado!');
@@ -340,8 +381,8 @@ function inicializarGraficos() {
             },
             x: {
                 grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                ticks: { 
-                    font: { family: 'Inter', size: 11 }, 
+                ticks: {
+                    font: { family: 'Inter', size: 11 },
                     color: '#64748b',
                     maxTicksLimit: 10
                 }
@@ -361,10 +402,10 @@ function inicializarGraficos() {
                     data: [],
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59,130,246,.1)',
-                    tension: 0.4, 
-                    pointRadius: 2, 
-                    pointHoverRadius: 4, 
-                    borderWidth: 2, 
+                    tension: 0.4,
+                    pointRadius: 2,
+                    pointHoverRadius: 4,
+                    borderWidth: 2,
                     fill: true
                 },
                 {
@@ -372,10 +413,10 @@ function inicializarGraficos() {
                     data: [],
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16,185,129,.1)',
-                    tension: 0.4, 
-                    pointRadius: 2, 
-                    pointHoverRadius: 4, 
-                    borderWidth: 2, 
+                    tension: 0.4,
+                    pointRadius: 2,
+                    pointHoverRadius: 4,
+                    borderWidth: 2,
                     fill: true
                 },
                 {
@@ -383,10 +424,10 @@ function inicializarGraficos() {
                     data: [],
                     borderColor: '#f59e0b',
                     backgroundColor: 'rgba(245,158,11,.1)',
-                    tension: 0.4, 
-                    pointRadius: 2, 
-                    pointHoverRadius: 4, 
-                    borderWidth: 2, 
+                    tension: 0.4,
+                    pointRadius: 2,
+                    pointHoverRadius: 4,
+                    borderWidth: 2,
                     fill: true
                 },
                 {
@@ -394,10 +435,10 @@ function inicializarGraficos() {
                     data: [],
                     borderColor: '#8b5cf6',
                     backgroundColor: 'rgba(139,92,246,.1)',
-                    tension: 0.4, 
-                    pointRadius: 2, 
-                    pointHoverRadius: 4, 
-                    borderWidth: 2, 
+                    tension: 0.4,
+                    pointRadius: 2,
+                    pointHoverRadius: 4,
+                    borderWidth: 2,
                     fill: true
                 }
             ]
@@ -467,10 +508,10 @@ function configurarNavegacao() {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             const view = btn.getAttribute('data-view');
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            
+
             const targetView = document.getElementById(`view-${view}`);
             if (targetView) {
                 targetView.classList.add('active');
@@ -499,10 +540,10 @@ function configurarCadastro() {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             const tab = btn.getAttribute('data-tab');
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            
+
             const targetTab = document.getElementById(`tab-${tab}`);
             if (targetTab) targetTab.classList.add('active');
         });
@@ -511,16 +552,16 @@ function configurarCadastro() {
 
 function inicializarDashboard() {
     console.log('🚀 Inicializando Dashboard InfraFlow...');
-    
+
     const elementosCriticos = [
         'realTimeChart',
-        'kpiCpuValue', 
+        'kpiCpuValue',
         'kpiMemoriaValue',
         'kpiDiscoValue',
         'kpiRedeValue',
         'monitorTableBody'
     ];
-    
+
     elementosCriticos.forEach(id => {
         if (!document.getElementById(id)) {
             console.error(`Elemento crítico não encontrado: ${id}`);
@@ -530,12 +571,12 @@ function inicializarDashboard() {
     inicializarGraficos();
     configurarNavegacao();
     configurarCadastro();
-    
+
     iniciarPollingDB();
-    
+
     const selectMonitor = document.getElementById("edgeSelector");
     const monitorSpan = document.getElementById("monitor-selecionado");
-    
+
     if (selectMonitor && monitorSpan) {
         function atualizarTitulo() {
             monitorSpan.textContent = selectMonitor.value ? " - " + selectMonitor.value : "";
@@ -543,16 +584,16 @@ function inicializarDashboard() {
         selectMonitor.addEventListener("change", atualizarTitulo);
         atualizarTitulo();
     }
-    
+
     console.log('✅ Dashboard inicializado com sucesso!');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('📄 DOM carregado, iniciando dashboard...');
     setTimeout(inicializarDashboard, 100);
 });
 
-window.addEventListener('beforeunload', function() {
+window.addEventListener('beforeunload', function () {
     pararPollingDB();
 });
 
@@ -589,7 +630,7 @@ function exportarCSV(dados, nomeArquivo) {
     gerenciadorInterface.mostrarNotificacao('Dados exportados com sucesso!', 'success');
 }
 
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     if (e.target.closest('#exportMonitorCsv')) {
         exportarCSV(dadosTempoReal, `infraflow_monitoramento_${new Date().toISOString().slice(0, 10)}.csv`);
     }
@@ -783,86 +824,86 @@ body.has-fixed-topbar{padding-top:64px}
 
     const lastCross = { cpu: false, memoria: false, disco: false, rede: false };
     function evaluatePoint(ponto, fonte = "Sistema") {
-    if (!ponto) return;
-    
-    const hora = new Date().toLocaleTimeString("pt-BR");
-    const last = window._lastCrossState || {};
-    window._lastCrossState = last;
+        if (!ponto) return;
 
-    function cross(key, cond, level, msg) {
-        if (cond && !last[key]) {
-            pushAlert({
-                id: Date.now() + "-" + key,
-                time: hora,
-                level: level,
-                source: fonte,
-                msg: msg
-            });
+        const hora = new Date().toLocaleTimeString("pt-BR");
+        const last = window._lastCrossState || {};
+        window._lastCrossState = last;
+
+        function cross(key, cond, level, msg) {
+            if (cond && !last[key]) {
+                pushAlert({
+                    id: Date.now() + "-" + key,
+                    time: hora,
+                    level: level,
+                    source: fonte,
+                    msg: msg
+                });
+            }
+            last[key] = cond;
         }
-        last[key] = cond;
+
+        // CPU
+        cross(
+            "cpu_crit",
+            ponto.cpu >= 85,
+            "CRITICO",
+            `CPU em ${ponto.cpu.toFixed(1)}% — Acima do limite crítico`
+        );
+
+        cross(
+            "cpu_warn",
+            ponto.cpu >= 70 && ponto.cpu < 85,
+            "ATENCAO",
+            `CPU em ${ponto.cpu.toFixed(1)}% — Utilização elevada`
+        );
+
+        // MEMÓRIA
+        cross(
+            "mem_crit",
+            ponto.memoria >= 85,
+            "CRITICO",
+            `Memória em ${ponto.memoria.toFixed(1)}% — Acima do limite crítico`
+        );
+
+        cross(
+            "mem_warn",
+            ponto.memoria >= 70 && ponto.memoria < 85,
+            "ATENCAO",
+            `Memória em ${ponto.memoria.toFixed(1)}% — Utilização elevada`
+        );
+
+        // DISCO
+        cross(
+            "disk_crit",
+            ponto.disco >= 90,
+            "CRITICO",
+            `Disco em ${ponto.disco.toFixed(1)}% — Acima do limite crítico (risco de travamento)`
+        );
+
+        cross(
+            "disk_warn",
+            ponto.disco >= 80 && ponto.disco < 90,
+            "ATENCAO",
+            `Disco em ${ponto.disco.toFixed(1)}% — Utilização elevada`
+        );
+
+        // REDE (exemplo: acima de 180 Mbps saturação)
+        cross(
+            "network_crit",
+            ponto.rede >= 180,
+            "CRITICO",
+            `Rede em ${ponto.rede.toFixed(1)} Mbps — Saturação crítica detectada`
+        );
+
+        cross(
+            "network_warn",
+            ponto.rede >= 120 && ponto.rede < 180,
+            "ATENCAO",
+            `Rede em ${ponto.rede.toFixed(1)} Mbps — Tráfego muito alto`
+        );
     }
-
-    // CPU
-    cross(
-        "cpu_crit",
-        ponto.cpu >= 85,
-        "CRITICO",
-        `CPU em ${ponto.cpu.toFixed(1)}% — Acima do limite crítico`
-    );
-
-    cross(
-        "cpu_warn",
-        ponto.cpu >= 70 && ponto.cpu < 85,
-        "ATENCAO",
-        `CPU em ${ponto.cpu.toFixed(1)}% — Utilização elevada`
-    );
-
-    // MEMÓRIA
-    cross(
-        "mem_crit",
-        ponto.memoria >= 85,
-        "CRITICO",
-        `Memória em ${ponto.memoria.toFixed(1)}% — Acima do limite crítico`
-    );
-
-    cross(
-        "mem_warn",
-        ponto.memoria >= 70 && ponto.memoria < 85,
-        "ATENCAO",
-        `Memória em ${ponto.memoria.toFixed(1)}% — Utilização elevada`
-    );
-
-    // DISCO
-    cross(
-        "disk_crit",
-        ponto.disco >= 90,
-        "CRITICO",
-        `Disco em ${ponto.disco.toFixed(1)}% — Acima do limite crítico (risco de travamento)`
-    );
-
-    cross(
-        "disk_warn",
-        ponto.disco >= 80 && ponto.disco < 90,
-        "ATENCAO",
-        `Disco em ${ponto.disco.toFixed(1)}% — Utilização elevada`
-    );
-
-    // REDE (exemplo: acima de 180 Mbps saturação)
-    cross(
-        "network_crit",
-        ponto.rede >= 180,
-        "CRITICO",
-        `Rede em ${ponto.rede.toFixed(1)} Mbps — Saturação crítica detectada`
-    );
-
-    cross(
-        "network_warn",
-        ponto.rede >= 120 && ponto.rede < 180,
-        "ATENCAO",
-        `Rede em ${ponto.rede.toFixed(1)} Mbps — Tráfego muito alto`
-    );
-}
-window.evaluatePoint = evaluatePoint;
+    window.evaluatePoint = evaluatePoint;
 
     const patchAlerts = () => {
         if (!window.gerenciadorInterface) return;
