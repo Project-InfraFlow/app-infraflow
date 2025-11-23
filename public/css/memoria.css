@@ -1018,6 +1018,7 @@ body {
     }
 }
 
+<<<<<<< HEAD
 /* Status colors for KPIs */
 .status-normal { border-left-color: #10b981 !important; }
 .status-warning { border-left-color: #f59e0b !important; }
@@ -1149,3 +1150,5 @@ body {
     font-size: 0.8rem;
     color: #6b7280;
 }
+=======
+>>>>>>> fe53ac5bd7d1ef2bcfcb0d30dcc6111afffc5c92
