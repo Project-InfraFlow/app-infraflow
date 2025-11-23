@@ -2118,3 +2118,12 @@ input:checked+.slider:before {
     color: #006060;
 }
 
+.critical-value {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.warning-value {
+    color: #f59e0b;
+    font-weight: 500;
+}

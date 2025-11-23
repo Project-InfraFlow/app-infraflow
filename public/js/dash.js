@@ -1228,3 +1228,100 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setInterval(updateSystemStatus, 1000);
 });
+
+function gerarDadosMockadosMonitoramento() {
+    const dados = [];
+    const now = new Date();
+    
+    for (let i = 0; i < 50; i++) {
+        const data = new Date(now);
+        data.setSeconds(data.getSeconds() - i * 2);
+        
+        const baseCPU = Math.random() > 0.7 ? Math.random() * 40 + 25 : Math.random() * 20;
+        const baseMemoria = Math.random() > 0.7 ? Math.random() * 30 + 55 : Math.random() * 50 + 30; 
+        const baseDisco = Math.random() > 0.8 ? Math.random() * 15 + 75 : Math.random() * 60;
+        const baseRede = Math.random() * 3 + 0.5;
+        
+        dados.push({
+            portico: 'INFRA-EDGE-01-Itápolis (SP-333)',
+            horario: data.toLocaleString('pt-BR'),
+            cpu: baseCPU.toFixed(1),
+            memoria: baseMemoria.toFixed(1),
+            disco: baseDisco.toFixed(1),
+            rede: baseRede.toFixed(1)
+        });
+    }
+    
+    return dados;
+}
+
+function preencherTabelaMonitoramento() {
+    const tbody = document.getElementById('monitorTableBody');
+    const dados = gerarDadosMockadosMonitoramento();
+    
+    tbody.innerHTML = '';
+    
+    dados.forEach(registro => {
+        const tr = document.createElement('tr');
+        
+        const cpuClass = registro.cpu > 85 ? 'critical-value' : registro.cpu > 45 ? 'warning-value' : '';
+        const memoriaClass = registro.memoria > 84 ? 'critical-value' : registro.memoria > 53 ? 'warning-value' : '';
+        const discoClass = registro.disco > 90 ? 'critical-value' : registro.disco > 80 ? 'warning-value' : '';
+        const redeClass = registro.rede > 75 ? 'critical-value' : registro.rede > 50 ? 'warning-value' : '';
+        
+        tr.innerHTML = `
+            <td>${registro.portico}</td>
+            <td>${registro.horario}</td>
+            <td class="${cpuClass}">${registro.cpu}%</td>
+            <td class="${memoriaClass}">${registro.memoria}%</td>
+            <td class="${discoClass}">${registro.disco}%</td>
+            <td class="${redeClass}">${registro.rede} Mbps</td>
+        `;
+        
+        tbody.appendChild(tr);
+    });
+    
+    document.getElementById('monitorPaginationInfo').textContent = `Mostrando ${dados.length} de ${dados.length} registros`;
+    document.getElementById('monitorPageInfo').textContent = 'Página 1 de 1';
+}
+
+function configurarExportCSV() {
+    document.getElementById('exportMonitorCsv').addEventListener('click', function() {
+        const dados = gerarDadosMockadosMonitoramento();
+        let csv = 'Pórtico,Horário,CPU (%),Memória (%),Disco (%),Rede (Mbps)\n';
+        
+        dados.forEach(registro => {
+            csv += `"${registro.portico}","${registro.horario}",${registro.cpu},${registro.memoria},${registro.disco},${registro.rede}\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'monitoramento_dados.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        alert('CSV exportado com sucesso!');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const view = btn.getAttribute('data-view');
+            if (view === 'monitor') {
+                setTimeout(() => {
+                    preencherTabelaMonitoramento();
+                    configurarExportCSV();
+                }, 100);
+            }
+        });
+    });
+    
+    if (document.getElementById('view-monitor').classList.contains('active')) {
+        preencherTabelaMonitoramento();
+        configurarExportCSV();
+    }
+});
