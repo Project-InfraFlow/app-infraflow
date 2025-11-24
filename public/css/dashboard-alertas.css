@@ -1723,3 +1723,30 @@ body {
     outline: none;
      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
+
+.security-indicator {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.nocsec-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #3b82f6;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.nocsec-link:hover {
+  background-color: #f1f5f9;
+}
+
+.nocsec-link i {
+  margin-right: 6px;
+  font-size: 16px;
+}
