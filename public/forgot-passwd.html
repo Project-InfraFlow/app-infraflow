@@ -25,31 +25,136 @@
             </div>
         </div>
         <div class="texts">
-            <div class="passo1" id="passo1">
-                <div class="titulo">
-                    <p>Redefinir Senha</p>
-                    <div class="linha"></div>
-                </div>
-                <div class="input">
-                    <label for="email_user">Insira seu e-mail</label>
-                    <input type="text" id="email_user">
-                    <button class="btn_send_code" id="send_code" onclick="send_code()">Enviar Código</button>
-                </div>
-            </div>
+    <!-- PASSO 1 -->
+    <div class="passo" id="passo1">
+        <div class="titulo">
+            <p>Redefinir Senha</p>
+            <div class="linha"></div>
         </div>
+        <div class="input">
+            <label for="email_user">Insira seu e-mail</label>
+            <input type="text" id="email_user">
+            <button class="btn_send_code" onclick="abrirPasso2()">Enviar Código</button>
+        </div>
+    </div>
+
+    <!-- PASSO 2 -->
+    <div class="passo" id="passo2" style="display: none;">
+        <div class="titulo">
+            <p>Verificação</p>
+            <div class="linha"></div>
+        </div>
+        <div class="input">
+            <label for="code">Insira o código enviado ao e-mail</label>
+            <input type="text" id="code">
+            <button class="btn_send_code" onclick="abrirPasso3()">Confirmar Código</button>
+        </div>
+    </div>
+
+    <!-- PASSO 3 -->
+    <div class="passo" id="passo3" style="display: none;">
+        <div class="titulo">
+            <p>Nova Senha</p>
+            <div class="linha"></div>
+        </div>
+        <div class="input">
+            <label for="nova_senha">Nova senha</label>
+            <input type="password" id="nova_senha">
+
+            <label for="confirmar_senha">Confirmar senha</label>
+            <input type="password" id="confirmar_senha">
+
+            <button class="btn_send_code" onclick="finalizar()">Redefinir Senha</button>
+        </div>
+    </div>
+</div>
     </div>
 </body>
 </html>
 
 <script>
+function abrirPasso2() {
 
-    function send_code(){
-        if (email_user.value == ""){
-            alert("Insira um e-mail válido.") 
-        }
 
-        style.d
 
+    const email = document.getElementById("email_user");
+
+    if (email.value === "") {
+        alert("Insira um e-mail válido.");
+        return;
     }
 
+    document.getElementById("passo1").style.display = "none";
+    document.getElementById("passo2").style.display = "block";
+}
+
+function abrirPasso3() {
+    const code = document.getElementById("code");
+
+    if (code.value === "") {
+        alert("Digite o código recebido.");
+        return;
+    }
+
+    document.getElementById("passo2").style.display = "none";
+    document.getElementById("passo3").style.display = "block";
+}
+
+function finalizar() {
+    const senha = document.getElementById("nova_senha").value;
+    const confirmar = document.getElementById("confirmar_senha").value;
+
+    if (senha === "" || confirmar === "") {
+        alert("Preencha todas as senhas.");
+        return;
+    }
+
+    if (senha !== confirmar) {
+        alert("As senhas não coincidem!");
+        return;
+    }
+
+    alert("Senha redefinida com sucesso!");
+   
+    window.location.href = "./login.html";
+}
+
+async function abrirPasso2() {
+    const emailInput = document.getElementById("email_user");
+    const email = emailInput.value?.trim();
+
+    if (!email) {
+        alert("Insira um e-mail válido.");
+        return;
+    }
+    
+   
+    fetch("/usuarios/enviar-codigo-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email }) // Apenas o e-mail
+    })
+    .then(function (resposta) {
+        
+        if (!resposta.ok) {
+            return resposta.text().then(function (t) { throw new Error(t || "Erro na requisição."); });
+        }
+        return resposta.json();
+    })
+    .then(function (json) {
+       
+        
+
+        alert("Se o e-mail estiver cadastrado, um código foi enviado para redefinição de senha.");
+        
+    
+        document.getElementById("passo1").style.display = "none";
+        document.getElementById("passo2").style.display = "block";
+    })
+    .catch(function (erro) {
+       
+        console.error('Erro:', erro);
+        alert("Erro ao tentar enviar o código. Tente novamente mais tarde.");
+    });
+}
 </script>

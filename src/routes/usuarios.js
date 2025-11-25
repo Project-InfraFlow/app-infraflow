@@ -24,5 +24,9 @@ router.get("/pesquisarUser/:pesquisa", function (req, res) {
      usuarioController.pesquisarUser(req, res); 
 })
 
+router.post("/enviar-codigo-reset", function (req, res) {
+    usuarioController.enviarCodigoReset(req, res); 
+});
+
 
 module.exports = router;

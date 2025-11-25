@@ -105,10 +105,28 @@ function cadastrarUser(nome, email, senha, tipo_user) {
     return database.executar(instrucaoSql);
 }
 
+// Funções recuperação de senha 
+
+function verificarEmail(email) {
+    var instrucaoSql = `
+        SELECT 
+            id_usuario, 
+            fk_empresa, 
+            email,
+            nome 
+        FROM usuario 
+        WHERE email = '${email}'
+        LIMIT 1;
+    `;
+   
+    return database.executar(instrucaoSql); 
+}
+
 module.exports = {
     autenticar,
     cadastrar,
     listarEmpresas,
     cadastrarUser,
-    pesquisarUser
+    pesquisarUser,
+    verificarEmail
 };

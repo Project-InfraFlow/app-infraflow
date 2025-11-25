@@ -126,10 +126,46 @@ function pesquisarUser(req, res) {
     })
 }
 
+function enviarCodigoReset(req, res) {
+    var email = (req.body && req.body.email) ? String(req.body.email).trim() : undefined;
+
+    if (email === undefined || email === "") {
+        res.status(400).send("O e-mail não foi fornecido!");
+        return;
+    }
+
+
+    usuarioModel.verificarEmail(email)
+        .then(function (resultadoConsulta) {
+            
+            if (Array.isArray(resultadoConsulta) && resultadoConsulta.length === 1) {
+                const usuario = resultadoConsulta[0];
+                
+                const codigo = Math.floor(100000 + Math.random() * 900000); 
+                
+                res.status(200).json({ 
+                    message: "Se o e-mail estiver cadastrado, o código foi enviado.",
+                    id_usuario: usuario.id_usuario 
+                });
+                
+            } else {
+
+                res.status(200).json({ 
+                    message: "Se o e-mail estiver cadastrado, o código foi enviado." 
+                });
+            }
+        })
+        .catch(function (erro) {
+            console.error("Erro ao verificar e-mail:", erro);
+            res.status(500).json(erro.sqlMessage || "Erro interno ao tentar buscar o e-mail.");
+        });
+}
+
 module.exports = {
     autenticar,
     cadastrar, 
     listarEmpresas, 
     cadastrarUser, 
-    pesquisarUser
+    pesquisarUser, 
+    enviarCodigoReset
 };
