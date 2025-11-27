@@ -115,25 +115,29 @@ function configurarNavegacao() {
 
 async function carregarDadosOverview() {
     try {
+        console.log('Carregando dados overview para máquina', ID_MAQUINA);
         const response = await fetch(`/api/memoria/detalhes/${ID_MAQUINA}`);
         
         if (!response.ok) {
             if (response.status === 404) {
+                console.warn('Dados não encontrados para máquina', ID_MAQUINA);
                 elements.kpiMemoriaUsoValue.textContent = 'N/D';
                 elements.kpiMemoriaLivreValue.textContent = 'N/D';
                 elements.kpiMemoriaTotalValue.textContent = '32 GB';
                 return;
             }
-            throw new Error('Erro na resposta da API');
+            throw new Error('Erro na resposta da API: ' + response.status);
         }
         
         const dados = await response.json();
         
         if (dados.error) {
+            console.error('Erro nos dados:', dados.error);
             elements.kpiMemoriaUsoValue.textContent = 'Erro';
             return;
         }
 
+        console.log('Dados recebidos:', dados);
         atualizarKPIs(dados);
         atualizarGraficos(dados);
         atualizarUltimaAtualizacao();
@@ -259,12 +263,14 @@ async function atualizarGraficoLinha() {
         const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=30`);
         
         if (!response.ok) {
+            console.warn('Erro ao buscar histórico para gráfico');
             return;
         }
         
         const historico = await response.json();
         
         if (historico.error) {
+            console.warn('Erro nos dados do histórico:', historico.error);
             return;
         }
 
@@ -277,9 +283,10 @@ async function atualizarGraficoLinha() {
             graficoMemoriaUso.data.labels = labels;
             graficoMemoriaUso.data.datasets[0].data = dadosUso;
             graficoMemoriaUso.update('none');
+            console.log('Gráfico de linha atualizado com', historico.length, 'pontos');
         }
     } catch (error) {
-        console.error('Erro ao atualizar gráfico de linha:', error);
+        console.error('Erro ao tentar atualizar gráfico de linha:', error);
     }
 }
 
@@ -287,10 +294,23 @@ function atualizarTabelaMonitor(dados) {
     const tbody = elements.monitorTableBody;
     tbody.innerHTML = '';
 
-    dados.forEach(item => {
+    const nomesMaquinas = {
+        1: "INFRA-EDGE-01-Itápolis (SP-333)",
+        2: "INFRA-EDGE-02-Jaboticabal (SP-333)", 
+        3: "INFRA-EDGE-03-São José dos Campos (SP-099)",
+        4: "INFRA-EDGE-04-Itaguaí (Km 414)"
+    };
+
+    const dadosOrdenados = dados.sort((a, b) => 
+        new Date(b.data_hora_captura) - new Date(a.data_hora_captura)
+    );
+
+    dadosOrdenados.forEach(item => {
+        const nomeMaquina = nomesMaquinas[item.id_maquina] || `Máquina ${item.id_maquina}`;
+        
         const row = `
         <tr>
-            <td>${document.getElementById('edgeSelector').options[document.getElementById('edgeSelector').selectedIndex].text}</td>
+            <td>${nomeMaquina}</td>
             <td>${item.uso_percent.toFixed(1)}%</td>
             <td>${item.memoria_livre_gb} GB</td>
             <td>${item.memoria_total_gb} GB</td>
@@ -301,22 +321,31 @@ function atualizarTabelaMonitor(dados) {
     });
 }
 
-function atualizarTabelaAlertas(alertas) {
-    const tbody = elements.historicoTableBody;
+function atualizarTabelaMonitor(dados) {
+    const tbody = elements.monitorTableBody;
     tbody.innerHTML = '';
 
-    alertas.forEach(alerta => {
+    const nomesMaquinas = {
+        1: "INFRA-EDGE-01-Itápolis (SP-333)",
+        2: "INFRA-EDGE-02-Jaboticabal (SP-333)", 
+        3: "INFRA-EDGE-03-São José dos Campos (SP-099)",
+        4: "INFRA-EDGE-04-Itaguaí (Km 414)"
+    };
+
+    const dadosOrdenados = dados.sort((a, b) => 
+        new Date(b.data_hora_captura) - new Date(a.data_hora_captura)
+    );
+
+    dadosOrdenados.forEach(item => {
+        const nomeMaquina = nomesMaquinas[item.id_maquina] || `Máquina ${item.id_maquina}`;
+        
         const row = `
         <tr>
-            <td>${alerta.nome_maquina || document.getElementById('edgeSelector').options[document.getElementById('edgeSelector').selectedIndex].text}</td>
-            <td>${alerta.descricao}</td>
-            <td>${alerta.uso_percent ? alerta.uso_percent.toFixed(1) + '%' : 'N/A'}</td>
-            <td>${new Date(alerta.data_hora).toLocaleString('pt-BR')}</td>
-            <td>
-                <span class="pill ${alerta.uso_percent > 84 ? 'crit' : 'warn'}">
-                    ${alerta.uso_percent > 84 ? 'Ação Crítica' : 'Monitorar'}
-                </span>
-            </td>
+            <td>${nomeMaquina}</td>
+            <td>${item.uso_percent.toFixed(1)}%</td>
+            <td>${item.memoria_livre_gb} GB</td>
+            <td>${item.memoria_total_gb} GB</td>
+            <td>${new Date(item.data_hora_captura).toLocaleString('pt-BR')}</td>
         </tr>
     `;
         tbody.innerHTML += row;
@@ -329,15 +358,17 @@ function atualizarUltimaAtualizacao() {
 }
 
 function iniciarAtualizacaoAutomatica() {
+    console.log('Iniciando atualização dos daods que estão sendo inseridos no banco de dados');
     carregarDadosOverview();
     carregarAlertasHistorico();
-
     updateInterval = setInterval(() => {
+        console.log('Atualizando dados...', new Date().toLocaleTimeString());
         carregarDadosOverview();
-        if (Math.floor(Date.now() / 1000) % 120 === 0) {
+        const now = new Date();
+        if (now.getSeconds() % 30 === 0) {
             carregarAlertasHistorico();
         }
-    }, 30000);
+    }, 2000); 
 }
 
 function configurarEventos() {
