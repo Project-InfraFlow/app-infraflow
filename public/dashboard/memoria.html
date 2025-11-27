@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="../css/memoria.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -235,197 +238,149 @@
                 </div>
 
                 <div class="view-content hidden" data-view-content="especificacao">
-                    <div class="view-header">
-                        <h1 class="view-title">
-                            <i class="fas fa-cogs"></i>
-                            Especificação Técnica - Pórticos FreeFlow
-                        </h1>
+    <div class="view-header">
+        <h1 class="view-title">
+            <i class="fas fa-cogs"></i>
+            Especificação Técnica - Pórticos FreeFlow
+        </h1>
+    </div>
+
+    <div class="specs-grid">
+        <div class="specs-card">
+            <div class="specs-header">
+                <i class="fas fa-microchip"></i>
+                <h3>Hardware - Controlador de Pórtico</h3>
+            </div>
+            <div class="specs-content">
+                <div class="spec-item">
+                    <span class="spec-label">Processador:</span>
+                    <span class="spec-value">Intel Xeon E-2336 (6 cores, 12 threads)</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Memória RAM:</span>
+                    <span class="spec-value">32GB DDR4 ECC 3200MHz</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Armazenamento:</span>
+                    <span class="spec-value">SSD NVMe 1TB + HDD 4TB</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Rede:</span>
+                    <span class="spec-value">Dual 10GbE SFP+ + Quad Gigabit</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Conectividade:</span>
+                    <span class="spec-value">4G/LTE + Wi-Fi 6 + GPS RTK</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="specs-card">
+            <div class="specs-header">
+                <i class="fas fa-satellite-dish"></i>
+                <h3>Sensores & Dispositivos</h3>
+            </div>
+            <div class="specs-content">
+                <div class="spec-item">
+                    <span class="spec-label">Câmeras ANPR:</span>
+                    <span class="spec-value">8MP com IR @ 60fps</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">RFID/DSRC:</span>
+                    <span class="spec-value">Antenas 5.8GHz DSRC</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Sensores:</span>
+                    <span class="spec-value">LiDAR + Loops Indutivos</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Processamento IA:</span>
+                    <span class="spec-value">NVIDIA Jetson Orin</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="specs-card">
+            <div class="specs-header">
+                <i class="fas fa-desktop"></i>
+                <h3>Software & Sistemas</h3>
+            </div>
+            <div class="specs-content">
+                <div class="spec-item">
+                    <span class="spec-label">Sistema Operacional:</span>
+                    <span class="spec-value">Ubuntu Server 22.04 LTS</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Containerização:</span>
+                    <span class="spec-value">Docker + Kubernetes</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Banco de Dados:</span>
+                    <span class="spec-value">PostgreSQL + Redis</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Monitoramento:</span>
+                    <span class="spec-value">Prometheus + Grafana</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="specs-card">
+            <div class="specs-header">
+                <i class="fas fa-chart-bar"></i>
+                <h3>Performance</h3>
+            </div>
+            <div class="specs-content">
+                <div class="spec-item">
+                    <span class="spec-label">Veículos/Hora:</span>
+                    <span class="spec-value">Até 4.000 por faixa</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Reconhecimento:</span>
+                    <span class="spec-value">&lt; 80ms por placa</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Uptime:</span>
+                    <span class="spec-value">99.99% (52min/ano)</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Temperatura:</span>
+                    <span class="spec-value">-25°C a 55°C</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="specs-card full-width">
+            <div class="specs-header">
+                <i class="fas fa-memory"></i>
+                <h3>Gestão de Memória RAM</h3>
+            </div>
+            <div class="specs-content">
+                <div class="memory-usage-info">
+                    <div class="usage-category">
+                        <h4>Alocação de Memória:</h4>
+                        <ul>
+                            <li><strong>Motor ANPR/OCR:</strong> 8-10GB - Processamento com IA</li>
+                            <li><strong>Banco em Memória:</strong> 6-8GB - Cache de transações</li>
+                            <li><strong>Buffer de Vídeo:</strong> 4-6GB - Frames HD</li>
+                            <li><strong>Serviços DSRC:</strong> 2-3GB - Comunicação</li>
+                            <li><strong>Sistema Operacional:</strong> 3-4GB - Kernel RT</li>
+                        </ul>
                     </div>
-
-                    <div class="specs-grid">
-                        <div class="specs-card">
-                            <div class="specs-header">
-                                <i class="fas fa-microchip"></i>
-                                <h3>Hardware</h3>
-                            </div>
-                            <div class="specs-content">
-                                <div class="spec-item">
-                                    <span class="spec-label">Processador:</span>
-                                    <span class="spec-value">Intel Core i7-10700 (8 cores, 16 threads)</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Memória RAM:</span>
-                                    <span class="spec-value">32GB DDR4 3200MHz (Expansível até 64GB)</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Armazenamento:</span>
-                                    <span class="spec-value">SSD NVMe 1TB + HDD 2TB para backups</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Placa de Rede:</span>
-                                    <span class="spec-value">Dual Gigabit Ethernet + Wi-Fi 6</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Fonte:</span>
-                                    <span class="spec-value">600W 80 Plus Gold</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="specs-card">
-                            <div class="specs-header">
-                                <i class="fas fa-desktop"></i>
-                                <h3>Software</h3>
-                            </div>
-                            <div class="specs-content">
-                                <div class="spec-item">
-                                    <span class="spec-label">Sistema Operacional:</span>
-                                    <span class="spec-value">Ubuntu Server 22.04 LTS</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Kernel:</span>
-                                    <span class="spec-value">Linux 5.15.x</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Runtime:</span>
-                                    <span class="spec-value">Node.js 18.x + Python 3.10</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Banco de Dados:</span>
-                                    <span class="spec-value">MySQL 8.0 + Redis</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Containerização:</span>
-                                    <span class="spec-value">Docker + Docker Compose</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="specs-card">
-                            <div class="specs-header">
-                                <i class="fas fa-network-wired"></i>
-                                <h3>Rede & Conectividade</h3>
-                            </div>
-                            <div class="specs-content">
-                                <div class="spec-item">
-                                    <span class="spec-label">Velocidade de Rede:</span>
-                                    <span class="spec-value">1 Gbps dedicado</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Latência:</span>
-                                    <span class="spec-value">&lt; 50ms para datacenter</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Uptime Requerido:</span>
-                                    <span class="spec-value">99.9% (8.76h/ano de downtime)</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Backup:</span>
-                                    <span class="spec-value">Incremental diário + Full semanal</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="specs-card">
-                            <div class="specs-header">
-                                <i class="fas fa-chart-bar"></i>
-                                <h3>Performance Esperada</h3>
-                            </div>
-                            <div class="specs-content">
-                                <div class="spec-item">
-                                    <span class="spec-label">Uso Médio de RAM:</span>
-                                    <span class="spec-value">45-60% em operação normal</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Pico de RAM:</span>
-                                    <span class="spec-value">Até 85% (processamento de imagens)</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Temperatura CPU:</span>
-                                    <span class="spec-value">45-65°C (máx: 85°C)</span>
-                                </div>
-                                <div class="spec-item">
-                                    <span class="spec-label">Throughput de Rede:</span>
-                                    <span class="spec-value">Até 800 Mbps sustentado</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="specs-card full-width">
-                            <div class="specs-header">
-                                <i class="fas fa-memory"></i>
-                                <h3>Gestão de Memória RAM - Pórticos FreeFlow</h3>
-                            </div>
-                            <div class="specs-content">
-                                <div class="memory-usage-info">
-                                    <div class="usage-category">
-                                        <h4>Processos Principais Consumindo Memória:</h4>
-                                        <ul>
-                                            <li><strong>Reconhecimento de Placas (ANPR):</strong> 4-6GB - Processamento
-                                                de imagens em tempo real</li>
-                                            <li><strong>Banco de Dados Local:</strong> 2-3GB - Cache de consultas e
-                                                transações</li>
-                                            <li><strong>API REST:</strong> 1-2GB - Comunicação com central</li>
-                                            <li><strong>Serviço de Logs:</strong> 1GB - Armazenamento temporário</li>
-                                            <li><strong>Sistema Operacional:</strong> 2-3GB - Kernel e serviços base
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="usage-category">
-                                        <h4>Otimizações Implementadas:</h4>
-                                        <ul>
-                                            <li><strong>Swap Configurado:</strong> 8GB para contingência</li>
-                                            <li><strong>Cache de Memória:</strong> Até 40% da RAM para arquivos
-                                                frequentes</li>
-                                            <li><strong>Garbage Collection:</strong> Automático a cada 30min</li>
-                                            <li><strong>Limpeza de Logs:</strong> Automática após 24h</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="specs-card full-width">
-                            <div class="specs-header">
-                                <i class="fas fa-bell"></i>
-                                <h3>Política de Alertas e Monitoramento</h3>
-                            </div>
-                            <div class="specs-content">
-                                <div class="alert-policies">
-                                    <div class="policy-category">
-                                        <h4>Níveis de Alerta de Memória:</h4>
-                                        <div class="policy-levels">
-                                            <div class="policy-level normal">
-                                                <span class="level-name">Normal</span>
-                                                <span class="level-range">40% - 53%</span>
-                                                <span class="level-action">Operação padrão</span>
-                                            </div>
-                                            <div class="policy-level warning">
-                                                <span class="level-name">Alerta Amarelo</span>
-                                                <span class="level-range">54% - 83%</span>
-                                                <span class="level-action">Monitorar tendência</span>
-                                            </div>
-                                            <div class="policy-level critical">
-                                                <span class="level-name">Alerta Vermelho</span>
-                                                <span class="level-range">84% - 100%</span>
-                                                <span class="level-action">Ação imediata necessária</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="policy-category">
-                                        <h4>Ações Automáticas:</h4>
-                                        <ul>
-                                            <li><strong>85%+:</strong> Limpeza agressiva de cache</li>
-                                            <li><strong>90%+:</strong> Reinício de serviços não-críticos</li>
-                                            <li><strong>95%+:</strong> Notificação urgente para equipe</li>
-                                            <li><strong>98%+:</strong> Failover automático (se configurado)</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="usage-category">
+                        <h4>Otimizações:</h4>
+                        <ul>
+                            <li><strong>Alocação Dinâmica:</strong> Ajuste por fluxo veicular</li>
+                            <li><strong>Cache Inteligente:</strong> 2GB para placas frequentes</li>
+                            <li><strong>Compressão LZ4:</strong> 70% redução em buffers</li>
+                            <li><strong>Swap Otimizado:</strong> ZRAM + SSD NVMe</li>
+                        </ul>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                 <div class="view-content hidden" data-view-content="historico">
                     <div class="view-header">
@@ -468,411 +423,408 @@
     </div>
 
     <script>
-        // Configurações
-        let ID_MAQUINA = 1; // Valor padrão
-        let updateInterval;
-        let graficoMemoriaUso, graficoMemoriaStatus;
+    let ID_MAQUINA = 1;
+    let updateInterval;
+    let graficoMemoriaUso, graficoMemoriaStatus;
 
-        // Elementos do DOM
-        const elements = {
-            kpiMemoriaUsoValue: document.getElementById('kpiMemoriaUsoValue'),
-            memoriaUsoProgress: document.getElementById('memoriaUsoProgress'),
-            kpiMemoriaLivreValue: document.getElementById('kpiMemoriaLivreValue'),
-            memoriaLivreProgress: document.getElementById('memoriaLivreProgress'),
-            kpiMemoriaTotalValue: document.getElementById('kpiMemoriaTotalValue'),
-            memoriaTotalProgress: document.getElementById('memoriaTotalProgress'),
-            kpiMemoriaAlertaValue: document.getElementById('kpiMemoriaAlertaValue'),
-            memoriaAlertaProgress: document.getElementById('memoriaAlertaProgress'),
-            lastUpdateTime: document.getElementById('lastUpdateTime'),
-            monitorTableBody: document.getElementById('monitorTableBody'),
-            historicoTableBody: document.getElementById('historicoTableBody'),
-            edgeSelector: document.getElementById('edgeSelector'),
-            logoutBtn: document.getElementById('logoutBtn'),
-            sidebarUser: document.getElementById('sidebarUser')
-        };
+    const elements = {
+        kpiMemoriaUsoValue: document.getElementById('kpiMemoriaUsoValue'),
+        memoriaUsoProgress: document.getElementById('memoriaUsoProgress'),
+        kpiMemoriaLivreValue: document.getElementById('kpiMemoriaLivreValue'),
+        memoriaLivreProgress: document.getElementById('memoriaLivreProgress'),
+        kpiMemoriaTotalValue: document.getElementById('kpiMemoriaTotalValue'),
+        memoriaTotalProgress: document.getElementById('memoriaTotalProgress'),
+        kpiMemoriaAlertaValue: document.getElementById('kpiMemoriaAlertaValue'),
+        memoriaAlertaProgress: document.getElementById('memoriaAlertaProgress'),
+        lastUpdateTime: document.getElementById('lastUpdateTime'),
+        monitorTableBody: document.getElementById('monitorTableBody'),
+        historicoTableBody: document.getElementById('historicoTableBody'),
+        edgeSelector: document.getElementById('edgeSelector')
+    };
 
-        // Inicialização dos gráficos
-        function inicializarGraficos() {
-            // Gráfico de Linha
-            const ctxLinha = document.getElementById('grafico_memoria_uso').getContext('2d');
-            graficoMemoriaUso = new Chart(ctxLinha, {
-                type: 'line',
-                data: {
-                    labels: Array(30).fill(''),
-                    datasets: [{
-                        label: 'Uso de Memória RAM (%)',
-                        data: [],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        tension: 0.4,
-                        pointRadius: 3,
-                        pointBackgroundColor: '#10b981',
-                        fill: true,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: { display: true, text: 'Uso (%)' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { display: false }
-                        }
+    function inicializarGraficos() {
+        const ctxLinha = document.getElementById('grafico_memoria_uso').getContext('2d');
+        graficoMemoriaUso = new Chart(ctxLinha, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Uso de Memória RAM (%)',
+                    data: [],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#10b981',
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: { display: true, text: 'Uso (%)' }
+                    },
+                    x: {
+                        grid: { display: false }
                     }
                 }
-            });
+            }
+        });
 
-            // Gráfico Doughnut
-            const ctxStatus = document.getElementById('grafico_memoria_status').getContext('2d');
-            graficoMemoriaStatus = new Chart(ctxStatus, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Utilizada', 'Livre'],
-                    datasets: [{
-                        data: [0, 100],
-                        backgroundColor: ['#059669', '#d1fae5'],
-                        borderColor: 'white',
-                        borderWidth: 2,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right' },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return `${context.label}: ${context.parsed}%`;
-                                }
+        const ctxStatus = document.getElementById('grafico_memoria_status').getContext('2d');
+        graficoMemoriaStatus = new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Utilizada', 'Livre'],
+                datasets: [{
+                    data: [0, 100],
+                    backgroundColor: ['#059669', '#d1fae5'],
+                    borderColor: 'white',
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.label}: ${context.parsed}%`;
                             }
                         }
-                    },
-                    cutout: '75%',
-                }
-            });
-        }
-
-        // Navegação entre views
-        function configurarNavegacao() {
-            document.querySelectorAll('.sidebar .nav-item').forEach(button => {
-                button.addEventListener('click', () => {
-                    const viewName = button.getAttribute('data-view');
-
-                    // Atualizar navegação
-                    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-
-                    // Mostrar view selecionada
-                    document.querySelectorAll('.view-content').forEach(view => {
-                        view.classList.add('hidden');
-                    });
-
-                    const selectedView = document.querySelector(`[data-view-content="${viewName}"]`);
-                    if (selectedView) {
-                        selectedView.classList.remove('hidden');
-
-                        // Carregar dados específicos da view
-                        switch (viewName) {
-                            case 'overview':
-                                carregarDadosOverview();
-                                break;
-                            case 'monitor':
-                                carregarDadosMonitor();
-                                break;
-                            case 'historico':
-                                carregarAlertasHistorico();
-                                break;
-                        }
                     }
+                },
+                cutout: '75%',
+            }
+        });
+    }
+
+    function configurarNavegacao() {
+        document.querySelectorAll('.sidebar .nav-item').forEach(button => {
+            button.addEventListener('click', () => {
+                const viewName = button.getAttribute('data-view');
+
+                document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                document.querySelectorAll('.view-content').forEach(view => {
+                    view.classList.add('hidden');
                 });
+
+                const selectedView = document.querySelector(`[data-view-content="${viewName}"]`);
+                if (selectedView) {
+                    selectedView.classList.remove('hidden');
+
+                    switch (viewName) {
+                        case 'overview':
+                            carregarDadosOverview();
+                            break;
+                        case 'monitor':
+                            carregarDadosMonitor();
+                            break;
+                        case 'historico':
+                            carregarAlertasHistorico();
+                            break;
+                    }
+                }
             });
-        }
+        });
+    }
 
-        // Funções para carregar dados da API
-        async function carregarDadosOverview() {
-            try {
-                const response = await fetch(`/api/memoria/detalhes/${ID_MAQUINA}`);
-                if (!response.ok) throw new Error('Erro na resposta da API');
-                
-                const dados = await response.json();
-
-                if (dados.uso_percent !== undefined) {
-                    atualizarKPIs(dados);
-                    atualizarGraficos(dados);
-                    atualizarUltimaAtualizacao();
+    async function carregarDadosOverview() {
+        try {
+            const response = await fetch(`/api/memoria/detalhes/${ID_MAQUINA}`);
+            
+            if (!response.ok) {
+                if (response.status === 404) {
+                    elements.kpiMemoriaUsoValue.textContent = 'N/D';
+                    elements.kpiMemoriaLivreValue.textContent = 'N/D';
+                    elements.kpiMemoriaTotalValue.textContent = '32 GB';
+                    return;
                 }
-            } catch (error) {
-                console.error('Erro ao carregar dados overview:', error);
+                throw new Error('Erro na resposta da API');
+            }
+            
+            const dados = await response.json();
+            
+            if (dados.error) {
                 elements.kpiMemoriaUsoValue.textContent = 'Erro';
+                return;
             }
+
+            atualizarKPIs(dados);
+            atualizarGraficos(dados);
+            atualizarUltimaAtualizacao();
+            
+        } catch (error) {
+            console.error('Erro ao carregar dados overview:', error);
+            elements.kpiMemoriaUsoValue.textContent = 'Erro';
         }
+    }
 
-        async function carregarDadosMonitor() {
-            try {
-                const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=50`);
-                if (!response.ok) throw new Error('Erro na resposta da API');
-                
-                const dados = await response.json();
-
-                if (dados.length > 0) {
-                    atualizarTabelaMonitor(dados);
-                } else {
-                    elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado encontrado</td></tr>';
+    async function carregarDadosMonitor() {
+        try {
+            const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=50`);
+            
+            if (!response.ok) {
+                if (response.status === 404) {
+                    elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado histórico disponível</td></tr>';
+                    return;
                 }
-            } catch (error) {
-                console.error('Erro ao carregar dados do monitor:', error);
-                elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Erro ao carregar dados</td></tr>';
+                throw new Error('Erro na resposta da API');
             }
+            
+            const dados = await response.json();
+            
+            if (dados.error) {
+                elements.monitorTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${dados.error}</td></tr>`;
+                return;
+            }
+
+            if (dados.length > 0) {
+                atualizarTabelaMonitor(dados);
+            } else {
+                elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado encontrado</td></tr>';
+            }
+            
+        } catch (error) {
+            console.error('Erro ao carregar dados do monitor:', error);
+            elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Erro ao carregar dados</td></tr>';
         }
+    }
 
-        async function carregarAlertasHistorico() {
-            try {
-                const response = await fetch(`/api/memoria/alertas/${ID_MAQUINA}?horas=24`);
-                if (!response.ok) throw new Error('Erro na resposta da API');
-                
-                const alertas = await response.json();
-
-                if (alertas.length > 0) {
-                    atualizarTabelaAlertas(alertas);
-                    // Atualizar KPI de alertas
-                    const alertasUltimaHora = alertas.filter(a => 
-                        new Date(a.data_hora) > new Date(Date.now() - 60 * 60 * 1000)
-                    );
-                    elements.kpiMemoriaAlertaValue.textContent = alertasUltimaHora.length;
-                    elements.memoriaAlertaProgress.style.width = `${Math.min(alertasUltimaHora.length * 10, 100)}%`;
-                } else {
+    async function carregarAlertasHistorico() {
+        try {
+            const response = await fetch(`/api/memoria/alertas/${ID_MAQUINA}?horas=24`);
+            
+            if (!response.ok) {
+                if (response.status === 404) {
                     elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum alerta encontrado</td></tr>';
                     elements.kpiMemoriaAlertaValue.textContent = '0';
                     elements.memoriaAlertaProgress.style.width = '0%';
+                    return;
                 }
-            } catch (error) {
-                console.error('Erro ao carregar alertas:', error);
-                elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Erro ao carregar alertas</td></tr>';
+                throw new Error('Erro na resposta da API');
             }
-        }
-
-        // Funções de atualização da UI
-        function atualizarKPIs(dados) {
-            // KPI Uso de Memória
-            elements.kpiMemoriaUsoValue.textContent = `${dados.uso_percent.toFixed(1)}%`;
-            elements.memoriaUsoProgress.style.width = `${dados.uso_percent}%`;
-
-            // KPI Memória Livre
-            elements.kpiMemoriaLivreValue.textContent = `${dados.livre_gb} GB`;
-            elements.memoriaLivreProgress.style.width = `${(dados.livre_gb / dados.total_gb) * 100}%`;
-
-            // KPI Memória Total
-            elements.kpiMemoriaTotalValue.textContent = `${dados.total_gb} GB`;
-            elements.memoriaTotalProgress.style.width = '100%';
-
-            // Verificar e atualizar cores baseadas nos parâmetros
-            atualizarCoresKPIs(dados.uso_percent);
-        }
-
-        function atualizarCoresKPIs(usoPercent) {
-            const kpiUso = document.getElementById('kpiMemoriaUso');
-            const progressBar = elements.memoriaUsoProgress;
-
-            // Remover classes anteriores
-            kpiUso.classList.remove('status-normal', 'status-warning', 'status-critical');
-            progressBar.classList.remove('status-normal', 'status-warning', 'status-critical');
-
-            // Aplicar classes baseadas no uso
-            if (usoPercent <= 53) {
-                kpiUso.classList.add('status-normal');
-                progressBar.classList.add('status-normal');
-            } else if (usoPercent <= 83) {
-                kpiUso.classList.add('status-warning');
-                progressBar.classList.add('status-warning');
-            } else {
-                kpiUso.classList.add('status-critical');
-                progressBar.classList.add('status-critical');
-            }
-        }
-
-        function atualizarGraficos(dados) {
-            // Atualizar gráfico de pizza
-            graficoMemoriaStatus.data.datasets[0].data = [dados.uso_percent, 100 - dados.uso_percent];
-            graficoMemoriaStatus.update('none');
-
-            // Atualizar gráfico de linha com histórico
-            atualizarGraficoLinha();
-        }
-
-        async function atualizarGraficoLinha() {
-            try {
-                const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=30`);
-                if (!response.ok) throw new Error('Erro na resposta da API');
-                
-                const historico = await response.json();
-
-                if (historico.length > 0) {
-                    const dadosUso = historico.map(item => item.uso_percent);
-                    graficoMemoriaUso.data.datasets[0].data = dadosUso;
-                    graficoMemoriaUso.update('none');
-                }
-            } catch (error) {
-                console.error('Erro ao atualizar gráfico de linha:', error);
-            }
-        }
-
-        function atualizarTabelaMonitor(dados) {
-            const tbody = elements.monitorTableBody;
-            tbody.innerHTML = '';
-
-            // Supondo 32GB totais (conforme especificação)
-            const totalGB = 32;
-
-            dados.forEach(item => {
-                const usadoGB = (item.uso_percent / 100) * totalGB;
-                const livreGB = totalGB - usadoGB;
-
-                const row = `
-                <tr>
-                    <td>${elements.edgeSelector.options[elements.edgeSelector.selectedIndex].text}</td>
-                    <td>${item.uso_percent.toFixed(1)}%</td>
-                    <td>${livreGB.toFixed(2)} GB</td>
-                    <td>${totalGB} GB</td>
-                    <td>${new Date(item.data_hora_captura).toLocaleString('pt-BR')}</td>
-                </tr>
-            `;
-                tbody.innerHTML += row;
-            });
-        }
-
-        function atualizarTabelaAlertas(alertas) {
-            const tbody = elements.historicoTableBody;
-            tbody.innerHTML = '';
-
-            alertas.forEach(alerta => {
-                const row = `
-                <tr>
-                    <td>${alerta.nome_maquina || elements.edgeSelector.options[elements.edgeSelector.selectedIndex].text}</td>
-                    <td>${alerta.descricao}</td>
-                    <td>${alerta.uso_percent ? alerta.uso_percent.toFixed(1) + '%' : 'N/A'}</td>
-                    <td>${new Date(alerta.data_hora).toLocaleString('pt-BR')}</td>
-                    <td>
-                        <span class="pill ${alerta.uso_percent > 84 ? 'crit' : 'warn'}">
-                            ${alerta.uso_percent > 84 ? 'Ação Crítica' : 'Monitorar'}
-                        </span>
-                    </td>
-                </tr>
-            `;
-                tbody.innerHTML += row;
-            });
-        }
-
-        function atualizarUltimaAtualizacao() {
-            const now = new Date();
-            elements.lastUpdateTime.textContent = now.toLocaleTimeString('pt-BR');
-        }
-
-        // Sistema de atualização automática
-        function iniciarAtualizacaoAutomatica() {
-            // Carregar dados iniciais
-            carregarDadosOverview();
-            carregarAlertasHistorico();
-
-            // Atualizar a cada 30 segundos
-            updateInterval = setInterval(() => {
-                carregarDadosOverview();
-                // Atualizar alertas a cada 2 minutos
-                if (Math.floor(Date.now() / 1000) % 120 === 0) {
-                    carregarAlertasHistorico();
-                }
-            }, 30000);
-        }
-
-        // Configurar eventos
-        function configurarEventos() {
-            // Seletor de máquina
-            elements.edgeSelector.addEventListener('change', function () {
-                ID_MAQUINA = this.value;
-                carregarDadosOverview();
-                if (document.querySelector('[data-view-content="monitor"]').classList.contains('hidden') === false) {
-                    carregarDadosMonitor();
-                }
-                if (document.querySelector('[data-view-content="historico"]').classList.contains('hidden') === false) {
-                    carregarAlertasHistorico();
-                }
-            });
-
-            // Logout
-            elements.logoutBtn.addEventListener('click', function() {
-                if (confirm('Deseja realmente sair?')) {
-                    window.location.href = '/login.html';
-                }
-            });
-
-            // Export CSV
-            document.getElementById('exportMonitorCsv')?.addEventListener('click', exportarCSVMonitor);
-            document.getElementById('exportHistoricoCsv')?.addEventListener('click', exportarCSVHistorico);
-        }
-
-        function exportarCSVMonitor() {
-            // Implementação básica de export CSV
-            const rows = [['Pórtico', 'Uso RAM (%)', 'RAM Livre (GB)', 'RAM Total (GB)', 'Horário']];
-            const tableRows = elements.monitorTableBody.querySelectorAll('tr');
             
-            tableRows.forEach(row => {
-                const cols = row.querySelectorAll('td');
-                if (cols.length === 5) {
-                    rows.push([
-                        cols[0].textContent,
-                        cols[1].textContent,
-                        cols[2].textContent,
-                        cols[3].textContent,
-                        cols[4].textContent
-                    ]);
-                }
-            });
+            const alertas = await response.json();
+            
+            if (alertas.error) {
+                elements.historicoTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${alertas.error}</td></tr>`;
+                elements.kpiMemoriaAlertaValue.textContent = '0';
+                elements.memoriaAlertaProgress.style.width = '0%';
+                return;
+            }
 
-            const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "monitor_memoria.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            if (alertas.length > 0) {
+                atualizarTabelaAlertas(alertas);
+                elements.kpiMemoriaAlertaValue.textContent = alertas.length;
+                elements.memoriaAlertaProgress.style.width = `${Math.min(alertas.length * 10, 100)}%`;
+            } else {
+                elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum alerta encontrado</td></tr>';
+                elements.kpiMemoriaAlertaValue.textContent = '0';
+                elements.memoriaAlertaProgress.style.width = '0%';
+            }
+        } catch (error) {
+            console.error('Erro ao carregar alertas:', error);
+            elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Erro ao carregar alertas</td></tr>';
+            elements.kpiMemoriaAlertaValue.textContent = '0';
+            elements.memoriaAlertaProgress.style.width = '0%';
         }
+    }
 
-        function exportarCSVHistorico() {
-            // Implementação similar para histórico
-            alert('Funcionalidade de exportação em desenvolvimento');
+    function atualizarKPIs(dados) {
+        elements.kpiMemoriaUsoValue.textContent = `${dados.uso_percent.toFixed(1)}%`;
+        elements.memoriaUsoProgress.style.width = `${dados.uso_percent}%`;
+
+        elements.kpiMemoriaLivreValue.textContent = `${dados.livre_gb} GB`;
+        elements.memoriaLivreProgress.style.width = `${(dados.livre_gb / dados.total_gb) * 100}%`;
+
+        elements.kpiMemoriaTotalValue.textContent = `${dados.total_gb} GB`;
+        elements.memoriaTotalProgress.style.width = '100%';
+
+        atualizarCoresKPIs(dados.uso_percent);
+    }
+
+    function atualizarCoresKPIs(usoPercent) {
+        const kpiUso = document.getElementById('kpiMemoriaUso');
+        const progressBar = elements.memoriaUsoProgress;
+
+        kpiUso.classList.remove('status-normal', 'status-warning', 'status-critical');
+        progressBar.classList.remove('status-normal', 'status-warning', 'status-critical');
+
+        if (usoPercent <= 53) {
+            kpiUso.classList.add('status-normal');
+            progressBar.classList.add('status-normal');
+        } else if (usoPercent <= 83) {
+            kpiUso.classList.add('status-warning');
+            progressBar.classList.add('status-warning');
+        } else {
+            kpiUso.classList.add('status-critical');
+            progressBar.classList.add('status-critical');
         }
+    }
 
-        // Verificar autenticação e carregar dados do usuário
-        function verificarAutenticacao() {
-            // Simulação - você deve integrar com seu sistema de login
-            const usuario = localStorage.getItem('usuario') || 'Admin';
-            elements.sidebarUser.textContent = usuario;
+    function atualizarGraficos(dados) {
+        graficoMemoriaStatus.data.datasets[0].data = [dados.uso_percent, 100 - dados.uso_percent];
+        graficoMemoriaStatus.update('none');
+
+        atualizarGraficoLinha();
+    }
+
+    async function atualizarGraficoLinha() {
+        try {
+            const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=30`);
+            
+            if (!response.ok) {
+                return;
+            }
+            
+            const historico = await response.json();
+            
+            if (historico.error) {
+                return;
+            }
+
+            if (historico.length > 0) {
+                const dadosUso = historico.map(item => item.uso_percent);
+                const labels = historico.map(item => 
+                    new Date(item.data_hora_captura).toLocaleTimeString('pt-BR')
+                );
+                
+                graficoMemoriaUso.data.labels = labels;
+                graficoMemoriaUso.data.datasets[0].data = dadosUso;
+                graficoMemoriaUso.update('none');
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar gráfico de linha:', error);
         }
+    }
 
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function () {
-            verificarAutenticacao();
-            inicializarGraficos();
-            configurarNavegacao();
-            configurarEventos();
-            iniciarAtualizacaoAutomatica();
+    function atualizarTabelaMonitor(dados) {
+        const tbody = elements.monitorTableBody;
+        tbody.innerHTML = '';
+
+        dados.forEach(item => {
+            const row = `
+            <tr>
+                <td>${document.getElementById('edgeSelector').options[document.getElementById('edgeSelector').selectedIndex].text}</td>
+                <td>${item.uso_percent.toFixed(1)}%</td>
+                <td>${item.memoria_livre_gb} GB</td>
+                <td>${item.memoria_total_gb} GB</td>
+                <td>${new Date(item.data_hora_captura).toLocaleString('pt-BR')}</td>
+            </tr>
+        `;
+            tbody.innerHTML += row;
         });
+    }
 
-        // Cleanup
-        window.addEventListener('beforeunload', function() {
-            if (updateInterval) {
-                clearInterval(updateInterval);
+    function atualizarTabelaAlertas(alertas) {
+        const tbody = elements.historicoTableBody;
+        tbody.innerHTML = '';
+
+        alertas.forEach(alerta => {
+            const row = `
+            <tr>
+                <td>${alerta.nome_maquina || document.getElementById('edgeSelector').options[document.getElementById('edgeSelector').selectedIndex].text}</td>
+                <td>${alerta.descricao}</td>
+                <td>${alerta.uso_percent ? alerta.uso_percent.toFixed(1) + '%' : 'N/A'}</td>
+                <td>${new Date(alerta.data_hora).toLocaleString('pt-BR')}</td>
+                <td>
+                    <span class="pill ${alerta.uso_percent > 84 ? 'crit' : 'warn'}">
+                        ${alerta.uso_percent > 84 ? 'Ação Crítica' : 'Monitorar'}
+                    </span>
+                </td>
+            </tr>
+        `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function atualizarUltimaAtualizacao() {
+        const now = new Date();
+        elements.lastUpdateTime.textContent = now.toLocaleTimeString('pt-BR');
+    }
+
+    function iniciarAtualizacaoAutomatica() {
+        carregarDadosOverview();
+        carregarAlertasHistorico();
+
+        updateInterval = setInterval(() => {
+            carregarDadosOverview();
+            if (Math.floor(Date.now() / 1000) % 120 === 0) {
+                carregarAlertasHistorico();
+            }
+        }, 30000);
+    }
+
+    function configurarEventos() {
+        elements.edgeSelector.addEventListener('change', function () {
+            ID_MAQUINA = this.value;
+            carregarDadosOverview();
+            if (document.querySelector('[data-view-content="monitor"]').classList.contains('hidden') === false) {
+                carregarDadosMonitor();
+            }
+            if (document.querySelector('[data-view-content="historico"]').classList.contains('hidden') === false) {
+                carregarAlertasHistorico();
             }
         });
 
-    </script>
+        document.getElementById('exportMonitorCsv')?.addEventListener('click', exportarCSVMonitor);
+        document.getElementById('exportHistoricoCsv')?.addEventListener('click', exportarCSVHistorico);
+    }
+
+    function exportarCSVMonitor() {
+        const rows = [['Pórtico', 'Uso RAM (%)', 'RAM Livre (GB)', 'RAM Total (GB)', 'Horário']];
+        const tableRows = elements.monitorTableBody.querySelectorAll('tr');
+        
+        tableRows.forEach(row => {
+            const cols = row.querySelectorAll('td');
+            if (cols.length === 5) {
+                rows.push([
+                    cols[0].textContent,
+                    cols[1].textContent,
+                    cols[2].textContent,
+                    cols[3].textContent,
+                    cols[4].textContent
+                ]);
+            }
+        });
+
+        const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "monitor_memoria.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function exportarCSVHistorico() {
+        alert('Funcionalidade de exportação em desenvolvimento');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        inicializarGraficos();
+        configurarNavegacao();
+        configurarEventos();
+        iniciarAtualizacaoAutomatica();
+    });
+
+    window.addEventListener('beforeunload', function() {
+        if (updateInterval) {
+            clearInterval(updateInterval);
+        }
+    });
+</script>
 </body>
 
 </html>

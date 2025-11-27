@@ -1,171 +1,401 @@
-import * as THREE from "https://unpkg.com/three@0.152.2/build/three.module.js";
-import { OrbitControls } from "https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js";
+let ID_MAQUINA = 1;
+let updateInterval;
+let graficoMemoriaUso, graficoMemoriaStatus;
 
-/* =======================================================
-   Função padrão para criar cenas 3D
-======================================================= */
-function createScene(container) {
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+const elements = {
+    kpiMemoriaUsoValue: document.getElementById('kpiMemoriaUsoValue'),
+    memoriaUsoProgress: document.getElementById('memoriaUsoProgress'),
+    kpiMemoriaLivreValue: document.getElementById('kpiMemoriaLivreValue'),
+    memoriaLivreProgress: document.getElementById('memoriaLivreProgress'),
+    kpiMemoriaTotalValue: document.getElementById('kpiMemoriaTotalValue'),
+    memoriaTotalProgress: document.getElementById('memoriaTotalProgress'),
+    kpiMemoriaAlertaValue: document.getElementById('kpiMemoriaAlertaValue'),
+    memoriaAlertaProgress: document.getElementById('memoriaAlertaProgress'),
+    lastUpdateTime: document.getElementById('lastUpdateTime'),
+    monitorTableBody: document.getElementById('monitorTableBody'),
+    historicoTableBody: document.getElementById('historicoTableBody'),
+    edgeSelector: document.getElementById('edgeSelector')
+};
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 1000);
-    camera.position.set(0, 1.5, 3);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    container.appendChild(renderer.domElement);
-
-    const hemi = new THREE.HemisphereLight(0xffffff, 0x333333, 0.8);
-    scene.add(hemi);
-
-    const dir = new THREE.DirectionalLight(0xffffff, 0.6);
-    dir.position.set(5, 10, 5);
-    scene.add(dir);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-
-    window.addEventListener("resize", () => {
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        camera.aspect = w/h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w,h);
+function inicializarGraficos() {
+    const ctxLinha = document.getElementById('grafico_memoria_uso').getContext('2d');
+    graficoMemoriaUso = new Chart(ctxLinha, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Uso de Memória RAM (%)',
+                data: [],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                pointRadius: 3,
+                pointBackgroundColor: '#10b981',
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: { display: true, text: 'Uso (%)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
     });
 
-    return { scene, camera, renderer, controls };
+    const ctxStatus = document.getElementById('grafico_memoria_status').getContext('2d');
+    graficoMemoriaStatus = new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+            labels: ['Utilizada', 'Livre'],
+            datasets: [{
+                data: [0, 100],
+                backgroundColor: ['#059669', '#d1fae5'],
+                borderColor: 'white',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `${context.label}: ${context.parsed}%`;
+                        }
+                    }
+                }
+            },
+            cutout: '75%',
+        }
+    });
 }
 
-/* =======================================================
-   MEMÓRIA RAM — MODELO 3D
-======================================================= */
-function initMemory3D() {
-    const container = document.getElementById("memory3d");
-    const { scene, camera, renderer, controls } = createScene(container);
+function configurarNavegacao() {
+    document.querySelectorAll('.sidebar .nav-item').forEach(button => {
+        button.addEventListener('click', () => {
+            const viewName = button.getAttribute('data-view');
 
-    // PCB
-    const pcb = new THREE.Mesh(
-        new THREE.BoxGeometry(2.2, 0.14, 0.4),
-        new THREE.MeshStandardMaterial({ color: 0x065f46 })
-    );
-    scene.add(pcb);
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
 
-    // Chips
-    const chipMaterial = new THREE.MeshStandardMaterial({ color: 0x10b981 });
-    for (let i = -3; i <= 3; i++) {
-        const chip = new THREE.Mesh(
-            new THREE.BoxGeometry(0.28, 0.08, 0.16),
-            chipMaterial
-        );
-        chip.position.set(i * 0.32 * 0.8, 0.08, 0);
-        scene.add(chip);
-    }
+            document.querySelectorAll('.view-content').forEach(view => {
+                view.classList.add('hidden');
+            });
 
-    // Contatos
-    const contacts = new THREE.Mesh(
-        new THREE.BoxGeometry(2.2, 0.02, 0.06),
-        new THREE.MeshStandardMaterial({ color: 0xffd233, metalness: 1 })
-    );
-    contacts.position.set(0, -0.07, 0.18);
-    scene.add(contacts);
+            const selectedView = document.querySelector(`[data-view-content="${viewName}"]`);
+            if (selectedView) {
+                selectedView.classList.remove('hidden');
 
-    // Label
-    const label = new THREE.Mesh(
-        new THREE.BoxGeometry(0.6, 0.02, 0.36),
-        new THREE.MeshStandardMaterial({ color: 0x0ea5a4 })
-    );
-    label.position.set(0.6, 0.08, -0.02);
-    scene.add(label);
-
-    // Animação
-    const clock = new THREE.Clock();
-    function animate() {
-        requestAnimationFrame(animate);
-        const t = clock.getElapsedTime();
-        pcb.rotation.y = Math.sin(t * 0.25) * 0.05;
-
-        controls.update();
-        renderer.render(scene, camera);
-    }
-    animate();
-
-    // Interação: simular uso
-    const useLabel = document.getElementById("memUsageLabel");
-    const freeLabel = document.getElementById("memFreeLabel");
-
-    document.getElementById("randomizeUsage").onclick = () => {
-        const usage = Math.floor(Math.random() * 60) + 20;
-        useLabel.textContent = usage + "%";
-        freeLabel.textContent = (100 - usage) + "%";
-
-        if (usage < 55) label.material.color.set("#10b981");
-        else if (usage < 85) label.material.color.set("#f59e0b");
-        else label.material.color.set("#ef4444");
-    };
+                switch (viewName) {
+                    case 'overview':
+                        carregarDadosOverview();
+                        break;
+                    case 'monitor':
+                        carregarDadosMonitor();
+                        break;
+                    case 'historico':
+                        carregarAlertasHistorico();
+                        break;
+                }
+            }
+        });
+    });
 }
 
-/* =======================================================
-   CONTROLADOR 3D
-======================================================= */
-function initController3D() {
-    const container = document.getElementById("controller3d");
-    const { scene, camera, renderer, controls } = createScene(container);
+async function carregarDadosOverview() {
+    try {
+        const response = await fetch(`/api/memoria/detalhes/${ID_MAQUINA}`);
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                elements.kpiMemoriaUsoValue.textContent = 'N/D';
+                elements.kpiMemoriaLivreValue.textContent = 'N/D';
+                elements.kpiMemoriaTotalValue.textContent = '32 GB';
+                return;
+            }
+            throw new Error('Erro na resposta da API');
+        }
+        
+        const dados = await response.json();
+        
+        if (dados.error) {
+            elements.kpiMemoriaUsoValue.textContent = 'Erro';
+            return;
+        }
 
-    const body = new THREE.Mesh(
-        new THREE.BoxGeometry(1.4, 0.18, 0.9),
-        new THREE.MeshStandardMaterial({ color: 0x1f2937 })
-    );
-    scene.add(body);
+        atualizarKPIs(dados);
+        atualizarGraficos(dados);
+        atualizarUltimaAtualizacao();
+        
+    } catch (error) {
+        console.error('Erro ao carregar dados overview:', error);
+        elements.kpiMemoriaUsoValue.textContent = 'Erro';
+    }
+}
 
-    // dissipador
-    const heatMaterial = new THREE.MeshStandardMaterial({
-        color: 0x94a3b8,
-        metalness: 1
+async function carregarDadosMonitor() {
+    try {
+        const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=50`);
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado histórico disponível</td></tr>';
+                return;
+            }
+            throw new Error('Erro na resposta da API');
+        }
+        
+        const dados = await response.json();
+        
+        if (dados.error) {
+            elements.monitorTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${dados.error}</td></tr>`;
+            return;
+        }
+
+        if (dados.length > 0) {
+            atualizarTabelaMonitor(dados);
+        } else {
+            elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado encontrado</td></tr>';
+        }
+        
+    } catch (error) {
+        console.error('Erro ao carregar dados do monitor:', error);
+        elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Erro ao carregar dados</td></tr>';
+    }
+}
+
+async function carregarAlertasHistorico() {
+    try {
+        const response = await fetch(`/api/memoria/alertas/${ID_MAQUINA}?horas=24`);
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum alerta encontrado</td></tr>';
+                elements.kpiMemoriaAlertaValue.textContent = '0';
+                elements.memoriaAlertaProgress.style.width = '0%';
+                return;
+            }
+            throw new Error('Erro na resposta da API');
+        }
+        
+        const alertas = await response.json();
+        
+        if (alertas.error) {
+            elements.historicoTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${alertas.error}</td></tr>`;
+            elements.kpiMemoriaAlertaValue.textContent = '0';
+            elements.memoriaAlertaProgress.style.width = '0%';
+            return;
+        }
+
+        if (alertas.length > 0) {
+            atualizarTabelaAlertas(alertas);
+            elements.kpiMemoriaAlertaValue.textContent = alertas.length;
+            elements.memoriaAlertaProgress.style.width = `${Math.min(alertas.length * 10, 100)}%`;
+        } else {
+            elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum alerta encontrado</td></tr>';
+            elements.kpiMemoriaAlertaValue.textContent = '0';
+            elements.memoriaAlertaProgress.style.width = '0%';
+        }
+    } catch (error) {
+        console.error('Erro ao carregar alertas:', error);
+        elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Erro ao carregar alertas</td></tr>';
+        elements.kpiMemoriaAlertaValue.textContent = '0';
+        elements.memoriaAlertaProgress.style.width = '0%';
+    }
+}
+
+function atualizarKPIs(dados) {
+    elements.kpiMemoriaUsoValue.textContent = `${dados.uso_percent.toFixed(1)}%`;
+    elements.memoriaUsoProgress.style.width = `${dados.uso_percent}%`;
+
+    elements.kpiMemoriaLivreValue.textContent = `${dados.livre_gb} GB`;
+    elements.memoriaLivreProgress.style.width = `${(dados.livre_gb / dados.total_gb) * 100}%`;
+
+    elements.kpiMemoriaTotalValue.textContent = `${dados.total_gb} GB`;
+    elements.memoriaTotalProgress.style.width = '100%';
+
+    atualizarCoresKPIs(dados.uso_percent);
+}
+
+function atualizarCoresKPIs(usoPercent) {
+    const kpiUso = document.getElementById('kpiMemoriaUso');
+    const progressBar = elements.memoriaUsoProgress;
+
+    kpiUso.classList.remove('status-normal', 'status-warning', 'status-critical');
+    progressBar.classList.remove('status-normal', 'status-warning', 'status-critical');
+
+    if (usoPercent <= 53) {
+        kpiUso.classList.add('status-normal');
+        progressBar.classList.add('status-normal');
+    } else if (usoPercent <= 83) {
+        kpiUso.classList.add('status-warning');
+        progressBar.classList.add('status-warning');
+    } else {
+        kpiUso.classList.add('status-critical');
+        progressBar.classList.add('status-critical');
+    }
+}
+
+function atualizarGraficos(dados) {
+    graficoMemoriaStatus.data.datasets[0].data = [dados.uso_percent, 100 - dados.uso_percent];
+    graficoMemoriaStatus.update('none');
+
+    atualizarGraficoLinha();
+}
+
+async function atualizarGraficoLinha() {
+    try {
+        const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=30`);
+        
+        if (!response.ok) {
+            return;
+        }
+        
+        const historico = await response.json();
+        
+        if (historico.error) {
+            return;
+        }
+
+        if (historico.length > 0) {
+            const dadosUso = historico.map(item => item.uso_percent);
+            const labels = historico.map(item => 
+                new Date(item.data_hora_captura).toLocaleTimeString('pt-BR')
+            );
+            
+            graficoMemoriaUso.data.labels = labels;
+            graficoMemoriaUso.data.datasets[0].data = dadosUso;
+            graficoMemoriaUso.update('none');
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar gráfico de linha:', error);
+    }
+}
+
+function atualizarTabelaMonitor(dados) {
+    const tbody = elements.monitorTableBody;
+    tbody.innerHTML = '';
+
+    dados.forEach(item => {
+        const row = `
+        <tr>
+            <td>${document.getElementById('edgeSelector').options[document.getElementById('edgeSelector').selectedIndex].text}</td>
+            <td>${item.uso_percent.toFixed(1)}%</td>
+            <td>${item.memoria_livre_gb} GB</td>
+            <td>${item.memoria_total_gb} GB</td>
+            <td>${new Date(item.data_hora_captura).toLocaleString('pt-BR')}</td>
+        </tr>
+    `;
+        tbody.innerHTML += row;
+    });
+}
+
+function atualizarTabelaAlertas(alertas) {
+    const tbody = elements.historicoTableBody;
+    tbody.innerHTML = '';
+
+    alertas.forEach(alerta => {
+        const row = `
+        <tr>
+            <td>${alerta.nome_maquina || document.getElementById('edgeSelector').options[document.getElementById('edgeSelector').selectedIndex].text}</td>
+            <td>${alerta.descricao}</td>
+            <td>${alerta.uso_percent ? alerta.uso_percent.toFixed(1) + '%' : 'N/A'}</td>
+            <td>${new Date(alerta.data_hora).toLocaleString('pt-BR')}</td>
+            <td>
+                <span class="pill ${alerta.uso_percent > 84 ? 'crit' : 'warn'}">
+                    ${alerta.uso_percent > 84 ? 'Ação Crítica' : 'Monitorar'}
+                </span>
+            </td>
+        </tr>
+    `;
+        tbody.innerHTML += row;
+    });
+}
+
+function atualizarUltimaAtualizacao() {
+    const now = new Date();
+    elements.lastUpdateTime.textContent = now.toLocaleTimeString('pt-BR');
+}
+
+function iniciarAtualizacaoAutomatica() {
+    carregarDadosOverview();
+    carregarAlertasHistorico();
+
+    updateInterval = setInterval(() => {
+        carregarDadosOverview();
+        if (Math.floor(Date.now() / 1000) % 120 === 0) {
+            carregarAlertasHistorico();
+        }
+    }, 30000);
+}
+
+function configurarEventos() {
+    elements.edgeSelector.addEventListener('change', function () {
+        ID_MAQUINA = this.value;
+        carregarDadosOverview();
+        if (document.querySelector('[data-view-content="monitor"]').classList.contains('hidden') === false) {
+            carregarDadosMonitor();
+        }
+        if (document.querySelector('[data-view-content="historico"]').classList.contains('hidden') === false) {
+            carregarAlertasHistorico();
+        }
     });
 
-    for (let i = -4; i <= 4; i++) {
-        const rib = new THREE.Mesh(
-            new THREE.BoxGeometry(0.22, 0.06, 0.85),
-            heatMaterial
-        );
-        rib.position.set(i * 0.08, 0.1, 0);
-        scene.add(rib);
-    }
-
-    // Portas
-    const port = new THREE.Mesh(
-        new THREE.BoxGeometry(0.22, 0.06, 0.12),
-        new THREE.MeshStandardMaterial({ color: 0xffd54f })
-    );
-    port.position.set(-0.6, -0.03, 0.35);
-    scene.add(port);
-
-    // LEDs
-    const ledMat = new THREE.MeshStandardMaterial({
-        color: 0x10b981,
-        emissive: 0x10b981
-    });
-
-    for (let i = 0; i < 3; i++) {
-        const led = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.02, 0.02), ledMat);
-        led.position.set(0.5 - i * 0.09, 0.06, 0.44);
-        scene.add(led);
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-        body.rotation.y += 0.002;
-
-        controls.update();
-        renderer.render(scene, camera);
-    }
-    animate();
+    document.getElementById('exportMonitorCsv')?.addEventListener('click', exportarCSVMonitor);
+    document.getElementById('exportHistoricoCsv')?.addEventListener('click', exportarCSVHistorico);
 }
 
-/* Inicialização */
-window.addEventListener("DOMContentLoaded", () => {
-    initMemory3D();
-    initController3D();
+function exportarCSVMonitor() {
+    const rows = [['Pórtico', 'Uso RAM (%)', 'RAM Livre (GB)', 'RAM Total (GB)', 'Horário']];
+    const tableRows = elements.monitorTableBody.querySelectorAll('tr');
+    
+    tableRows.forEach(row => {
+        const cols = row.querySelectorAll('td');
+        if (cols.length === 5) {
+            rows.push([
+                cols[0].textContent,
+                cols[1].textContent,
+                cols[2].textContent,
+                cols[3].textContent,
+                cols[4].textContent
+            ]);
+        }
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "monitor_memoria.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportarCSVHistorico() {
+    alert('Funcionalidade de exportação em desenvolvimento');
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    inicializarGraficos();
+    configurarNavegacao();
+    configurarEventos();
+    iniciarAtualizacaoAutomatica();
+});
+
+window.addEventListener('beforeunload', function() {
+    if (updateInterval) {
+        clearInterval(updateInterval);
+    }
 });
