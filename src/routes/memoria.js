@@ -23,7 +23,7 @@ router.get("/detalhes/:idMaquina", async (req, res) => {
         
         if (resultados.length > 0) {
             const usoPercent = resultados[0].uso_percent;
-            const totalGB = 32;
+            const totalGB = 24;
             const usadoGB = (usoPercent / 100) * totalGB;
             const livreGB = totalGB - usadoGB;
             
