@@ -52,7 +52,7 @@ body {
     color: var(--gray-800);
     background: var(--gray-50);
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    
+    overflow-y: hidden;
 }
 
 .hidden {
@@ -1749,4 +1749,10 @@ body {
 .nocsec-link i {
   margin-right: 6px;
   font-size: 16px;
+}
+
+
+a {
+    text-decoration: none;
+    color: white;
 }
