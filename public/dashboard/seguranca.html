@@ -61,8 +61,8 @@
         <h3>Ações Rápidas</h3>
         <ul>
           <li><i class="fas fa-ban"></i> Bloquear usuário</li>
-          <li><i class="fas fa-sign-out-alt"></i> Encerrar sessão</li>
-          <li><i class="fas fa-sync"></i> Reiniciar monitoramento</li>
+          <!-- <li><i class="fas fa-sign-out-alt"></i> Encerrar sessão</li>
+          <li><i class="fas fa-sync"></i> Reiniciar monitoramento</li> -->
           <li><i class="fas fa-phone"></i> Acionar supervisor</li>
           <li><i class="fas fa-file-alt"></i> Registrar evento</li>
         </ul>
@@ -94,7 +94,7 @@
             <i class="fas fa-shield-halved"></i>
           </div>
           <div class="kpi-body">
-            <p class="kpi-label">Status da Operação</p>
+            <p class="kpi-label">Versão do Kernel</p>
             <p class="kpi-value" id="status-operacao">Normal</p>
           </div>
         </div>
@@ -269,22 +269,59 @@
   </script>
 
   <script>
-
     document.getElementById('logoutBtn').addEventListener('click', function () {
-      try {
-        sessionStorage.clear();
-        localStorage.removeItem('login_email');
-      } catch (e) { }
-      window.location.replace('../login.html');
+        try {
+            sessionStorage.clear();
+            localStorage.removeItem('login_email');
+        } catch (e) { }
+        window.location.replace('../login.html');
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
-      const userEmail = localStorage.getItem('login_email');
-      if (userEmail) {
-        document.getElementById('sidebarUser').textContent = userEmail.split('@')[0];
-      }
+    function getStatusOperacao() {
+    const userAgent = navigator.userAgent;
+    let baseSistema = "Linux";
+    
+    if (userAgent.includes('Windows')) baseSistema = "Windows";
+    else if (userAgent.includes('Mac')) baseSistema = "macOS";
+    
+    // Simula uma versão plausível
+    const versoes = {
+        "Linux": ["6.8.0", "6.5.0", "5.15.0", "6.2.0"],
+        "Windows": ["10.0.22621", "10.0.19045", "10.0.20348"],
+        "macOS": ["23.0.0", "22.0.0", "21.0.0"]
+    };
+    
+    const versao = versoes[baseSistema][Math.floor(Math.random() * versoes[baseSistema].length)];
+    return `${baseSistema} ${versao}`;
+}
+
+    // Função para atualizar todas as informações
+    function atualizarInformacoes() {
+        // Atualizar usuário logado
+        const userEmail = localStorage.getItem('login_email');
+        if (userEmail) {
+            document.getElementById('sidebarUser').textContent = userEmail.split('@')[0];
+        }
+        
+        // Atualizar status da operação
+        const statusOperacao = getStatusOperacao();
+        console.log('Status definido como:', statusOperacao); // Para debug
+        document.getElementById('status-operacao').textContent = statusOperacao;
+        
+        // Atualizar horário
+        document.getElementById('lastUpdateTime').textContent = 
+            new Date().toLocaleTimeString('pt-BR');
+    }
+
+    // Executar quando a página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM Carregado - Iniciando atualizações'); // Para debug
+        atualizarInformacoes();
     });
-  </script>
+
+    // Atualizar a cada minuto (opcional)
+    setInterval(atualizarInformacoes, 60000);
+</script>
 </body>
 
 </html>
