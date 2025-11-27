@@ -49,10 +49,10 @@ function cadastrar(req, res) {
     var cnpj = req.body.CNPJServer;
     var emailEmpresa = req.body.emailEmpresaServer;
     var telefone = req.body.telefoneServer;
-    var tecnico = req.body.tecnicoServer; 
+    var tecnico = req.body.tecnicoServer;
     var emailUser = req.body.emailUserServer;
     var senha = req.body.senhaServer;
-    var token = req.body.tokenServer; 
+    var token = req.body.tokenServer;
 
     if (razao == undefined) {
         res.status(400).send("A razão social está undefined!");
@@ -62,8 +62,8 @@ function cadastrar(req, res) {
         res.status(400).send("A senha está undefined!");
     } else if (emailUser == undefined) {
         res.status(400).send("O e-mail do usuário está undefined!");
-    } else if ((emailEmpresa == undefined || String(emailEmpresa).trim() === "") && 
-               (telefone == undefined || String(telefone).trim() === "")) {
+    } else if ((emailEmpresa == undefined || String(emailEmpresa).trim() === "") &&
+        (telefone == undefined || String(telefone).trim() === "")) {
         res.status(400).send("É necessário preencher pelo menos o e-mail ou o telefone da empresa!");
     } else {
         usuarioModel.cadastrar(razao, cnpj, emailEmpresa, telefone, tecnico, emailUser, senha, token)
@@ -93,7 +93,7 @@ function listarEmpresas(req, res) {
 function cadastrarUser(req, res) {
     var nome = req.body.nomeServer;
     var email = req.body.emailUserServer;
-    var tipo_user = req.body.tipoUserServer; 
+    var tipo_user = req.body.tipoUserServer;
     var senha = req.body.senhaUserServer;
 
     if (nome == undefined) {
@@ -104,7 +104,7 @@ function cadastrarUser(req, res) {
         res.status(400).send("o tipo_user está undefined!");
     } else if (senha == undefined) {
         res.status(400).send("A senha do usuário está undefined!");
-    }  else {
+    } else {
         usuarioModel.cadastrarUser(nome, email, senha, tipo_user)
             .then(function (resultado) {
                 res.status(200).json(resultado);
@@ -119,11 +119,11 @@ function pesquisarUser(req, res) {
     let param_pesq = req.params.pesquisa
 
     usuarioModel.pesquisarUser(param_pesq)
-    .then(resultado => {
-        if (resultado.length > 0) {
-            res.status(200).json(resultado)
-        }
-    })
+        .then(resultado => {
+            if (resultado.length > 0) {
+                res.status(200).json(resultado)
+            }
+        })
 }
 
 function enviarCodigoReset(req, res) {
@@ -137,21 +137,21 @@ function enviarCodigoReset(req, res) {
 
     usuarioModel.verificarEmail(email)
         .then(function (resultadoConsulta) {
-            
+
             if (Array.isArray(resultadoConsulta) && resultadoConsulta.length === 1) {
                 const usuario = resultadoConsulta[0];
-                
-                const codigo = Math.floor(100000 + Math.random() * 900000); 
-                
-                res.status(200).json({ 
+
+                const codigo = Math.floor(100000 + Math.random() * 900000);
+
+                res.status(200).json({
                     message: "Se o e-mail estiver cadastrado, o código foi enviado.",
-                    id_usuario: usuario.id_usuario 
+                    id_usuario: usuario.id_usuario
                 });
-                
+
             } else {
 
-                res.status(200).json({ 
-                    message: "Se o e-mail estiver cadastrado, o código foi enviado." 
+                res.status(200).json({
+                    message: "Se o e-mail estiver cadastrado, o código foi enviado."
                 });
             }
         })
@@ -161,47 +161,85 @@ function enviarCodigoReset(req, res) {
         });
 }
 
-
 function buscarLogsAWS(req, res) {
-    // Tenta AWS CloudWatch PRIMEIRO
-    const AWS = require('aws-sdk');
-    const cloudwatchlogs = new AWS.CloudWatchLogs({
-        region: 'us-east-1', // Sua região
-        // As credenciais vêm do IAM Role da EC2 automaticamente
-    });
+    const { exec } = require('child_process');
 
-    const params = {
-        logGroupName: 'auth-log',
-        limit: 20,
-        startTime: Date.now() - (60 * 60 * 1000) // Última hora
-    };
-
-    cloudwatchlogs.filterLogEvents(params, (err, data) => {
-        if (err) {
-            console.log('❌ AWS CloudWatch indisponível:', err.message);
-            console.log('🔄 Tentando logs locais...');
-            
-            const { exec } = require('child_process');
-            exec('tail -20 /var/log/auth.log', (error, stdout) => {
-                if (error) {
-                    console.log('❌ Logs locais indisponíveis, usando simulados...');
-                    return enviarLogsSimulados(res);
-                }
-                
-                const logs = processarLogsReais(stdout);
-                console.log(`✅ ${logs.length} logs locais enviados`);
-                res.json(logs);
-            });
-            return;
+    exec('tail -20 /var/log/auth.log', (error, stdout) => {
+        if (error) {
+            const logs = [
+                { timestamp: new Date(), message: "SSH login successful - user: ubuntu", type: "info" },
+                { timestamp: new Date(), message: "Failed password attempt - IP: 192.168.1.100", type: "warning" },
+                { timestamp: new Date(), message: "Invalid user access attempt - username: root", type: "error" },
+                { timestamp: new Date(), message: "Security scan completed - no threats found", type: "info" },
+                { timestamp: new Date(), message: "System resource usage normal", type: "info" },
+                { timestamp: new Date(), message: "Database connection established", type: "info" },
+                { timestamp: new Date(), message: "Network traffic analysis running", type: "info" },
+                { timestamp: new Date(), message: "Firewall rule updated - port 22", type: "info" },
+                { timestamp: new Date(), message: "User permission changed - elevated privileges", type: "warning" },
+                { timestamp: new Date(), message: "Login attempt from unusual location", type: "warning" }
+            ];
+            return res.json(logs);
         }
 
-        const logs = data.events.map(event => ({
-            timestamp: new Date(event.timestamp),
-            message: event.message.substring(0, 150),
-            type: classificarLog(event.message)
-        }));
+        const logs = stdout.split('\n')
+            .filter(line => line.trim())
+            .slice(0, 10)
+            .map(line => ({
+                timestamp: new Date(),
+                message: line.substring(0, 120),
+                type: 'info'
+            }));
 
-        console.log(`✅ ${logs.length} logs AWS CloudWatch enviados`);
+        res.json(logs);
+    });
+}
+
+function tentarCloudWatch(res) {
+    try {
+        const AWS = require('aws-sdk');
+        const cloudwatchlogs = new AWS.CloudWatchLogs({
+            region: 'us-east-1'
+        });
+
+        const params = {
+            logGroupName: 'auth-log',
+            limit: 20,
+            startTime: Date.now() - (60 * 60 * 1000)
+        };
+
+        cloudwatchlogs.filterLogEvents(params, (err, data) => {
+            if (err) {
+                console.log('CloudWatch falhou, tentando logs locais...');
+                buscarLogsLocais(res);
+                return;
+            }
+
+            const logs = data.events.map(event => ({
+                timestamp: new Date(event.timestamp),
+                message: event.message.substring(0, 150),
+                type: classificarLog(event.message)
+            }));
+
+            console.log(`${logs.length} logs CloudWatch enviados`);
+            res.json(logs);
+        });
+    } catch (awsError) {
+        console.log('AWS SDK falhou, usando logs locais...');
+        buscarLogsLocais(res);
+    }
+}
+
+function buscarLogsLocais(res) {
+    const { exec } = require('child_process');
+
+    exec('tail -20 /var/log/auth.log', (error, stdout) => {
+        if (error) {
+            console.log('Logs locais falharam, usando simulados...');
+            return enviarLogsSimulados(res);
+        }
+
+        const logs = processarLogsReais(stdout);
+        console.log(`${logs.length} logs locais enviados`);
         res.json(logs);
     });
 }
@@ -220,7 +258,7 @@ function processarLogsReais(stdout) {
 function enviarLogsSimulados(res) {
     const eventos = [
         "SSH login successful - user: ubuntu",
-        "Failed password attempt - IP: 192.168.1.100", 
+        "Failed password attempt - IP: 192.168.1.100",
         "Invalid user access attempt - username: root",
         "SSH authentication successful",
         "Sudo command executed by admin user",
@@ -240,10 +278,10 @@ function enviarLogsSimulados(res) {
         "Data encryption active - AES-256",
         "Intrusion detection system online"
     ];
-    
+
     const logs = [];
     const numLogs = Math.floor(Math.random() * 6) + 15;
-    
+
     for (let i = 0; i < numLogs; i++) {
         logs.push({
             timestamp: new Date(Date.now() - Math.random() * 3600000),
@@ -251,7 +289,7 @@ function enviarLogsSimulados(res) {
             type: Math.random() > 0.8 ? 'warning' : 'info'
         });
     }
-    
+
     logs.sort((a, b) => b.timestamp - a.timestamp);
     console.log(`${logs.length} logs simulados enviados`);
     res.json(logs.slice(0, 20));
@@ -272,10 +310,10 @@ function classificarLog(line) {
 
 module.exports = {
     autenticar,
-    cadastrar, 
-    listarEmpresas, 
-    cadastrarUser, 
-    pesquisarUser, 
+    cadastrar,
+    listarEmpresas,
+    cadastrarUser,
+    pesquisarUser,
     enviarCodigoReset,
     buscarLogsAWS
 };
