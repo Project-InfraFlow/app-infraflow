@@ -17,6 +17,7 @@ var empresasRouter = require("./src/routes/empresas");
 var segurancaRouter = require("./src/routes/segurancaRoutes");
 var memoriaRouter = require("./src/routes/memoria");
 var alertaRouter = require("./src/routes/alertas-route");
+var redeRouter = require("./src/routes/redeRoute");
 
 var app = express();
 app.use(express.json());
@@ -34,8 +35,7 @@ app.use("/api/seguranca", segurancaRouter);
 app.use("/api/memoria", memoriaRouter);
 
 app.use("/alertas-route", alertaRouter);
-
-
+app.use("/redeRoute", redeRouter);
 
 app.use("/api/leituras", leiturasRouter);
 

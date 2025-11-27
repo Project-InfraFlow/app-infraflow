@@ -53,6 +53,30 @@ body {
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
+.charts-grid.two-charts {
+    display: flex; 
+    gap: 20px; 
+    margin-bottom: 20px; 
+}
+
+#chart1, #chart2 {
+    width: 70%; 
+}           
+.charts-grid.two-charts .chart-container {
+    flex: 1; 
+    min-width: 0; 
+}
+
+@media (max-width: 900px) {
+    .charts-grid.two-charts {
+        flex-direction: column; 
+    }
+    .charts-grid.two-charts .chart-container {
+        margin-bottom: 20px; 
+    }
+}
+
+
 .hidden {
     display: none !important;
 }
@@ -472,7 +496,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding-top: calc(var(--topbar-height) - 8px);
+    padding-top: 0;
 }
 
 .view {
@@ -668,19 +692,19 @@ body {
 }
 
 .kpi-icon.cpu {
-    background: linear-gradient(135deg, var(--cpu-color), #2563eb);
+    background: linear-gradient(135deg, var(--gray-400), #7c3aed);
 }
 
 .kpi-icon.memoria {
-    background: linear-gradient(135deg, var(--memoria-color), #059669);
+    background: linear-gradient(135deg, var(--gray-400), #7c3aed);
 }
 
 .kpi-icon.disco {
-    background: linear-gradient(135deg, var(--disco-color), #d97706);
+    background: linear-gradient(135deg, var(--gray-400), #7c3aed);
 }
 
 .kpi-icon.rede {
-    background: linear-gradient(135deg, var(--rede-color), #7c3aed);
+    background: linear-gradient(135deg, var(--gray-400), #7c3aed);
 }
 
 .kpi-info {
@@ -691,7 +715,7 @@ body {
 }
 
 .kpi-label {
-    font-size: 0.875rem;
+    font-size: 0.900rem;
     font-weight: 500;
     color: var(--gray-600);
 }
@@ -720,19 +744,19 @@ body {
 }
 
 .progress-bar.cpu {
-    background: linear-gradient(90deg, var(--cpu-color), #2563eb);
+    background: linear-gradient(90deg, var(--rede-color), #2563eb);
 }
 
 .progress-bar.memoria {
-    background: linear-gradient(90deg, var(--memoria-color), #059669);
+    background: linear-gradient(90deg, var(--rede-color), #2563eb);
 }
 
 .progress-bar.disco {
-    background: linear-gradient(90deg, var(--disco-color), #d97706);
+    background: linear-gradient(90deg, var(--rede-color), #2563eb);
 }
 
 .progress-bar.rede {
-    background: linear-gradient(90deg, var(--rede-color), #7c3aed);
+    background: linear-gradient(90deg, var(--rede-color), #2563eb);
 }
 
 .system-status-section {
