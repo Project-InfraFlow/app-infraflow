@@ -32,6 +32,7 @@ app.use("/avisos", avisosRouter);
 app.use("/medidas", medidasRouter);
 app.use("/empresas", empresasRouter);
 app.use("/api/seguranca", segurancaRouter);
+app.use("/usuarios", segurancaRouter);
 app.use("/api/memoria", memoriaRouter);
 
 app.use("/alertas-route", alertaRouter);

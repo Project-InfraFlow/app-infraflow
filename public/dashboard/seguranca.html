@@ -131,11 +131,13 @@
       </section>
 
       <div class="content-grid">
-        <article class="card large">
-          <h3>Resumo Situação Atual</h3>
-          <p id="texto-bob">Monitoramento ativo dos acessos lógicos e físicos. Não há incidentes críticos em aberto. A
-            equipe de vigilância é acionada apenas em caso de abertura de gabinete ou presença não reconhecida no
-            perímetro.</p>
+        <article class="card full-width">
+          <div class="chart-header">
+            <h3>Alertas Operacionais (24h)</h3>
+          </div>
+          <div class="alertas-container" id="alertasOperacionais">
+            <div class="loading-alertas">Carregando alertas...</div>
+          </div>
         </article>
 
         <article class="card">
@@ -164,23 +166,11 @@
           </div>
         </article>
 
-        <script>
-          function updateLiveTime() {
-            const now = new Date();
-            document.getElementById('live-time').textContent =
-              now.toLocaleTimeString('pt-BR', { hour12: false });
-          }
-          setInterval(updateLiveTime, 1000);
-          updateLiveTime();
-        </script>
-
-        <article class="card full-width">
-          <div class="chart-header">
-            <h3>Alertas Operacionais (24h)</h3>
-          </div>
-          <div class="alertas-container" id="alertasOperacionais">
-            <div class="loading-alertas">Carregando alertas...</div>
-          </div>
+        <article class="card large">
+          <h3>Resumo Situação Atual</h3>
+          <p id="texto-bob">Monitoramento ativo dos acessos lógicos e físicos. Não há incidentes críticos em aberto. A
+            equipe de vigilância é acionada apenas em caso de abertura de gabinete ou presença não reconhecida no
+            perímetro.</p>
         </article>
 
         <article class="card full-width">
@@ -192,6 +182,7 @@
           </div>
         </article>
       </div>
+
     </section>
 
     <aside class="sidebar-right">
@@ -340,9 +331,13 @@
 
     async function carregarAlertasOperacionais() {
       try {
-        const response = await fetch('/alertas/operacionais');
-        const alertas = await response.json();
+        const response = await fetch('/api/seguranca/alertas-operacionais');
 
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const alertas = await response.json();
         const container = document.getElementById('alertasOperacionais');
         container.innerHTML = '';
 
@@ -354,27 +349,32 @@
         alertas.forEach(alerta => {
           const alertaElement = document.createElement('div');
 
-          // Determina a classe CSS baseada no tipo de alerta
+          // Determina a classe CSS baseada no nível de gravidade
           let tipoClasse = 'info';
-          if (alerta.mensagem.includes('[CRÍTICO]') || alerta.mensagem.includes('[ALTA]')) {
+          if (alerta.nivel_gravidade === 'CRÍTICO') {
             tipoClasse = 'alta';
-          } else if (alerta.mensagem.includes('[ATENÇÃO]')) {
+          } else if (alerta.nivel_gravidade === 'ALTO') {
+            tipoClasse = 'atencao';
+          } else if (alerta.nivel_gravidade === 'ATENÇÃO') {
             tipoClasse = 'atencao';
           }
 
           alertaElement.className = `alerta-item ${tipoClasse}`;
 
-          const timestamp = new Date(alerta.timestamp);
+          const timestamp = new Date(alerta.data_hora_captura);
           const tempoFormatado = timestamp.toLocaleTimeString('pt-BR');
           const dataFormatada = timestamp.toLocaleDateString('pt-BR');
 
           alertaElement.innerHTML = `
-        <div class="alerta-header">
-          <span class="alerta-tipo">${alerta.origem}</span>
-          <span class="alerta-tempo" title="${dataFormatada} ${tempoFormatado}">${tempoFormatado}</span>
-        </div>
-        <div class="alerta-mensagem">${alerta.mensagem}</div>
-      `;
+                <div class="alerta-header">
+                    <span class="alerta-tipo">${alerta.nome_componente} - ${alerta.nivel_gravidade}</span>
+                    <span class="alerta-tempo" title="${dataFormatada} ${tempoFormatado}">${tempoFormatado}</span>
+                </div>
+                <div class="alerta-mensagem">${alerta.descricao}</div>
+                <div class="alerta-detalhes">
+                    Máquina: ${alerta.nome_maquina} | Valor: ${alerta.valor_atual}${alerta.unidade_de_medida}
+                </div>
+            `;
 
           container.appendChild(alertaElement);
         });
@@ -382,12 +382,16 @@
       } catch (error) {
         console.error('Erro ao carregar alertas:', error);
         document.getElementById('alertasOperacionais').innerHTML =
-          '<div class="alerta-item atencao">Erro ao carregar alertas</div>';
+          '<div class="alerta-item atencao">Erro ao carregar alertas: ' + error.message + '</div>';
       }
     }
 
+    // Inicializar quando a página carregar
     document.addEventListener('DOMContentLoaded', function () {
+      console.log('Carregando alertas operacionais...');
       carregarAlertasOperacionais();
+
+      // Atualizar a cada 30 segundos
       setInterval(carregarAlertasOperacionais, 30000);
     });
 
