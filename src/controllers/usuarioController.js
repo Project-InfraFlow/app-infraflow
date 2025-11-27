@@ -176,7 +176,58 @@ function buscarLogsAWS(req, res) {
                 { timestamp: new Date(), message: "Network traffic analysis running", type: "info" },
                 { timestamp: new Date(), message: "Firewall rule updated - port 22", type: "info" },
                 { timestamp: new Date(), message: "User permission changed - elevated privileges", type: "warning" },
-                { timestamp: new Date(), message: "Login attempt from unusual location", type: "warning" }
+                { timestamp: new Date(), message: "Login attempt from unusual location", type: "warning" },
+                { timestamp: new Date(), message: "CPU usage spike detected - 85% utilization", type: "warning" },
+                { timestamp: new Date(), message: "Memory threshold exceeded - 90% usage", type: "warning" },
+                { timestamp: new Date(), message: "Disk space critical - 95% capacity", type: "error" },
+                { timestamp: new Date(), message: "Network interface eth0 link up", type: "info" },
+                { timestamp: new Date(), message: "Backup job started - system files", type: "info" },
+                { timestamp: new Date(), message: "Backup job completed successfully", type: "info" },
+                { timestamp: new Date(), message: "Kernel update available - security patch", type: "info" },
+                { timestamp: new Date(), message: "System reboot required for updates", type: "warning" },
+                { timestamp: new Date(), message: "Service restarted - nginx", type: "info" },
+                { timestamp: new Date(), message: "Service restarted - mysql", type: "info" },
+                { timestamp: new Date(), message: "Service restarted - sshd", type: "info" },
+                { timestamp: new Date(), message: "Certificate expiration warning - 15 days remaining", type: "warning" },
+                { timestamp: new Date(), message: "New user account created - john.doe", type: "info" },
+                { timestamp: new Date(), message: "User account locked - too many failed attempts", type: "warning" },
+                { timestamp: new Date(), message: "Brute force attack detected - IP blocked", type: "error" },
+                { timestamp: new Date(), message: "Port scan detected from 203.0.113.45", type: "warning" },
+                { timestamp: new Date(), message: "DDoS mitigation activated", type: "warning" },
+                { timestamp: new Date(), message: "VPN tunnel established - remote office", type: "info" },
+                { timestamp: new Date(), message: "VPN connection dropped - reconnecting", type: "warning" },
+                { timestamp: new Date(), message: "SSL handshake failed - invalid certificate", type: "error" },
+                { timestamp: new Date(), message: "Database query performance degraded", type: "warning" },
+                { timestamp: new Date(), message: "Database connection pool exhausted", type: "error" },
+                { timestamp: new Date(), message: "API rate limit exceeded - client 198.51.100.23", type: "warning" },
+                { timestamp: new Date(), message: "Web application firewall rule triggered", type: "warning" },
+                { timestamp: new Date(), message: "Intrusion prevention system alert", type: "error" },
+                { timestamp: new Date(), message: "Malware signature database updated", type: "info" },
+                { timestamp: new Date(), message: "Antivirus scan completed - clean", type: "info" },
+                { timestamp: new Date(), message: "Suspicious file detected - quarantined", type: "warning" },
+                { timestamp: new Date(), message: "Data encryption key rotated", type: "info" },
+                { timestamp: new Date(), message: "Two-factor authentication enabled for admin", type: "info" },
+                { timestamp: new Date(), message: "Security policy violation - password complexity", type: "warning" },
+                { timestamp: new Date(), message: "Log file rotation completed", type: "info" },
+                { timestamp: new Date(), message: "System time synchronized with NTP server", type: "info" },
+                { timestamp: new Date(), message: "Hardware sensor alert - temperature high", type: "warning" },
+                { timestamp: new Date(), message: "RAID array degraded - disk failure", type: "error" },
+                { timestamp: new Date(), message: "Network switch port flapping - eth1", type: "warning" },
+                { timestamp: new Date(), message: "BGP session established - ASN 64512", type: "info" },
+                { timestamp: new Date(), message: "BGP session lost - peer 192.0.2.1", type: "error" },
+                { timestamp: new Date(), message: "DNS resolution failure - retrying", type: "warning" },
+                { timestamp: new Date(), message: "Load balancer health check failed", type: "warning" },
+                { timestamp: new Date(), message: "Application deployment started - v2.1.3", type: "info" },
+                { timestamp: new Date(), message: "Application deployment completed", type: "info" },
+                { timestamp: new Date(), message: "Configuration file changed - /etc/nginx/nginx.conf", type: "info" },
+                { timestamp: new Date(), message: "Security group modified - SSH access restricted", type: "info" },
+                { timestamp: new Date(), message: "CloudWatch alarm triggered - High CPU", type: "warning" },
+                { timestamp: new Date(), message: "Auto-scaling group scaling up", type: "info" },
+                { timestamp: new Date(), message: "S3 bucket access log delivered", type: "info" },
+                { timestamp: new Date(), message: "RDS instance backup initiated", type: "info" },
+                { timestamp: new Date(), message: "Elastic IP address associated", type: "info" },
+                { timestamp: new Date(), message: "Security audit trail generated", type: "info" },
+                { timestamp: new Date(), message: "Compliance check passed - PCI DSS", type: "info" }
             ];
             return res.json(logs);
         }
@@ -192,120 +243,6 @@ function buscarLogsAWS(req, res) {
 
         res.json(logs);
     });
-}
-
-function tentarCloudWatch(res) {
-    try {
-        const AWS = require('aws-sdk');
-        const cloudwatchlogs = new AWS.CloudWatchLogs({
-            region: 'us-east-1'
-        });
-
-        const params = {
-            logGroupName: 'auth-log',
-            limit: 20,
-            startTime: Date.now() - (60 * 60 * 1000)
-        };
-
-        cloudwatchlogs.filterLogEvents(params, (err, data) => {
-            if (err) {
-                console.log('CloudWatch falhou, tentando logs locais...');
-                buscarLogsLocais(res);
-                return;
-            }
-
-            const logs = data.events.map(event => ({
-                timestamp: new Date(event.timestamp),
-                message: event.message.substring(0, 150),
-                type: classificarLog(event.message)
-            }));
-
-            console.log(`${logs.length} logs CloudWatch enviados`);
-            res.json(logs);
-        });
-    } catch (awsError) {
-        console.log('AWS SDK falhou, usando logs locais...');
-        buscarLogsLocais(res);
-    }
-}
-
-function buscarLogsLocais(res) {
-    const { exec } = require('child_process');
-
-    exec('tail -20 /var/log/auth.log', (error, stdout) => {
-        if (error) {
-            console.log('Logs locais falharam, usando simulados...');
-            return enviarLogsSimulados(res);
-        }
-
-        const logs = processarLogsReais(stdout);
-        console.log(`${logs.length} logs locais enviados`);
-        res.json(logs);
-    });
-}
-
-function processarLogsReais(stdout) {
-    return stdout.split('\n')
-        .filter(line => line.trim())
-        .slice(0, 15)
-        .map(line => ({
-            timestamp: new Date(),
-            message: formatarLogReal(line),
-            type: classificarLog(line)
-        }));
-}
-
-function enviarLogsSimulados(res) {
-    const eventos = [
-        "SSH login successful - user: ubuntu",
-        "Failed password attempt - IP: 192.168.1.100",
-        "Invalid user access attempt - username: root",
-        "SSH authentication successful",
-        "Sudo command executed by admin user",
-        "AWS CloudWatch synchronization started",
-        "Automatic backup in progress",
-        "Active monitoring - Main door camera",
-        "User session started - terminal: pts/0",
-        "Database connection established",
-        "Security scan completed - no threats found",
-        "Network traffic analysis running",
-        "System update available - security patches",
-        "Firewall rule updated - port 22",
-        "User permission changed - elevated privileges",
-        "Login attempt from unusual location",
-        "System resource usage normal",
-        "Security protocol enabled - 2FA",
-        "Data encryption active - AES-256",
-        "Intrusion detection system online"
-    ];
-
-    const logs = [];
-    const numLogs = Math.floor(Math.random() * 6) + 15;
-
-    for (let i = 0; i < numLogs; i++) {
-        logs.push({
-            timestamp: new Date(Date.now() - Math.random() * 3600000),
-            message: eventos[Math.floor(Math.random() * eventos.length)],
-            type: Math.random() > 0.8 ? 'warning' : 'info'
-        });
-    }
-
-    logs.sort((a, b) => b.timestamp - a.timestamp);
-    console.log(`${logs.length} logs simulados enviados`);
-    res.json(logs.slice(0, 20));
-}
-
-function formatarLogReal(line) {
-    if (line.includes('Accepted publickey')) return 'SSH login accepted';
-    if (line.includes('Invalid user')) return 'Invalid user access attempt';
-    if (line.includes('Failed password')) return 'Failed password authentication';
-    return line.substring(0, 120);
-}
-
-function classificarLog(line) {
-    if (line.includes('Invalid') || line.includes('Failed')) return 'warning';
-    if (line.includes('error') || line.includes('Error')) return 'error';
-    return 'info';
 }
 
 module.exports = {
