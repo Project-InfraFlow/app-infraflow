@@ -697,3 +697,70 @@ body {
     font-size: 0.8rem;
     font-family: 'Courier New', monospace;
 }
+
+.alertas-container {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e1e1e1;
+}
+
+.alerta-item {
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border-left: 4px solid #007bff;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.alerta-item.alta {
+  border-left-color: #dc3545;
+  background: #f8d7da;
+}
+
+.alerta-item.atencao {
+  border-left-color: #ffc107;
+  background: #fff3cd;
+}
+
+.alerta-item.info {
+  border-left-color: #17a2b8;
+  background: #d1ecf1;
+}
+
+.alerta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.alerta-tipo {
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.alerta-tempo {
+  font-size: 0.75em;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.alerta-mensagem {
+  font-size: 0.9em;
+  color: #212529;
+  line-height: 1.4;
+}
+
+.loading-alertas {
+  text-align: center;
+  color: #6c757d;
+  padding: 20px;
+  font-style: italic;
+}

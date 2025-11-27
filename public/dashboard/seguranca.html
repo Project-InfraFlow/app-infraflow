@@ -121,11 +121,11 @@
 
         <div class="kpi-card">
           <div class="kpi-icon lock">
-            <i class="fas fa-door-closed"></i>
+            <i class="fas fa-usb"></i>
           </div>
           <div class="kpi-body">
-            <p class="kpi-label">Acesso Físico</p>
-            <p class="kpi-value" id="acesso-gabinete">Fechada</p>
+            <p class="kpi-label">Status USB/Pen Drive</p>
+            <p class="kpi-value" id="acesso-gabinete">Desconectado</p>
           </div>
         </div>
       </section>
@@ -178,8 +178,8 @@
           <div class="chart-header">
             <h3>Alertas Operacionais (24h)</h3>
           </div>
-          <div class="chart-wrapper">
-            <canvas id="cyberAlertsChart"></canvas>
+          <div class="alertas-container" id="alertasOperacionais">
+            <div class="loading-alertas">Carregando alertas...</div>
           </div>
         </article>
 
@@ -206,45 +206,45 @@
 
   <script>
     // Variável para contador de tentativas
-let contadorTentativas = 1;
+    let contadorTentativas = 1;
 
-async function carregarDadosSeguranca() {
-  try {
-    // Busca estatísticas de segurança
-    const responseStats = await fetch('/usuarios/estatisticas-seguranca');
-    const stats = await responseStats.json();
-    
-    // Atualiza a KPI
-    contadorTentativas = stats.tentativasAtaque;
-    document.getElementById('tentativas-ataque').textContent = contadorTentativas;
-    
-    // Busca logs (mantém seu código original)
-    const responseLogs = await fetch('/usuarios/logs-aws');
-    const logs = await responseLogs.json();
+    async function carregarDadosSeguranca() {
+      try {
+        // Busca estatísticas de segurança
+        const responseStats = await fetch('/usuarios/estatisticas-seguranca');
+        const stats = await responseStats.json();
 
-    const logsContainer = document.getElementById('cyberLogs');
-    logsContainer.innerHTML = '';
+        // Atualiza a KPI
+        contadorTentativas = stats.tentativasAtaque;
+        document.getElementById('tentativas-ataque').textContent = contadorTentativas;
 
-    logs.forEach(log => {
-      const logElement = document.createElement('div');
-      logElement.className = `log-item ${log.type}`;
-      logElement.innerHTML = `
+        // Busca logs (mantém seu código original)
+        const responseLogs = await fetch('/usuarios/logs-aws');
+        const logs = await responseLogs.json();
+
+        const logsContainer = document.getElementById('cyberLogs');
+        logsContainer.innerHTML = '';
+
+        logs.forEach(log => {
+          const logElement = document.createElement('div');
+          logElement.className = `log-item ${log.type}`;
+          logElement.innerHTML = `
             <div class="log-time">${new Date(log.timestamp).toLocaleTimeString()}</div>
             <div class="log-message">${log.message}</div>
         `;
-      logsContainer.appendChild(logElement);
-    });
-    
-  } catch (error) {
-    console.log('Erro ao carregar dados:', error);
-    // Fallback - mantém o valor atual se der erro
-    document.getElementById('tentativas-ataque').textContent = contadorTentativas;
-  }
-}
+          logsContainer.appendChild(logElement);
+        });
 
-// Carrega dados a cada 3 segundos
-carregarDadosSeguranca();
-setInterval(carregarDadosSeguranca, 3000);
+      } catch (error) {
+        console.log('Erro ao carregar dados:', error);
+        // Fallback - mantém o valor atual se der erro
+        document.getElementById('tentativas-ataque').textContent = contadorTentativas;
+      }
+    }
+
+    // Carrega dados a cada 3 segundos
+    carregarDadosSeguranca();
+    setInterval(carregarDadosSeguranca, 3000);
 
     const logStyles = `
 <style>
@@ -286,58 +286,112 @@ setInterval(carregarDadosSeguranca, 3000);
 
   <script>
     document.getElementById('logoutBtn').addEventListener('click', function () {
-        try {
-            sessionStorage.clear();
-            localStorage.removeItem('login_email');
-        } catch (e) { }
-        window.location.replace('../login.html');
+      try {
+        sessionStorage.clear();
+        localStorage.removeItem('login_email');
+      } catch (e) { }
+      window.location.replace('../login.html');
     });
 
     function getStatusOperacao() {
-    const userAgent = navigator.userAgent;
-    let baseSistema = "Linux";
-    
-    if (userAgent.includes('Windows')) baseSistema = "Windows";
-    else if (userAgent.includes('Mac')) baseSistema = "macOS";
-    
-    // Simula uma versão plausível
-    const versoes = {
+      const userAgent = navigator.userAgent;
+      let baseSistema = "Linux";
+
+      if (userAgent.includes('Windows')) baseSistema = "Windows";
+      else if (userAgent.includes('Mac')) baseSistema = "macOS";
+
+      // Simula uma versão plausível
+      const versoes = {
         "Linux": ["6.8.0", "6.5.0", "5.15.0", "6.2.0"],
         "Windows": ["10.0.22621", "10.0.19045", "10.0.20348"],
         "macOS": ["23.0.0", "22.0.0", "21.0.0"]
-    };
-    
-    const versao = versoes[baseSistema][Math.floor(Math.random() * versoes[baseSistema].length)];
-    return `${baseSistema} ${versao}`;
-}
+      };
+
+      const versao = versoes[baseSistema][Math.floor(Math.random() * versoes[baseSistema].length)];
+      return `${baseSistema} ${versao}`;
+    }
 
     // Função para atualizar todas as informações
     function atualizarInformacoes() {
-        // Atualizar usuário logado
-        const userEmail = localStorage.getItem('login_email');
-        if (userEmail) {
-            document.getElementById('sidebarUser').textContent = userEmail.split('@')[0];
-        }
-        
-        // Atualizar status da operação
-        const statusOperacao = getStatusOperacao();
-        console.log('Status definido como:', statusOperacao); // Para debug
-        document.getElementById('status-operacao').textContent = statusOperacao;
-        
-        // Atualizar horário
-        document.getElementById('lastUpdateTime').textContent = 
-            new Date().toLocaleTimeString('pt-BR');
+      // Atualizar usuário logado
+      const userEmail = localStorage.getItem('login_email');
+      if (userEmail) {
+        document.getElementById('sidebarUser').textContent = userEmail.split('@')[0];
+      }
+
+      // Atualizar status da operação
+      const statusOperacao = getStatusOperacao();
+      console.log('Status definido como:', statusOperacao); // Para debug
+      document.getElementById('status-operacao').textContent = statusOperacao;
+
+      // Atualizar horário
+      document.getElementById('lastUpdateTime').textContent =
+        new Date().toLocaleTimeString('pt-BR');
     }
 
     // Executar quando a página carregar
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM Carregado - Iniciando atualizações'); // Para debug
-        atualizarInformacoes();
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('DOM Carregado - Iniciando atualizações'); // Para debug
+      atualizarInformacoes();
     });
 
     // Atualizar a cada minuto (opcional)
     setInterval(atualizarInformacoes, 60000);
-</script>
+
+    async function carregarAlertasOperacionais() {
+      try {
+        const response = await fetch('/alertas/operacionais');
+        const alertas = await response.json();
+
+        const container = document.getElementById('alertasOperacionais');
+        container.innerHTML = '';
+
+        if (alertas.length === 0) {
+          container.innerHTML = '<div class="alerta-item">Nenhum alerta nas últimas 24 horas</div>';
+          return;
+        }
+
+        alertas.forEach(alerta => {
+          const alertaElement = document.createElement('div');
+
+          // Determina a classe CSS baseada no tipo de alerta
+          let tipoClasse = 'info';
+          if (alerta.mensagem.includes('[CRÍTICO]') || alerta.mensagem.includes('[ALTA]')) {
+            tipoClasse = 'alta';
+          } else if (alerta.mensagem.includes('[ATENÇÃO]')) {
+            tipoClasse = 'atencao';
+          }
+
+          alertaElement.className = `alerta-item ${tipoClasse}`;
+
+          const timestamp = new Date(alerta.timestamp);
+          const tempoFormatado = timestamp.toLocaleTimeString('pt-BR');
+          const dataFormatada = timestamp.toLocaleDateString('pt-BR');
+
+          alertaElement.innerHTML = `
+        <div class="alerta-header">
+          <span class="alerta-tipo">${alerta.origem}</span>
+          <span class="alerta-tempo" title="${dataFormatada} ${tempoFormatado}">${tempoFormatado}</span>
+        </div>
+        <div class="alerta-mensagem">${alerta.mensagem}</div>
+      `;
+
+          container.appendChild(alertaElement);
+        });
+
+      } catch (error) {
+        console.error('Erro ao carregar alertas:', error);
+        document.getElementById('alertasOperacionais').innerHTML =
+          '<div class="alerta-item atencao">Erro ao carregar alertas</div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      carregarAlertasOperacionais();
+      setInterval(carregarAlertasOperacionais, 30000);
+    });
+
+  </script>
 </body>
 
 </html>

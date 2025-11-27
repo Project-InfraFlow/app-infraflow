@@ -1,6 +1,7 @@
 var usuarioModel = require("../models/usuarioModel");
 
 let tentativasAtaque = 1;
+let usbConectado = false;
 
 function autenticar(req, res) {
     var email = (req.body && (req.body.email || req.body.emailServer)) ? String(req.body.email || req.body.emailServer).trim() : undefined;
