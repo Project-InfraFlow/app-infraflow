@@ -1231,3 +1231,8 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+a {
+    text-decoration: none;
+    color: white;
+}

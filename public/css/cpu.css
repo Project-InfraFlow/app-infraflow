@@ -1746,3 +1746,8 @@ body.slack-open #contentWrapper {
     max-height: 200px !important; 
     width: 100% !important;
 }
+
+a {
+    text-decoration: none;
+    color: white;
+}
