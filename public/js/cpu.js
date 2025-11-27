@@ -1,18 +1,22 @@
-// ================================
-// GRÁFICO 1 — CPU x LATÊNCIA
-// ================================
+async function getLeituras() {
+    const response = await fetch("http://localhost:3000/leituras?maquinaId=1&limite=30");
+    return await response.json();
+}
+
+
+
 const ctxCpuLatencia = document
     .getElementById("cpuLatenciaChart")
     .getContext("2d");
 
-new Chart(ctxCpuLatencia, {
+let cpuLatenciaChart = new Chart(ctxCpuLatencia, {
     type: "line",
     data: {
-        labels: ["10:00", "10:05", "10:10", "10:15", "10:20"], // exemplo
+        labels: [],
         datasets: [
             {
                 label: "CPU (%)",
-                data: [70, 75, 78, 82, 80],
+                data: [],
                 borderColor: "#2563eb",
                 backgroundColor: "transparent",
                 borderWidth: 2,
@@ -21,7 +25,7 @@ new Chart(ctxCpuLatencia, {
             },
             {
                 label: "Latência (ms)",
-                data: [180, 190, 200, 230, 215],
+                data: [],
                 borderColor: "#f59e0b",
                 backgroundColor: "transparent",
                 borderWidth: 2,
@@ -33,6 +37,7 @@ new Chart(ctxCpuLatencia, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: false,
         interaction: {
             mode: "index",
             intersect: false
@@ -41,18 +46,12 @@ new Chart(ctxCpuLatencia, {
             y1: {
                 type: "linear",
                 position: "left",
-                title: {
-                    display: true,
-                    text: "CPU (%)"
-                }
+                title: { display: true, text: "CPU (%)" }
             },
             y2: {
                 type: "linear",
                 position: "right",
-                title: {
-                    display: true,
-                    text: "Latência (ms)"
-                },
+                title: { display: true, text: "Latência (ms)" },
                 grid: { drawOnChartArea: false }
             }
         }
@@ -60,23 +59,21 @@ new Chart(ctxCpuLatencia, {
 });
 
 
-// ================================
-// GRÁFICO 2 — PROCESSOS EM EXECUÇÃO (BARRA)
-// ================================
+
 const ctxProcessos = document
     .getElementById("processosChart")
     .getContext("2d");
 
-new Chart(ctxProcessos, {
+let processosChart = new Chart(ctxProcessos, {
     type: "bar",
     data: {
-        labels: ["10:00", "10:05", "10:10", "10:15", "10:20"],
+        labels: [],
         datasets: [
             {
                 label: "Processos em Execução",
-                data: [180, 190, 200, 215, 213],
+                data: [],
                 backgroundColor: "#16a34a",
-                borderRadius: 5      // deixa a barra bonitinha
+                borderRadius: 5
             }
         ]
     },
@@ -84,15 +81,32 @@ new Chart(ctxProcessos, {
         responsive: true,
         maintainAspectRatio: false,
         animation: false,
-
         scales: {
             y: {
                 beginAtZero: false,
-                title: {
-                    display: true,
-                    text: "Processos"
-                }
+                title: { display: true, text: "Processos" }
             }
         }
     }
 });
+
+
+async function atualizarGraficos() {
+
+    const dados = await getLeituras();
+
+    cpuLatenciaChart.data.labels = dados.map(d => d.hora);
+    cpuLatenciaChart.data.datasets[0].data = dados.map(d => d.cpu);
+    cpuLatenciaChart.data.datasets[1].data = dados.map(d => d.latencia);
+    cpuLatenciaChart.update();
+
+    processosChart.data.labels = dados.map(d => d.hora);
+    processosChart.data.datasets[0].data = dados.map(d => d.processos);
+    processosChart.update();
+}
+
+
+
+setInterval(atualizarGraficos, 5000);
+
+atualizarGraficos();
