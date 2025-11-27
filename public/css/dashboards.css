@@ -2230,3 +2230,8 @@ input:checked+.slider:before {
 .kpi-detail-btn i {
   font-size: 11px;
 }
+
+a {
+    text-decoration: none;
+    color: white;
+}
