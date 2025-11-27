@@ -226,7 +226,7 @@ router.post("/log-tentativa", async (req, res) => {
         
         res.json({ 
             success: true, 
-            message: 'Tentativa registrada com sucesso',
+            message: 'Tentativa de acesso não autorizado identificada!',
             ip: ip_origem,
             descricao: descricao
         });

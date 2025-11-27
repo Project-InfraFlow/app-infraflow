@@ -32,4 +32,13 @@ router.get("/logs-aws", function (req, res) {
     usuarioController.buscarLogsAWS(req, res);
 });
 
+
+router.post("/registrar-tentativa", function (req, res) {
+    usuarioController.registrarTentativaAtaque(req, res);
+});
+
+router.get("/estatisticas-seguranca", function (req, res) {
+    usuarioController.getEstatisticasSeguranca(req, res);
+});
+
 module.exports = router;

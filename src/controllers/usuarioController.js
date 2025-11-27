@@ -1,5 +1,7 @@
 var usuarioModel = require("../models/usuarioModel");
 
+let tentativasAtaque = 1;
+
 function autenticar(req, res) {
     var email = (req.body && (req.body.email || req.body.emailServer)) ? String(req.body.email || req.body.emailServer).trim() : undefined;
     var senha = (req.body && (req.body.senha || req.body.senhaServer)) ? req.body.senha || req.body.senhaServer : undefined;
@@ -16,11 +18,10 @@ function autenticar(req, res) {
             .then(function (resultadoAutenticar) {
                 if (Array.isArray(resultadoAutenticar) && resultadoAutenticar.length == 1) {
                     const r = resultadoAutenticar[0];
-                    // Resposta mantendo compatibilidade e entregando os IDs exigidos
                     res.json({
-                        id: r.id_usuario,                  // compatibilidade
-                        id_usuario: r.id_usuario,          // para sessionStorage.ID_USUARIO
-                        fk_empresa: r.id_empresa,          // para sessionStorage.ID_EMPRESA
+                        id: r.id_usuario,
+                        id_usuario: r.id_usuario,
+                        fk_empresa: r.id_empresa,
                         email: r.email,
                         nome: r.nome,
                         empresa: {
@@ -30,7 +31,7 @@ function autenticar(req, res) {
                         token: {
                             valor: r.token
                         },
-                        aquarios: [] // mantém seu shape antigo
+                        aquarios: []
                     });
                 } else if (Array.isArray(resultadoAutenticar) && resultadoAutenticar.length == 0) {
                     res.status(403).send("Email ou senha ou token inválido(s)");
@@ -133,7 +134,6 @@ function enviarCodigoReset(req, res) {
         res.status(400).send("O e-mail não foi fornecido!");
         return;
     }
-
 
     usuarioModel.verificarEmail(email)
         .then(function (resultadoConsulta) {
@@ -245,6 +245,33 @@ function buscarLogsAWS(req, res) {
     });
 }
 
+function registrarTentativaAtaque(req, res) {
+    try {
+        const { ip, rota, metodo } = req.body;
+        
+        tentativasAtaque++;
+        
+        console.log(`🚨 Tentativa de ataque registrada: ${ip} -> ${rota} (${metodo})`);
+        
+        res.json({
+            success: true,
+            tentativas: tentativasAtaque,
+            message: "Tentativa de acesso não autorizado identificada!"
+        });
+        
+    } catch (error) {
+        console.error("Erro ao registrar tentativa:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+function getEstatisticasSeguranca(req, res) {
+    res.json({
+        tentativasAtaque: tentativasAtaque,
+        status: "ativo"
+    });
+}
+
 module.exports = {
     autenticar,
     cadastrar,
@@ -252,5 +279,7 @@ module.exports = {
     cadastrarUser,
     pesquisarUser,
     enviarCodigoReset,
-    buscarLogsAWS
+    buscarLogsAWS,
+    registrarTentativaAtaque,
+    getEstatisticasSeguranca
 };

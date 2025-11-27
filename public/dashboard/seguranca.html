@@ -205,30 +205,46 @@
   <script src="../js/seguranca.js"></script>
 
   <script>
-    async function carregarLogsReais() {
-      try {
-        const response = await fetch('/usuarios/logs-aws');
-        const logs = await response.json();
+    // Variável para contador de tentativas
+let contadorTentativas = 1;
 
-        const logsContainer = document.getElementById('cyberLogs');
-        logsContainer.innerHTML = '';
+async function carregarDadosSeguranca() {
+  try {
+    // Busca estatísticas de segurança
+    const responseStats = await fetch('/usuarios/estatisticas-seguranca');
+    const stats = await responseStats.json();
+    
+    // Atualiza a KPI
+    contadorTentativas = stats.tentativasAtaque;
+    document.getElementById('tentativas-ataque').textContent = contadorTentativas;
+    
+    // Busca logs (mantém seu código original)
+    const responseLogs = await fetch('/usuarios/logs-aws');
+    const logs = await responseLogs.json();
 
-        logs.forEach(log => {
-          const logElement = document.createElement('div');
-          logElement.className = `log-item ${log.type}`;
-          logElement.innerHTML = `
-                <div class="log-time">${new Date(log.timestamp).toLocaleTimeString()}</div>
-                <div class="log-message">${log.message}</div>
-            `;
-          logsContainer.appendChild(logElement);
-        });
-      } catch (error) {
-        console.log('Erro ao carregar logs:', error);
-      }
-    }
+    const logsContainer = document.getElementById('cyberLogs');
+    logsContainer.innerHTML = '';
 
-    carregarLogsReais();
-    setInterval(carregarLogsReais, 5000);
+    logs.forEach(log => {
+      const logElement = document.createElement('div');
+      logElement.className = `log-item ${log.type}`;
+      logElement.innerHTML = `
+            <div class="log-time">${new Date(log.timestamp).toLocaleTimeString()}</div>
+            <div class="log-message">${log.message}</div>
+        `;
+      logsContainer.appendChild(logElement);
+    });
+    
+  } catch (error) {
+    console.log('Erro ao carregar dados:', error);
+    // Fallback - mantém o valor atual se der erro
+    document.getElementById('tentativas-ataque').textContent = contadorTentativas;
+  }
+}
+
+// Carrega dados a cada 3 segundos
+carregarDadosSeguranca();
+setInterval(carregarDadosSeguranca, 3000);
 
     const logStyles = `
 <style>
