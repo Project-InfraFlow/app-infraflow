@@ -28,5 +28,8 @@ router.post("/enviar-codigo-reset", function (req, res) {
     usuarioController.enviarCodigoReset(req, res); 
 });
 
+router.get("/logs-aws", function (req, res) {
+    usuarioController.buscarLogsAWS(req, res);
+});
 
 module.exports = router;
