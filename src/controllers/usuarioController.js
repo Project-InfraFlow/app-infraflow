@@ -161,30 +161,60 @@ function enviarCodigoReset(req, res) {
         });
 }
 
+
 function buscarLogsAWS(req, res) {
-    const { exec } = require('child_process');
-    
-    exec('tail -20 /var/log/auth.log', (error, stdout) => {
-        if (error) {
-            console.log('Logs reais indisponiveis, usando logs simulados...');
-            return enviarLogsSimulados(res);
+    // Tenta AWS CloudWatch PRIMEIRO
+    const AWS = require('aws-sdk');
+    const cloudwatchlogs = new AWS.CloudWatchLogs({
+        region: 'us-east-1', // Sua região
+        // As credenciais vêm do IAM Role da EC2 automaticamente
+    });
+
+    const params = {
+        logGroupName: 'auth-log',
+        limit: 20,
+        startTime: Date.now() - (60 * 60 * 1000) // Última hora
+    };
+
+    cloudwatchlogs.filterLogEvents(params, (err, data) => {
+        if (err) {
+            console.log('❌ AWS CloudWatch indisponível:', err.message);
+            console.log('🔄 Tentando logs locais...');
+            
+            const { exec } = require('child_process');
+            exec('tail -20 /var/log/auth.log', (error, stdout) => {
+                if (error) {
+                    console.log('❌ Logs locais indisponíveis, usando simulados...');
+                    return enviarLogsSimulados(res);
+                }
+                
+                const logs = processarLogsReais(stdout);
+                console.log(`✅ ${logs.length} logs locais enviados`);
+                res.json(logs);
+            });
+            return;
         }
-        
-        const logLines = stdout.split('\n').filter(line => line.trim());
-        
-        if (logLines.length === 0) {
-            return enviarLogsSimulados(res);
-        }
-        
-        const logs = logLines.slice(0, 15).map(line => ({
+
+        const logs = data.events.map(event => ({
+            timestamp: new Date(event.timestamp),
+            message: event.message.substring(0, 150),
+            type: classificarLog(event.message)
+        }));
+
+        console.log(`✅ ${logs.length} logs AWS CloudWatch enviados`);
+        res.json(logs);
+    });
+}
+
+function processarLogsReais(stdout) {
+    return stdout.split('\n')
+        .filter(line => line.trim())
+        .slice(0, 15)
+        .map(line => ({
             timestamp: new Date(),
             message: formatarLogReal(line),
             type: classificarLog(line)
         }));
-        
-        console.log(`${logs.length} logs reais enviados`);
-        res.json(logs);
-    });
 }
 
 function enviarLogsSimulados(res) {
@@ -208,31 +238,21 @@ function enviarLogsSimulados(res) {
         "System resource usage normal",
         "Security protocol enabled - 2FA",
         "Data encryption active - AES-256",
-        "Intrusion detection system online",
-        "VPN connection established",
-        "Security audit log generated",
-        "Access control list updated",
-        "Malware scan initiated",
-        "Network intrusion attempt blocked"
+        "Intrusion detection system online"
     ];
     
-    const tipos = ["info", "warning", "error"];
     const logs = [];
-    
-    // Gera 15-20 logs simulados
     const numLogs = Math.floor(Math.random() * 6) + 15;
     
     for (let i = 0; i < numLogs; i++) {
         logs.push({
-            timestamp: new Date(Date.now() - Math.random() * 3600000), // Última hora
+            timestamp: new Date(Date.now() - Math.random() * 3600000),
             message: eventos[Math.floor(Math.random() * eventos.length)],
-            type: tipos[Math.floor(Math.random() * tipos.length)]
+            type: Math.random() > 0.8 ? 'warning' : 'info'
         });
     }
     
-    // Ordena por timestamp (mais recente primeiro)
     logs.sort((a, b) => b.timestamp - a.timestamp);
-    
     console.log(`${logs.length} logs simulados enviados`);
     res.json(logs.slice(0, 20));
 }
@@ -241,9 +261,6 @@ function formatarLogReal(line) {
     if (line.includes('Accepted publickey')) return 'SSH login accepted';
     if (line.includes('Invalid user')) return 'Invalid user access attempt';
     if (line.includes('Failed password')) return 'Failed password authentication';
-    if (line.includes('session opened')) return 'User session initiated';
-    if (line.includes('Connection closed')) return 'Connection terminated';
-    if (line.includes('sudo')) return 'Privileged command executed';
     return line.substring(0, 120);
 }
 
