@@ -1182,6 +1182,10 @@ input:checked+.slider {
 
 input:checked+.slider:before {
     transform: translateX(20px);
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
 }
 
 .switch-label {
