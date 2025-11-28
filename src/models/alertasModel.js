@@ -64,8 +64,39 @@ function listarAlertas() {
     return database.executar(instrucaoSql);
 }
 
+function kpiStatusAndamento() {
+    const instrucaoSql = `
+        SELECT
+            SUM(dt_abertura IS NULL) AS sem_abertura,
+            COUNT(*) AS total_alertas
+        FROM alerta
+    `;
+    return database.executar(instrucaoSql);
+}
+
+
+
+// gráficos
+
+function kpiAlertasPorComponente() {
+    const sql = `
+        SELECT 
+            c.nome_componente AS componente,
+            COUNT(a.id_alerta) AS total
+        FROM alerta a
+        JOIN leitura l ON a.fk_id_leitura = l.id_leitura
+        JOIN componente c ON l.fk_id_componente = c.id_componente
+        WHERE l.data_hora_captura >= NOW() - INTERVAL 24 HOUR
+        GROUP BY c.nome_componente
+        ORDER BY c.nome_componente;
+    `;
+    return database.executar(sql);
+}
+
 module.exports = {
     kpiAlertasTotais, 
     kpiAtencao, 
-    kpiCritico
+    kpiCritico, 
+    kpiStatusAndamento, 
+    kpiAlertasPorComponente
 }

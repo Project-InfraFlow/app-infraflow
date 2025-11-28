@@ -20,6 +20,7 @@ var alertaRouter = require("./src/routes/alertas-route");
 var redeRouter = require("./src/routes/redeRoute");
 var latenciaRouter = require("./src/routes/latencia");
 var iaRouter = require("./src/routes/ia");
+var discoRouter = require("./src/routes/disco.js");
 
 var app = express();
 app.use(express.json());
@@ -36,7 +37,9 @@ app.use("/empresas", empresasRouter);
 app.use("/api/seguranca", segurancaRouter);
 app.use("/api/memoria", memoriaRouter);
 
-app.use("/alertas-route", alertaRouter);
+app.use("/api/disco", discoRouter);
+
+// app.use("/alertas-route", alertaRouter);
 app.use("/redeRoute", redeRouter);
 app.use("/api", latenciaRouter);
 

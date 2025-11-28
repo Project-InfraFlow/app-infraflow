@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfraFlow - Sistema de Monitoramento</title>
+    <link rel="stylesheet" href="../css/dash_disco.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <aside class="sidebar">
+
+            <nav class="nav">
+                <button data-view="overview" class="nav-item active">
+                    <i class="fas fa-gauge"></i>
+                    <a href="./dashboard.html"><span>Painel</span></a>
+                </button>
+                <button data-view="monitor" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <a href="./dashboard.html#view-monitor"><span>Monitoramento</span></a>
+                </button>
+                <button data-view="cadastro" class="nav-item">
+                    <i class="fas fa-pen-to-square"></i>
+                   <a href="./dashboard.html#view-cadastro"><span>Cadastro</span></a> 
+                </button>
+                <button data-view="historico" class="nav-item">
+                    <i class="fas fa-clock-rotate-left"></i>
+                    <a href="./dashboard-alertas.html"><span>Histórico de Alertas</span></a>
+                </button>
+            </nav>
+
+            <div class="divider"></div>
+
+            <div class="user-section">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="sidebarUser">Admin</span>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </aside>
+
+
+        <div class="main-area">
+            <header class="topbar">
+
+                <div class="brand">
+                    <img src="../assets/infra-parafundobranco.png" alt="">
+                </div>
+                <div class="topbar-left">
+                    <div class="machine-select">
+                        <i class="fas fa-server"></i>
+                        <label for="edgeSelector"
+                            style="display:block; font-size:14px; margin-bottom:4px; color: gray;">
+                            Selecione um pórtico FreeFlow:
+                        </label>
+                        <select id="edgeSelector">
+                            <option value="1">INFRA-EDGE-01-Itápolis (SP-333)</option>
+                            <option value="2">INFRA-EDGE-02-Jaboticabal (SP-333)</option>
+                            <option value="3">INFRA-EDGE-03-São José dos Campos (SP-099)</option>
+                            <option value="4">INFRA-EDGE-04-Itaguaí (Km 414)</option>
+                        </select>
+                    </div>
+                    <div class="os-info">
+                        <i class="fab fa-ubuntu"></i>
+                        <span>Ubuntu 22.04 LTS</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Online</span>
+                    </div>
+                    <div class="last-update">
+                        <span class="update-label">Última atualização:</span>
+                        <span class="update-time" id="lastUpdateTime">--:--:--</span>
+                    </div>
+                </div>
+            </header>
+
+
+            <main class="content">
+
+                <div class="view-content active" data-view-content="overview">
+                    <div class="view-header">
+                        <h1 class="view-title">
+                            <i class="fas fa-memory"></i>
+                            Painel de Monitoramento detalhado de disco
+                        </h1>
+                    </div>
+
+                    <div class="kpis-grid">
+                        <div class="kpi-card" id="kpiMemoriaUso">
+                            <div class="kpi-header">
+                                <div class="kpi-icon memoria">
+                                    <i class="fas fa-percent"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span class="kpi-label">Uso do disco atual</span>
+                                </div>
+                            </div>
+                            <div class="kpi-value" id="kpiMemoriaUsoValue">0%</div>
+                            <div class="kpi-progress">
+                                <div class="progress-bar memoria" id="memoriaUsoProgress"></div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card" id="kpiMemoriaLivre">
+                            <div class="kpi-header">
+                                <div class="kpi-icon memoria">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span class="kpi-label">Porcentagem livre do disco</span>
+                                </div>
+                            </div>
+                            <div class="kpi-value" id="kpiMemoriaLivreValue">0 GB</div>
+                            <div class="kpi-progress">
+                                <div class="progress-bar memoria" id="memoriaLivreProgress"></div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card" id="kpiMemoriaTotal">
+                            <div class="kpi-header">
+                                <div class="kpi-icon memoria">
+                                    <i class="fas fa-microchip"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span class="kpi-label">Tendência de uso</span>
+                                </div>
+                            </div>
+                            <div class="kpi-value" id="kpiMemoriaTotalValue">0 GB</div>
+                            <div class="kpi-progress">
+                                <div class="progress-bar memoria" id="memoriaTotalProgress"></div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card" id="kpiMemoriaAlerta">
+                            <div class="kpi-header">
+                                <div class="kpi-icon memoria">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span class="kpi-label">Alertas Críticos (Última Hora)</span>
+                                </div>
+                            </div>
+                            <div class="kpi-value kpi-alert" id="kpiMemoriaAlertaValue">0</div>
+                            <div class="kpi-progress">
+                                <div class="progress-bar memoria" id="memoriaAlertaProgress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="status-and-legend-container">
+
+    <!-- ESQUERDA – PARÂMETROS -->
+    <div class="legend-card" style="height: 20%;"">
+        <h3 class="legend-title">
+            <i class="fas fa-circle-info"></i> Parâmetros de Alerta
+        </h3>
+        <table class="legend-table">
+            <thead>
+                <tr>
+                    <th>Componente</th>
+                    <th>Utilização saudável</th>
+                    <th>Alta utilização <small>(monitorar)*</small></th>
+                    <th>Saturação <small>(crítico)</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Memória RAM (%)</td>
+                    <td>40% – 53%</td>
+                    <td><span class="pill warn">54% – 83%</span></td>
+                    <td><span class="pill crit">&gt; 84%</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DIREITA – INFORMAÇÕES DE LATÊNCIA -->
+    <div class="legend-card">
+        <h3 class="legend-title">
+            <i class="fas fa-tachometer-alt"></i> Informações de Latência do Disco
+        </h3>
+
+        <table class="legend-table">
+            <thead>
+                <tr>
+                    <th>Métrica</th>
+                    <th>Valor saudável</th>
+                    <th>Alerta</th>
+                    <th>Crítico</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Latência de leitura (ms)</td>
+                    <td>0 – 5ms</td>
+                    <td><span class="pill warn">5 – 15ms</span></td>
+                    <td><span class="pill crit">&gt; 15ms</span></td>
+                </tr>
+                <tr>
+                    <td>Latência de escrita (ms)</td>
+                    <td>0 – 5ms</td>
+                    <td><span class="pill warn">5 – 15ms</span></td>
+                    <td><span class="pill crit">&gt; 15ms</span></td>
+                </tr>
+                <tr>
+                    <td>Latência total (ms)</td>
+                    <td>0 – 5ms</td>
+                    <td><span class="pill warn">5 – 15ms</span></td>
+                    <td><span class="pill crit">&gt; 15ms</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+                    <div class="charts">
+                        <div class="chart-box" style="height: 100%; margin-top: -10%;">
+                            <h3><i class="fas fa-chart-line"></i>Utilização do disco em tempo real</h3>
+                            <canvas id="grafico_memoria_uso"></canvas>
+                        </div>
+                        <div class="chart-box">
+                            <h3><i class="fas fa-chart-bar"></i>Aplicações que mais consomem espaço</h3>
+                            <canvas id="grafico_memoria_status"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="view-content hidden" data-view-content="monitor">
+                    <div class="view-header">
+                        <h1 class="view-title">
+                            <i class="fas fa-chart-line"></i> Monitoramento (Histórico de Registros)
+                        </h1>
+                    </div>
+                    <div class="table-section">
+                        <div class="table-header">
+                            <h3 class="table-title">
+                                <i class="fas fa-table"></i> Últimas Leituras
+                            </h3>
+                            <div class="table-actions">
+                                <button id="exportMonitorCsv" class="btn btn-export">
+                                    <i class="fas fa-download"></i> Exportar CSV
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-container monitor-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-server"></i> Pórtico</th>
+                                        <th><i class="fas fa-percent"></i> Uso RAM (%)</th>
+                                        <th><i class="fas fa-check-circle"></i> RAM Livre (GB)</th>
+                                        <th><i class="fas fa-microchip"></i> RAM Total (GB)</th>
+                                        <th><i class="fas fa-clock"></i> Horário</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="monitorTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view-content hidden" data-view-content="especificacao">
+                    <div class="view-header">
+                        <h1 class="view-title">
+                            <i class="fas fa-cogs"></i>
+                            Especificação Técnica - Pórticos FreeFlow
+                        </h1>
+                    </div>
+
+                    <div class="specs-grid">
+                        <div class="specs-card">
+                            <div class="specs-header">
+                                <i class="fas fa-microchip"></i>
+                                <h3>Hardware - Controlador de Pórtico</h3>
+                            </div>
+                            <div class="specs-content">
+                                <div class="spec-item">
+                                    <span class="spec-label">Processador:</span>
+                                    <span class="spec-value">Intel Xeon E-2336 (6 cores, 12 threads)</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Memória RAM:</span>
+                                    <span class="spec-value">32GB DDR4 ECC 3200MHz</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Armazenamento:</span>
+                                    <span class="spec-value">SSD NVMe 1TB + HDD 4TB</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Rede:</span>
+                                    <span class="spec-value">Dual 10GbE SFP+ + Quad Gigabit</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Conectividade:</span>
+                                    <span class="spec-value">4G/LTE + Wi-Fi 6 + GPS RTK</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="specs-card">
+                            <div class="specs-header">
+                                <i class="fas fa-satellite-dish"></i>
+                                <h3>Sensores & Dispositivos</h3>
+                            </div>
+                            <div class="specs-content">
+                                <div class="spec-item">
+                                    <span class="spec-label">Câmeras ANPR:</span>
+                                    <span class="spec-value">8MP com IR @ 60fps</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">RFID/DSRC:</span>
+                                    <span class="spec-value">Antenas 5.8GHz DSRC</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Sensores:</span>
+                                    <span class="spec-value">LiDAR + Loops Indutivos</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Processamento IA:</span>
+                                    <span class="spec-value">NVIDIA Jetson Orin</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="specs-card">
+                            <div class="specs-header">
+                                <i class="fas fa-desktop"></i>
+                                <h3>Software & Sistemas</h3>
+                            </div>
+                            <div class="specs-content">
+                                <div class="spec-item">
+                                    <span class="spec-label">Sistema Operacional:</span>
+                                    <span class="spec-value">Ubuntu Server 22.04 LTS</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Containerização:</span>
+                                    <span class="spec-value">Docker + Kubernetes</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Banco de Dados:</span>
+                                    <span class="spec-value">PostgreSQL + Redis</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Monitoramento:</span>
+                                    <span class="spec-value">Prometheus + Grafana</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="specs-card">
+                            <div class="specs-header">
+                                <i class="fas fa-chart-bar"></i>
+                                <h3>Performance</h3>
+                            </div>
+                            <div class="specs-content">
+                                <div class="spec-item">
+                                    <span class="spec-label">Veículos/Hora:</span>
+                                    <span class="spec-value">Até 4.000 por faixa</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Reconhecimento:</span>
+                                    <span class="spec-value">&lt; 80ms por placa</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Uptime:</span>
+                                    <span class="spec-value">99.99% (52min/ano)</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Temperatura:</span>
+                                    <span class="spec-value">-25°C a 55°C</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="specs-card full-width">
+                            <div class="specs-header">
+                                <i class="fas fa-memory"></i>
+                                <h3>Gestão de Memória RAM</h3>
+                            </div>
+                            <div class="specs-content">
+                                <div class="memory-usage-info">
+                                    <div class="usage-category">
+                                        <h4>Alocação de Memória:</h4>
+                                        <ul>
+                                            <li><strong>Motor ANPR/OCR:</strong> 8-10GB - Processamento com IA</li>
+                                            <li><strong>Banco em Memória:</strong> 6-8GB - Cache de transações</li>
+                                            <li><strong>Buffer de Vídeo:</strong> 4-6GB - Frames HD</li>
+                                            <li><strong>Serviços DSRC:</strong> 2-3GB - Comunicação</li>
+                                            <li><strong>Sistema Operacional:</strong> 3-4GB - Kernel RT</li>
+                                        </ul>
+                                    </div>
+                                    <div class="usage-category">
+                                        <h4>Otimizações:</h4>
+                                        <ul>
+                                            <li><strong>Alocação Dinâmica:</strong> Ajuste por fluxo veicular</li>
+                                            <li><strong>Cache Inteligente:</strong> 2GB para placas frequentes</li>
+                                            <li><strong>Compressão LZ4:</strong> 70% redução em buffers</li>
+                                            <li><strong>Swap Otimizado:</strong> ZRAM + SSD NVMe</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view-content hidden" data-view-content="historico">
+                    <div class="view-header">
+                        <h1 class="view-title">
+                            <i class="fas fa-clock-rotate-left"></i>
+                            Histórico de Alertas de Memória RAM
+                        </h1>
+                    </div>
+                    <div class="table-section">
+                        <div class="table-header">
+                            <h3 class="table-title">
+                                <i class="fas fa-list-check"></i> Alertas de Saturação (Crítico)
+                            </h3>
+                            <div class="table-actions">
+                                <button id="exportHistoricoCsv" class="btn btn-export">
+                                    <i class="fas fa-download"></i> Exportar CSV
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-container historico-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-server"></i> Pórtico</th>
+                                        <th><i class="fas fa-bell"></i> Alerta</th>
+                                        <th><i class="fas fa-percent"></i> Uso RAM (%)</th>
+                                        <th><i class="fas fa-calendar"></i> Data e Hora</th>
+                                        <th><i class="fas fa-clipboard-list"></i> Ação Tomada</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historicoTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+   
+</body>
+
+</html>

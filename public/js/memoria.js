@@ -1,16 +1,16 @@
 let ID_MAQUINA = 1;
 let updateInterval;
-let graficoMemoriaUso, graficoMemoriaStatus;
+let graficoDiscoUso, graficoDiscoStatus;
 
 const elements = {
-    kpiMemoriaUsoValue: document.getElementById('kpiMemoriaUsoValue'),
-    memoriaUsoProgress: document.getElementById('memoriaUsoProgress'),
-    kpiMemoriaLivreValue: document.getElementById('kpiMemoriaLivreValue'),
-    memoriaLivreProgress: document.getElementById('memoriaLivreProgress'),
-    kpiMemoriaTotalValue: document.getElementById('kpiMemoriaTotalValue'),
-    memoriaTotalProgress: document.getElementById('memoriaTotalProgress'),
-    kpiMemoriaAlertaValue: document.getElementById('kpiMemoriaAlertaValue'),
-    memoriaAlertaProgress: document.getElementById('memoriaAlertaProgress'),
+    kpiDiscoUsoValue: document.getElementById('kpiMemoriaUsoValue'),
+    discoUsoProgress: document.getElementById('memoriaUsoProgress'),
+    kpiDiscoLivreValue: document.getElementById('kpiMemoriaLivreValue'),
+    discoLivreProgress: document.getElementById('memoriaLivreProgress'),
+    kpiDiscoTotalValue: document.getElementById('kpiMemoriaTotalValue'),
+    discoTotalProgress: document.getElementById('memoriaTotalProgress'),
+    kpiDiscoAlertaValue: document.getElementById('kpiMemoriaAlertaValue'),
+    discoAlertaProgress: document.getElementById('memoriaAlertaProgress'),
     lastUpdateTime: document.getElementById('lastUpdateTime'),
     monitorTableBody: document.getElementById('monitorTableBody'),
     historicoTableBody: document.getElementById('historicoTableBody'),
@@ -19,12 +19,12 @@ const elements = {
 
 function inicializarGraficos() {
     const ctxLinha = document.getElementById('grafico_memoria_uso').getContext('2d');
-    graficoMemoriaUso = new Chart(ctxLinha, {
+    graficoDiscoUso = new Chart(ctxLinha, {
         type: 'line',
         data: {
             labels: [],
             datasets: [{
-                label: 'Uso de Memória RAM (%)',
+                label: 'Uso de Disco (%)',
                 data: [],
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -39,23 +39,17 @@ function inicializarGraficos() {
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: { display: true, text: 'Uso (%)' }
-                },
-                x: {
-                    grid: { display: false }
-                }
+                y: { beginAtZero: true, max: 100 },
+                x: { grid: { display: false } }
             }
         }
     });
 
     const ctxStatus = document.getElementById('grafico_memoria_status').getContext('2d');
-    graficoMemoriaStatus = new Chart(ctxStatus, {
+    graficoDiscoStatus = new Chart(ctxStatus, {
         type: 'doughnut',
         data: {
-            labels: ['Utilizada', 'Livre'],
+            labels: ['Utilizado', 'Livre'],
             datasets: [{
                 data: [0, 100],
                 backgroundColor: ['#059669', '#d1fae5'],
@@ -66,16 +60,7 @@ function inicializarGraficos() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'right' },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            return `${context.label}: ${context.parsed}%`;
-                        }
-                    }
-                }
-            },
+            plugins: { legend: { position: 'right' } },
             cutout: '75%',
         }
     });
@@ -89,24 +74,17 @@ function configurarNavegacao() {
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
 
-            document.querySelectorAll('.view-content').forEach(view => {
-                view.classList.add('hidden');
-            });
+            document.querySelectorAll('.view-content').forEach(view => view.classList.add('hidden'));
 
             const selectedView = document.querySelector(`[data-view-content="${viewName}"]`);
+
             if (selectedView) {
                 selectedView.classList.remove('hidden');
 
                 switch (viewName) {
-                    case 'overview':
-                        carregarDadosOverview();
-                        break;
-                    case 'monitor':
-                        carregarDadosMonitor();
-                        break;
-                    case 'historico':
-                        carregarAlertasHistorico();
-                        break;
+                    case 'overview': carregarDadosOverview(); break;
+                    case 'monitor': carregarDadosMonitor(); break;
+                    case 'historico': carregarAlertasHistorico(); break;
                 }
             }
         });
@@ -115,318 +93,172 @@ function configurarNavegacao() {
 
 async function carregarDadosOverview() {
     try {
-        console.log('Carregando dados overview para máquina', ID_MAQUINA);
-        const response = await fetch(`/api/memoria/detalhes/${ID_MAQUINA}`);
+        const response = await fetch(`/api/disco/detalhes/${ID_MAQUINA}`);
         
-        if (!response.ok) {
-            if (response.status === 404) {
-                console.warn('Dados não encontrados para máquina', ID_MAQUINA);
-                elements.kpiMemoriaUsoValue.textContent = 'N/D';
-                elements.kpiMemoriaLivreValue.textContent = 'N/D';
-                elements.kpiMemoriaTotalValue.textContent = '32 GB';
-                return;
-            }
-            throw new Error('Erro na resposta da API: ' + response.status);
-        }
-        
-        const dados = await response.json();
-        
-        if (dados.error) {
-            console.error('Erro nos dados:', dados.error);
-            elements.kpiMemoriaUsoValue.textContent = 'Erro';
-            return;
-        }
+        if (!response.ok) throw new Error('Erro API');
 
-        console.log('Dados recebidos:', dados);
+        const dados = await response.json();
+
         atualizarKPIs(dados);
         atualizarGraficos(dados);
         atualizarUltimaAtualizacao();
-        
+
     } catch (error) {
-        console.error('Erro ao carregar dados overview:', error);
-        elements.kpiMemoriaUsoValue.textContent = 'Erro';
+        console.error('Erro ao carregar dados overview (disco):', error);
+        elements.kpiDiscoUsoValue.textContent = 'N/D';
     }
 }
 
 async function carregarDadosMonitor() {
     try {
-        const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=50`);
-        
-        if (!response.ok) {
-            if (response.status === 404) {
-                elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado histórico disponível</td></tr>';
-                return;
-            }
-            throw new Error('Erro na resposta da API');
-        }
-        
+        const response = await fetch(`/api/disco/historico/${ID_MAQUINA}?limite=50`);
+
+        if (!response.ok) throw new Error('Erro API');
+
         const dados = await response.json();
-        
-        if (dados.error) {
-            elements.monitorTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${dados.error}</td></tr>`;
+        if (!dados.length) {
+            elements.monitorTableBody.innerHTML = '<tr><td colspan="5">Nenhum dado encontrado</td></tr>';
             return;
         }
 
-        if (dados.length > 0) {
-            atualizarTabelaMonitor(dados);
-        } else {
-            elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado encontrado</td></tr>';
-        }
-        
+        atualizarTabelaMonitor(dados);
+
     } catch (error) {
-        console.error('Erro ao carregar dados do monitor:', error);
-        elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Erro ao carregar dados</td></tr>';
+        console.error('Erro ao monitorar disco:', error);
     }
 }
 
 async function carregarAlertasHistorico() {
     try {
-        const response = await fetch(`/api/memoria/alertas/${ID_MAQUINA}?horas=24`);
-        
-        if (!response.ok) {
-            if (response.status === 404) {
-                elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum alerta encontrado</td></tr>';
-                elements.kpiMemoriaAlertaValue.textContent = '0';
-                elements.memoriaAlertaProgress.style.width = '0%';
-                return;
-            }
-            throw new Error('Erro na resposta da API');
-        }
-        
+        const response = await fetch(`/api/disco/alertas/${ID_MAQUINA}?horas=24`);
+
+        if (!response.ok) throw new Error('Erro API');
+
         const alertas = await response.json();
-        
-        if (alertas.error) {
-            elements.historicoTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${alertas.error}</td></tr>`;
-            elements.kpiMemoriaAlertaValue.textContent = '0';
-            elements.memoriaAlertaProgress.style.width = '0%';
+
+        if (!alertas.length) {
+            elements.kpiDiscoAlertaValue.textContent = '0';
+            elements.discoAlertaProgress.style.width = '0%';
             return;
         }
 
-        if (alertas.length > 0) {
-            atualizarTabelaAlertas(alertas);
-            elements.kpiMemoriaAlertaValue.textContent = alertas.length;
-            elements.memoriaAlertaProgress.style.width = `${Math.min(alertas.length * 10, 100)}%`;
-        } else {
-            elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum alerta encontrado</td></tr>';
-            elements.kpiMemoriaAlertaValue.textContent = '0';
-            elements.memoriaAlertaProgress.style.width = '0%';
-        }
+        atualizarTabelaAlertas(alertas);
+
+        elements.kpiDiscoAlertaValue.textContent = alertas.length;
+        elements.discoAlertaProgress.style.width =
+            `${Math.min(alertas.length * 10, 100)}%`;
+
     } catch (error) {
-        console.error('Erro ao carregar alertas:', error);
-        elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Erro ao carregar alertas</td></tr>';
-        elements.kpiMemoriaAlertaValue.textContent = '0';
-        elements.memoriaAlertaProgress.style.width = '0%';
+        console.error('Erro ao carregar alertas disco:', error);
     }
 }
 
 function atualizarKPIs(dados) {
-    elements.kpiMemoriaUsoValue.textContent = `${dados.uso_percent.toFixed(1)}%`;
-    elements.memoriaUsoProgress.style.width = `${dados.uso_percent}%`;
+    elements.kpiDiscoUsoValue.textContent = `${dados.uso_percent.toFixed(1)}%`;
+    elements.discoUsoProgress.style.width = `${dados.uso_percent}%`;
 
-    elements.kpiMemoriaLivreValue.textContent = `${dados.livre_gb} GB`;
-    elements.memoriaLivreProgress.style.width = `${(dados.livre_gb / dados.total_gb) * 100}%`;
+    elements.kpiDiscoLivreValue.textContent = `${dados.livre_gb} GB`;
+    elements.discoLivreProgress.style.width =
+        `${(dados.livre_gb / dados.total_gb) * 100}%`;
 
-    elements.kpiMemoriaTotalValue.textContent = `${dados.total_gb} GB`;
-    elements.memoriaTotalProgress.style.width = '100%';
+    elements.kpiDiscoTotalValue.textContent = `${dados.total_gb} GB`;
+    elements.discoTotalProgress.style.width = '100%';
 
     atualizarCoresKPIs(dados.uso_percent);
 }
 
 function atualizarCoresKPIs(usoPercent) {
-    const kpiUso = document.getElementById('kpiMemoriaUso');
-    const progressBar = elements.memoriaUsoProgress;
+    const card = document.getElementById('kpiMemoriaUso');
+    const bar = elements.discoUsoProgress;
 
-    kpiUso.classList.remove('status-normal', 'status-warning', 'status-critical');
-    progressBar.classList.remove('status-normal', 'status-warning', 'status-critical');
+    card.classList.remove('status-normal', 'status-warning', 'status-critical');
+    bar.classList.remove('status-normal', 'status-warning', 'status-critical');
 
-    if (usoPercent <= 53) {
-        kpiUso.classList.add('status-normal');
-        progressBar.classList.add('status-normal');
-    } else if (usoPercent <= 83) {
-        kpiUso.classList.add('status-warning');
-        progressBar.classList.add('status-warning');
+    if (usoPercent <= 70) {
+        card.classList.add('status-normal');
+        bar.classList.add('status-normal');
+    } else if (usoPercent <= 90) {
+        card.classList.add('status-warning');
+        bar.classList.add('status-warning');
     } else {
-        kpiUso.classList.add('status-critical');
-        progressBar.classList.add('status-critical');
+        card.classList.add('status-critical');
+        bar.classList.add('status-critical');
     }
 }
 
 function atualizarGraficos(dados) {
-    graficoMemoriaStatus.data.datasets[0].data = [dados.uso_percent, 100 - dados.uso_percent];
-    graficoMemoriaStatus.update('none');
+    graficoDiscoStatus.data.datasets[0].data = [
+        dados.uso_percent,
+        100 - dados.uso_percent
+    ];
 
+    graficoDiscoStatus.update('none');
     atualizarGraficoLinha();
 }
 
 async function atualizarGraficoLinha() {
     try {
-        const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=30`);
-        
-        if (!response.ok) {
-            console.warn('Erro ao buscar histórico para gráfico');
-            return;
-        }
-        
-        const historico = await response.json();
-        
-        if (historico.error) {
-            console.warn('Erro nos dados do histórico:', historico.error);
-            return;
-        }
+        const response = await fetch(`/api/disco/historico/${ID_MAQUINA}?limite=30`);
+        if (!response.ok) return;
 
-        if (historico.length > 0) {
-            const dadosUso = historico.map(item => item.uso_percent);
-            const labels = historico.map(item => 
-                new Date(item.data_hora_captura).toLocaleTimeString('pt-BR')
-            );
-            
-            graficoMemoriaUso.data.labels = labels;
-            graficoMemoriaUso.data.datasets[0].data = dadosUso;
-            graficoMemoriaUso.update('none');
-            console.log('Gráfico de linha atualizado com', historico.length, 'pontos');
-        }
-    } catch (error) {
-        console.error('Erro ao tentar atualizar gráfico de linha:', error);
+        const historico = await response.json();
+        if (!historico.length) return;
+
+        graficoDiscoUso.data.labels = historico.map(h =>
+            new Date(h.data_hora_captura).toLocaleTimeString('pt-BR')
+        );
+        graficoDiscoUso.data.datasets[0].data = historico.map(h => h.uso_percent);
+
+        graficoDiscoUso.update('none');
+
+    } catch (e) {
+        console.error('Erro histórico disco:', e);
     }
 }
 
 function atualizarTabelaMonitor(dados) {
-    const tbody = elements.monitorTableBody;
-    tbody.innerHTML = '';
+    elements.monitorTableBody.innerHTML = '';
 
-    const nomesMaquinas = {
+    const nomes = {
         1: "INFRA-EDGE-01-Itápolis (SP-333)",
-        2: "INFRA-EDGE-02-Jaboticabal (SP-333)", 
+        2: "INFRA-EDGE-02-Jaboticabal (SP-333)",
         3: "INFRA-EDGE-03-São José dos Campos (SP-099)",
-        4: "INFRA-EDGE-04-Itaguaí (Km 414)"
+        4: "INFRA-EDGE-04-Itaguaí (Km 414)",
     };
 
-    const dadosOrdenados = dados.sort((a, b) => 
-        new Date(b.data_hora_captura) - new Date(a.data_hora_captura)
-    );
+    dados.sort((a, b) => new Date(b.data_hora_captura) - new Date(a.data_hora_captura));
 
-    dadosOrdenados.forEach(item => {
-        const nomeMaquina = nomesMaquinas[item.id_maquina] || `Máquina ${item.id_maquina}`;
-        
-        const row = `
+    dados.forEach(item => {
+        elements.monitorTableBody.innerHTML += `
         <tr>
-            <td>${nomeMaquina}</td>
+            <td>${nomes[item.id_maquina]}</td>
             <td>${item.uso_percent.toFixed(1)}%</td>
-            <td>${item.memoria_livre_gb} GB</td>
-            <td>${item.memoria_total_gb} GB</td>
+            <td>${item.livre_gb} GB</td>
+            <td>${item.total_gb} GB</td>
             <td>${new Date(item.data_hora_captura).toLocaleString('pt-BR')}</td>
-        </tr>
-    `;
-        tbody.innerHTML += row;
-    });
-}
-
-function atualizarTabelaMonitor(dados) {
-    const tbody = elements.monitorTableBody;
-    tbody.innerHTML = '';
-
-    const nomesMaquinas = {
-        1: "INFRA-EDGE-01-Itápolis (SP-333)",
-        2: "INFRA-EDGE-02-Jaboticabal (SP-333)", 
-        3: "INFRA-EDGE-03-São José dos Campos (SP-099)",
-        4: "INFRA-EDGE-04-Itaguaí (Km 414)"
-    };
-
-    const dadosOrdenados = dados.sort((a, b) => 
-        new Date(b.data_hora_captura) - new Date(a.data_hora_captura)
-    );
-
-    dadosOrdenados.forEach(item => {
-        const nomeMaquina = nomesMaquinas[item.id_maquina] || `Máquina ${item.id_maquina}`;
-        
-        const row = `
-        <tr>
-            <td>${nomeMaquina}</td>
-            <td>${item.uso_percent.toFixed(1)}%</td>
-            <td>${item.memoria_livre_gb} GB</td>
-            <td>${item.memoria_total_gb} GB</td>
-            <td>${new Date(item.data_hora_captura).toLocaleString('pt-BR')}</td>
-        </tr>
-    `;
-        tbody.innerHTML += row;
+        </tr>`;
     });
 }
 
 function atualizarUltimaAtualizacao() {
-    const now = new Date();
-    elements.lastUpdateTime.textContent = now.toLocaleTimeString('pt-BR');
+    elements.lastUpdateTime.textContent =
+        new Date().toLocaleTimeString('pt-BR');
 }
 
-function iniciarAtualizacaoAutomatica() {
-    console.log('Iniciando atualização dos daods que estão sendo inseridos no banco de dados');
-    carregarDadosOverview();
-    carregarAlertasHistorico();
-    updateInterval = setInterval(() => {
-        console.log('Atualizando dados...', new Date().toLocaleTimeString());
-        carregarDadosOverview();
-        const now = new Date();
-        if (now.getSeconds() % 30 === 0) {
-            carregarAlertasHistorico();
-        }
-    }, 2000); 
-}
-
-function configurarEventos() {
-    elements.edgeSelector.addEventListener('change', function () {
-        ID_MAQUINA = this.value;
-        carregarDadosOverview();
-        if (document.querySelector('[data-view-content="monitor"]').classList.contains('hidden') === false) {
-            carregarDadosMonitor();
-        }
-        if (document.querySelector('[data-view-content="historico"]').classList.contains('hidden') === false) {
-            carregarAlertasHistorico();
-        }
-    });
-
-    document.getElementById('exportMonitorCsv')?.addEventListener('click', exportarCSVMonitor);
-    document.getElementById('exportHistoricoCsv')?.addEventListener('click', exportarCSVHistorico);
-}
-
-function exportarCSVMonitor() {
-    const rows = [['Pórtico', 'Uso RAM (%)', 'RAM Livre (GB)', 'RAM Total (GB)', 'Horário']];
-    const tableRows = elements.monitorTableBody.querySelectorAll('tr');
-    
-    tableRows.forEach(row => {
-        const cols = row.querySelectorAll('td');
-        if (cols.length === 5) {
-            rows.push([
-                cols[0].textContent,
-                cols[1].textContent,
-                cols[2].textContent,
-                cols[3].textContent,
-                cols[4].textContent
-            ]);
-        }
-    });
-
-    const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "monitor_memoria.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-function exportarCSVHistorico() {
-    alert('Funcionalidade de exportação em desenvolvimento');
-}
-
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     inicializarGraficos();
     configurarNavegacao();
-    configurarEventos();
     iniciarAtualizacaoAutomatica();
+    configurarEventos();
 });
 
-window.addEventListener('beforeunload', function() {
-    if (updateInterval) {
-        clearInterval(updateInterval);
-    }
-});
+function iniciarAtualizacaoAutomatica() {
+    carregarDadosOverview();
+    carregarAlertasHistorico();
+
+    updateInterval = setInterval(() => {
+        carregarDadosOverview();
+    }, 2000);
+}
+
+window.addEventListener('beforeunload', () => clearInterval(updateInterval));
