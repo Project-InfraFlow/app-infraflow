@@ -281,13 +281,14 @@ chart.render();
 // KPIS DA DASH 
 
 function kpiAlertasTotais() {
-  fetch('/usuarios/kpiAlertasTotais', {
+  fetch('/alertas-route/kpiAlertasTotais', {
     method: "GET"
   }).then(res => res.json())
     .then(function (resultado) {
-      var kpi = document.getElementById('num-kpi-users')
-      var users = resultado[0].usuarios
-      kpi.innerHTML = `<p>${users}</p>`
+      console.log("oiiiiii")
+      var kpitotal = document.getElementById('total-alertas')
+      var alertasTotais = resultado[0].alertasTotais
+      kpitotal.innerHTML = `<p>${alertasTotais}<p>`
 
     })
 }
