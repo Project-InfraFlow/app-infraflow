@@ -37,12 +37,13 @@ router.get('/', async function (req, res) {
             });
         }
 
+
         const dados = resultado.map(r => ({
             horario: r.horario,
             hora: new Date(r.horario).toLocaleTimeString("pt-BR"),
-            cpu: r.cpu,
-            cpuIdle: r.cpu_idle,
-            processos: r.processos
+            cpu: Number(r.cpu) || 0,
+            cpuIdle: Number(r.cpu_idle) || 0,
+            processos: Number(r.processos) || 0
         })).reverse();
 
         const ultimo = dados[dados.length - 1];

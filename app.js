@@ -8,6 +8,7 @@ var express = require("express");
 var cors = require("cors");
 var path = require("path");
 
+var cpuRouter = require("./src/routes/cpu");
 var leiturasRouter = require("./src/routes/leituras");
 var indexRouter = require("./src/routes/index");
 var usuarioRouter = require("./src/routes/usuarios");
@@ -36,6 +37,7 @@ app.use("/medidas", medidasRouter);
 app.use("/empresas", empresasRouter);
 app.use("/api/seguranca", segurancaRouter);
 app.use("/api/memoria", memoriaRouter);
+app.use("/api/cpu", cpuRouter);
 
 app.use("/api/disco", discoRouter);
 
