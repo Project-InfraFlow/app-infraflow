@@ -40,7 +40,7 @@ app.use("/api/memoria", memoriaRouter);
 app.use("/api/disco", discoRouter);
 
 // app.use("/alertas-route", alertaRouter);
-app.use("/redeRoute", redeRouter);
+app.use("/rede", redeRouter);
 app.use("/api", latenciaRouter);
 
 app.use("/api/leituras", leiturasRouter);

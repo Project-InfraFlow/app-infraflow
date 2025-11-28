@@ -103,13 +103,13 @@
                 <span class="kpi-label">Latência</span>
               </div>
             </div>
-            <div class="kpi-value" id="kpiCpuValue">0 ms</div>
+            <div class="kpi-value" id="kpiLatenciaValue">0 ms</div>
             <div class="kpi-progress">
-              <div class="progress-bar cpu" id="cpuProgress"></div>
+              <div class="progress-bar rede" id="redeProgress"></div>
             </div>
           </div>
 
-          <div class="kpi-card" id="kpiMemoria">
+          <div class="kpi-card" id="kpiRede">
             <div class="kpi-header">
               <div class="kpi-icon memoria">
                 <i class="fas fa-memory"></i>
@@ -118,13 +118,13 @@
                 <span class="kpi-label">Jitter</span>
               </div>
             </div>
-            <div class="kpi-value" id="kpiMemoriaValue">0%</div>
+            <div class="kpi-value" id="kpiJitterValue">0 ms</div>
             <div class="kpi-progress">
-              <div class="progress-bar memoria" id="memoriaProgress"></div>
+              <div class="progress-bar rede" id="redeProgress"></div>
             </div>
           </div>
 
-          <div class="kpi-card" id="kpiDisco">
+          <div class="kpi-card" id="kpiRede">
             <div class="kpi-header">
               <div class="kpi-icon disco">
                 <i class="fas fa-hdd"></i>
@@ -133,9 +133,9 @@
                 <span class="kpi-label">Perda de pacotes</span>
               </div>
             </div>
-            <div class="kpi-value" id="kpiDiscoValue">0%</div>
+            <div class="kpi-value" id="kpiPacoteValue">0%</div>
             <div class="kpi-progress">
-              <div class="progress-bar disco" id="discoProgress"></div>
+              <div class="progress-bar rede" id="redeProgress"></div>
             </div>
           </div>
 
@@ -148,7 +148,7 @@
                 <span class="kpi-label">Velocidade de download e upload</span>
               </div>
             </div>
-            <div class="kpi-value" id="kpiRedeValue">0 Mbps</div>
+            <div class="kpi-value" id="kpiDownloadValue">0 Mbps</div>
             <div class="kpi-progress">
               <div class="progress-bar rede" id="redeProgress"></div>
             </div>
@@ -165,10 +165,10 @@
                 Métrica:
             </label>
             <select id="componentSelector" onchange="updateChart('chart1')">
-                <option value="latency" selected>Latência (ms)</option>
+                <option value="latencia" selected>Latência (ms)</option>
                 <option value="jitter">Jitter (ms)</option>
-                <option value="packetLoss">Perda de Pacote (%)</option>
-                <option value="speed">Velocidade (Mbps)</option>
+                <option value="perda">Perda de Pacote (%)</option>
+                <option value="velocidade">Velocidade (Mbps)</option>
             </select>
         </div>
         </div>
@@ -246,10 +246,10 @@
                     <td><span class="pill crit">&gt; 1%</span></td>
                   </tr>
                   <tr>
-                    <td>Velocidade do download (%)</td>
-                    <td>60% – 100% </td>
-                    <td><span class="pill warn">20% – 60%</span></td>
-                    <td><span class="pill crit">≤ 20%</span></td>
+                    <td>Velocidade do download (Mbps)</td>
+                    <td>≤ 60 Mbps</td>
+                    <td><span class="pill warn">60 Mbps – 90 Mbps</span></td>
+                    <td><span class="pill crit">&gt; 90 Mbps</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -659,159 +659,178 @@
     <script src=""></script>
 
   <script>
-    
 
-    function createGroupedBarChart(canvasId, label1, data1, label2, data2) {
-    const ctx = document.getElementById(canvasId).getContext('2d');
-    new Chart(ctx, {
-        type: 'bar', 
+const MAQUINAS = [
+    { id: 2, nome: "INFRA-EDGE-01 (Itápolis)" },
+    { id: 3, nome: "INFRA-EDGE-02 (Jaboticabal)" },
+    { id: 4, nome: "INFRA-EDGE-03 (SJC)" },
+    { id: 5, nome: "INFRA-EDGE-03 (Itaguaí)" }
+];
+
+const MACHINE_COLORS = {
+    2: "rgb(255, 99, 132)",  
+    3: "rgb(54, 162, 235)",  
+    4: "rgb(75, 192, 192)",  
+    5: "rgb(255, 159, 64)"  
+};
+
+let chart1 = null;
+let chart2 = null;
+let chart1_labels = [];
+
+async function getHistorico(maquinaId, metric) {
+    try {
+        const res = await fetch(`/rede/historico/${maquinaId}/${metric}`);
+        return await res.json();
+    } catch (err) {
+        console.error("Erro ao carregar histórico:", err);
+        return [];
+    }
+}
+
+async function renderChart1() {
+    const metric = document.getElementById("componentSelector").value;
+    const ctx = document.getElementById("chart1").getContext("2d");
+
+    if (chart1) chart1.destroy();
+
+    const datasets = [];
+    chart1_labels = [];
+
+    for (const maquina of MAQUINAS) {
+        const historico = await getHistorico(maquina.id, metric);
+
+        const valores = historico.map(item => item.valor);
+        const labels = historico.map(item => {
+            const dt = new Date(item.data_hora_captura);
+            return dt.toLocaleTimeString("pt-BR", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            });
+        });
+
+        datasets.push({
+            label: maquina.nome,
+            data: valores,
+            borderColor: MACHINE_COLORS[maquina.id],
+            backgroundColor: MACHINE_COLORS[maquina.id],
+            fill: false,
+            tension: 0.2
+        });
+
+        if (datasets.length === 1) chart1_labels = labels;
+    }
+
+    chart1 = new Chart(ctx, {
+        type: "line",
         data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-            datasets: [
-                {
-                    label: label1,
-                    data: data1,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)', // Download
-                },
-                {
-                    label: label2,
-                    data: data2,
-                    backgroundColor: 'rgba(255, 99, 132, 0.7)', // Upload
-                }
-            ]
+            labels: chart1_labels,
+            datasets
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, 
-            scales: {
-                x: {
-                    stacked: false 
-                },
-                y: {
-                    beginAtZero: true
+            plugins: {
+                title: {
+                    display: true,
+                    text: metric.toUpperCase() + " (tempo real entre máquinas)"
                 }
             }
         }
     });
 }
 
-const downloadData = [35, 45, 60, 50, 70, 85];
-const uploadData = [15, 25, 30, 28, 40, 50]; 
+async function calcularMediaDownload(maquinaId) {
+    const historico = await getHistorico(maquinaId, "velocidade");
+    if (historico.length === 0) return 0;
 
-createGroupedBarChart('chart2', 'Média Download (Mbps)', downloadData, 'Média Upload (Mbps)', uploadData);
+    const soma = historico.reduce((acc, obj) => acc + obj.valor, 0);
+    return (soma / historico.length).toFixed(2);
+}
 
-let myChart = null; 
+async function renderChart2() {
+    const ctx = document.getElementById("chart2").getContext("2d");
 
-    const ALL_DATA = {
-        // Latência (ms)
-        latency: {
-            unit: 'ms',
-            title: 'Latência (ms)',
-            'INFRA-EDGE-01 (Itápolis)': [15, 17, 16, 18, 19, 20],
-            'INFRA-EDGE-02 (Jaboticabal)': [22, 20, 24, 25, 23, 21],
-            'INFRA-EDGE-03 (SJC)': [10, 11, 10, 12, 13, 14],
-            'INFRA-EDGE-04 (Itaguaí)': [30, 35, 33, 37, 39, 41]
-        },
-        // Jitter (ms)
-        jitter: {
-            unit: 'ms',
-            title: 'Jitter (ms)',
-            'INFRA-EDGE-01 (Itápolis)': [2, 1, 3, 2, 1, 1.5],
-            'INFRA-EDGE-02 (Jaboticabal)': [5, 4, 6, 5, 4, 4.5],
-            'INFRA-EDGE-03 (SJC)': [1, 0.5, 1, 1, 0.5, 0.8],
-            'INFRA-EDGE-04 (Itaguaí)': [10, 9, 12, 11, 10, 10.5]
-        },
-        // Perda de Pacote (%)
-        packetLoss: {
-            unit: '%',
-            title: 'Perda de Pacote (%)',
-            'INFRA-EDGE-01 (Itápolis)': [0, 0, 0, 0, 0, 0.5],
-            'INFRA-EDGE-02 (Jaboticabal)': [1, 2, 1, 3, 2, 2.5],
-            'INFRA-EDGE-03 (SJC)': [0, 0, 0, 0, 0, 0],
-            'INFRA-EDGE-04 (Itaguaí)': [5, 6, 4, 7, 5, 6.5]
-        },
-        // Velocidade (Mbps)
-        speed: {
-            unit: 'Mbps',
-            title: 'Velocidade (Mbps)',
-            'INFRA-EDGE-01 (Itápolis)': [80, 85, 90, 88, 92, 95],
-            'INFRA-EDGE-02 (Jaboticabal)': [50, 55, 60, 58, 62, 65],
-            'INFRA-EDGE-03 (SJC)': [95, 98, 99, 100, 98, 97],
-            'INFRA-EDGE-04 (Itaguaí)': [30, 35, 40, 38, 42, 45]
-        }
-    };
+    if (chart2) chart2.destroy();
 
-    const MACHINE_COLORS = {
-        'INFRA-EDGE-01 (Itápolis)': 'rgb(255, 99, 132)', 
-        'INFRA-EDGE-02 (Jaboticabal)': 'rgb(54, 162, 235)', 
-        'INFRA-EDGE-03 (SJC)': 'rgb(75, 192, 192)', 
-        'INFRA-EDGE-04 (Itaguaí)': 'rgb(255, 159, 64)' 
-    };
+    const labels = [];
+    const valores = [];
 
-    function updateChart(canvasId) {
-        const ctx = document.getElementById(canvasId).getContext('2d');
-        const selector = document.getElementById('componentSelector');
-        
-        const selectedMetricKey = selector.value;
-        const metricData = ALL_DATA[selectedMetricKey];
-
-        if (!metricData) return; 
-
-        if (myChart) {
-            myChart.destroy();
-        }
-
-        const labels = ['-10s', '-8s', '-6s', '-4s', '-2s', 'Agora'];
-        
-        const datasets = Object.keys(MACHINE_COLORS).map(machineLabel => ({
-            label: machineLabel,
-            data: metricData[machineLabel], 
-            borderColor: MACHINE_COLORS[machineLabel],
-            backgroundColor: MACHINE_COLORS[machineLabel],
-            fill: false, 
-            tension: 0.2 
-        }));
-
-        // Cria o novo gráfico
-        myChart = new Chart(ctx, {
-            type: 'line', 
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: metricData.title + ' em Tempo Real' 
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: metricData.title + ' (' + metricData.unit + ')' 
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Tempo'
-                        }
-                    }
-                }
-            }
-        });
+    for (const maquina of MAQUINAS) {
+        labels.push(maquina.nome);
+        valores.push(await calcularMediaDownload(maquina.id));
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        updateChart('chart1'); 
+    chart2 = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [{
+                label: "Média Download (Mbps)",
+                data: valores,
+                backgroundColor: Object.values(MACHINE_COLORS)
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
     });
-  
-  </script>
+}
+
+
+async function atualizarDashboard() {
+    console.log("🔄 Atualizando dashboard...");
+
+    await renderChart1();
+    await renderChart2();
+    await atualizarKPIs();  
+}
+
+async function atualizarKPIs() {
+    const maquinaId = 2; 
+
+    try {
+        const res = await fetch(`/rede/latest/${maquinaId}`);
+        const data = await res.json();
+
+        document.getElementById("kpiLatenciaValue").textContent =
+            data.latencia !== null ? `${data.latencia} ms` : "--";
+
+        document.getElementById("kpiJitterValue").textContent =
+            data.jitter !== null ? `${data.jitter} ms` : "--";
+
+        document.getElementById("kpiPacoteValue").textContent =
+            data.perda !== null ? `${data.perda}%` : "--";
+
+        document.getElementById("kpiDownloadValue").textContent =
+            data.velocidade !== null ? `${data.velocidade} Mbps` : "--";
+
+    } catch (err) {
+        console.error("Erro ao atualizar KPIs:", err);
+    }
+}
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("📄 DOM carregado, iniciando dashboard...");
+    atualizarDashboard();
+});
+
+setInterval(() => {
+    renderChart1();
+    renderChart2();
+    atualizarKPIs();
+}, 5000);
+document.getElementById("componentSelector").addEventListener("change", renderChart1);
+
+</script>
+
 </body>
 
 </html>

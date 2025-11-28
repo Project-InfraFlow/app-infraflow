@@ -28,149 +28,136 @@ let timerDB = null;
 let timerLatencia = null;
 let dadosLatencia = [];
 
-async function buscarLatenciaDB() {
-    try {
-        const dados = await fetchLatenciaDB({ maquinaId: 1, limite: 1 });
+// async function buscarLatenciaDB() {
+//     try {
+//         const dados = await fetchLatenciaDB({ maquinaId: 1, limite: 1 });
         
-        if (dados) {
-            dadosLatencia = dados;
-            atualizarKPILatencia(dados);
+//         if (dados) {
+//             dadosLatencia = dados;
+//             atualizarKPILatencia(dados);
             
-            if (graficos.tempoReal && document.getElementById('componentSelector')?.value === 'latency') {
-                atualizarGraficoTempoReal();
-            }
-        }
-    } catch (error) {
-        console.error('Erro no polling de latência:', error);
-    }
-}
+//             if (graficos.tempoReal && document.getElementById('componentSelector')?.value === 'latency') {
+//                 atualizarGraficoTempoReal();
+//             }
+//         }
+//     } catch (error) {
+//         console.error('Erro no polling de latência:', error);
+//     }
+// }
 
-// Iniciar polling de latência
-function iniciarPollingLatencia() {
-    pararPollingLatencia();
-    buscarLatenciaDB();
-    timerLatencia = setInterval(buscarLatenciaDB, 2000);
-}
+// // Iniciar polling de latência
+// function iniciarPollingLatencia() {
+//     pararPollingLatencia();
+//     buscarLatenciaDB();
+//     timerLatencia = setInterval(buscarLatenciaDB, 2000);
+// }
 
-// Parar polling de latência
-function pararPollingLatencia() {
-    if (timerLatencia) {
-        clearInterval(timerLatencia);
-        timerLatencia = null;
-    }
-}
+// // Parar polling de latência
+// function pararPollingLatencia() {
+//     if (timerLatencia) {
+//         clearInterval(timerLatencia);
+//         timerLatencia = null;
+//     }
+// }
 
 
-async function fetchLeiturasDB(params = { maquinaId: 1, limite: 50 }) {
+async function loadKPIs() {
     try {
-        const qs = new URLSearchParams(params).toString();
-        const resp = await fetch(`/api/leituras?${qs}`);
+        const res = await fetch(`/rede/ultimas/1`);
+        const data = await res.json();
 
-        if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
-        }
+        // Montar estrutura unificada
+        let metrics = {
+            latencia: null,
+            jitter: null,
+            perda: null,
+            download: null
+        };
 
-        const arr = await resp.json();
-        console.log("API /api/leituras → exemplo recebido:", arr[0]);
-
-
-        if (!Array.isArray(arr)) {
-            throw new Error('Resposta da API não é um array');
-        }
-
-        if (arr.length) {
-            console.log('Exemplo de leitura da API:', arr[0]);
-        }
-
-        const parsed = arr.map(r => {
-            const tsBruto = r.horario || r.data_hora_captura || r.timestamp;
-
-            const cpu = Number(
-                r.cpu ??
-                r.cpu_percent ??
-                r.cpuPercent ??
-                0
-            );
-
-            const memoria = Number(
-                r.memoria ??
-                r.memoria_percent ??
-                r.ram ??              // mantém compat com a versão antiga
-                r.memoriaPercent ??
-                0
-            );
-
-            const disco = Number(
-                r.disco ??
-                r.disco_percent ??
-                r.discoPercent ??
-                0
-            );
-
-            const rede = Number(
-                r.rede ??
-                r.rede_mbps ??
-                r.rede_percent ??
-                r.redePercent ??
-                0
-            );
-
-            return {
-                ts: tsBruto,
-                timestamp: tsBruto ? new Date(tsBruto) : new Date(),
-                cpu,
-                memoria,
-                disco,
-                rede,
-                nucleos: r.nucleos || []
-            };
+        data.forEach(item => {
+            if (item.dados_texto.includes("Latencia")) metrics.latencia = item.dados_float;
+            if (item.dados_texto.includes("Jitter")) metrics.jitter = item.dados_float;
+            if (item.dados_texto.includes("Perda")) metrics.perda = item.dados_float;
+            if (item.dados_texto.includes("Velocidade")) metrics.download = item.dados_float;
         });
 
+        // Preencher KPIs
+        kpiLatenciaValue.innerText = metrics.latencia?.toFixed(2) + " ms";
+        kpiJitterValue.innerText = metrics.jitter?.toFixed(2) + " ms";
+        kpiPerdaValue.innerText = metrics.perda?.toFixed(2) + " %";
+        kpiDownloadValue.innerText = metrics.download?.toFixed(2) + " Mbps";
 
-        return parsed;
-    } catch (error) {
-        console.error('Erro ao buscar leituras:', error);
-        throw error;
+        // colorização (verde/amarelo/vermelho)
+        applyStatusColor(kpiLatenciaValue.parentElement, metrics.latencia, [50, 100]);
+        applyStatusColor(kpiJitterValue.parentElement, metrics.jitter, [20, 50]);
+        applyStatusColor(kpiPerdaValue.parentElement, metrics.perda, [2, 10]);
+        applyStatusColor(kpiDownloadValue.parentElement, metrics.download, [50, 20], true);
+
+    } catch (err) {
+        console.error("Erro KPI rede:", err);
     }
 }
 
-function iniciarPollingDB() {
-    pararPollingDB();
+// ================================
+// COR DA KPI (verde/amarelo/vermelho)
+// ================================
+function applyStatusColor(card, valor, limiares, invertido = false) {
+    if (valor === null) return;
 
-    buscarDadosDB();
+    let [warn, danger] = limiares;
 
-    timerDB = setInterval(buscarDadosDB, 2000);
-}
+    let estado = "normal";
 
-async function buscarDadosDB() {
-    try {
-        const dados = await fetchLeiturasDB({ maquinaId: 1, limite: 50 });
-
-        if (dados && dados.length > 0) {
-            dadosTempoReal = dados.slice(-50);
-            estadoApp.dadosCompletos = dados;
-
-            gerenciadorInterface.atualizarInformacoesSistema();
-            gerenciadorInterface.atualizarKPIs();
-
-            if (graficos.tempoReal) {
-                atualizarGraficoTempoReal();
-            }
-
-            atualizarTabelaMonitoramento();
-
-            try {
-                const ultimo = dadosTempoReal[dadosTempoReal.length - 1];
-                const fonte = document.getElementById('edgeSelector')?.value || 'Pórtico';
-                window.evaluatePoint(ultimo, fonte);
-            } catch (err) {
-                console.error("Erro ao avaliar alertas:", err);
-            }
-        }
-    } catch (error) {
-        console.error('Erro no polling:', error);
+    if (!invertido) {
+        if (valor >= danger) estado = "danger";
+        else if (valor >= warn) estado = "warning";
+    } else {
+        if (valor <= danger) estado = "danger";
+        else if (valor <= warn) estado = "warning";
     }
+
+    card.classList.remove("normal", "warning", "danger");
+    card.classList.add(estado);
 }
+
+
+// function iniciarPollingDB() {
+//     pararPollingDB();
+
+//     buscarDadosDB();
+
+//     timerDB = setInterval(buscarDadosDB, 2000);
+// }
+
+// async function buscarDadosDB() {
+//     try {
+//         const dados = await fetchLeiturasDB({ maquinaId: 1, limite: 50 });
+
+//         if (dados && dados.length > 0) {
+//             dadosTempoReal = dados.slice(-50);
+//             estadoApp.dadosCompletos = dados;
+
+//             gerenciadorInterface.atualizarInformacoesSistema();
+//             gerenciadorInterface.atualizarKPIs();
+
+//             if (graficos.tempoReal) {
+//                 atualizarGraficoTempoReal();
+//             }
+
+//             atualizarTabelaMonitoramento();
+
+//             try {
+//                 const ultimo = dadosTempoReal[dadosTempoReal.length - 1];
+//                 const fonte = document.getElementById('edgeSelector')?.value || 'Pórtico';
+//                 window.evaluatePoint(ultimo, fonte);
+//             } catch (err) {
+//                 console.error("Erro ao avaliar alertas:", err);
+//             }
+//         }
+//     } catch (error) {
+//         console.error('Erro no polling:', error);
+//     }
+// }
 
 function pararPollingDB() {
     if (timerDB) {
@@ -483,25 +470,57 @@ function inicializarGraficos() {
     console.log('Gráfico tempo real inicializado');
 }
 
-function atualizarGraficoTempoReal() {
-    if (!graficos.tempoReal || !dadosTempoReal || dadosTempoReal.length === 0) {
-        return;
+// ================================
+// GRÁFICO
+// ================================
+async function loadChart() {
+    const metric = selectMetric.value;
+
+    try {
+        const res = await fetch(`/rede/historico/1/${metric}`);
+        const data = await res.json();
+
+        const labels = data.map(item => formatTime(item.data_hora_captura));
+        const valores = data.map(item => item.valor);
+
+        if (redeChart) redeChart.destroy();
+
+        const ctx = document.getElementById("chartRede").getContext("2d");
+
+        redeChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels,
+                datasets: [{
+                    label: metric.toUpperCase(),
+                    data: valores,
+                    borderWidth: 2,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true } },
+                scales: {
+                    x: { display: true },
+                    y: { display: true }
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error("Erro gráfico:", err);
     }
-
-    const maxPontos = 50;
-    const dadosLimitados = dadosTempoReal.slice(-maxPontos);
-
-    graficos.tempoReal.data.labels = dadosLimitados.map(d =>
-        new Date(d.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    );
-
-    graficos.tempoReal.data.datasets[0].data = dadosLimitados.map(d => d.cpu);
-    graficos.tempoReal.data.datasets[1].data = dadosLimitados.map(d => d.memoria);
-    graficos.tempoReal.data.datasets[2].data = dadosLimitados.map(d => d.disco);
-    graficos.tempoReal.data.datasets[3].data = dadosLimitados.map(d => toRedePct(d.rede));
-
-    graficos.tempoReal.update('none');
 }
+
+// ================================
+// FORMATAÇÃO
+// ================================
+function formatTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
 
 function atualizarTabelaMonitoramento() {
     const tbody = document.getElementById('monitorTableBody');
@@ -631,7 +650,16 @@ function configurarCadastro() {
     });
 }
 
+const IS_DASHBOARD_REDE = window.location.pathname.includes("dashbord_rede");
+
 function inicializarDashboard() {
+
+    // Se estamos no dashboard de rede → NÃO rodar inicialização do INFRAFLOW
+    if (IS_DASHBOARD_REDE) {
+        console.log("🟢 Dashboard REDE detectado → ignorando inicialização do InfraFlow.");
+        return;
+    }
+
     console.log('🚀 Inicializando Dashboard InfraFlow...');
 
     const elementosCriticos = [
@@ -656,8 +684,6 @@ function inicializarDashboard() {
     iniciarPollingDB();
     iniciarPollingLatencia();
 
-    iniciarPollingDB();
-
     const selectMonitor = document.getElementById("edgeSelector");
     const monitorSpan = document.getElementById("monitor-selecionado");
 
@@ -677,10 +703,6 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(inicializarDashboard, 100);
 });
 
-window.addEventListener('beforeunload', function () {
-    pararPollingDB();
-    pararPollingLatencia();
-});
 
 function exportarCSV(dados, nomeArquivo) {
     if (!dados || dados.length === 0) {
@@ -1214,10 +1236,10 @@ function checkForCriticalAlerts() {
     // Esta função deve ser integrada com sua lógica de monitoramento
     // Por enquanto, vamos simular a verificação
 
-    const cpuValue = parseInt(document.getElementById('kpiCpuValue').textContent) || 0;
-    const memoriaValue = parseInt(document.getElementById('kpiMemoriaValue').textContent) || 0;
-    const discoValue = parseInt(document.getElementById('kpiDiscoValue').textContent) || 0;
-    const redeValue = parseInt(document.getElementById('kpiRedeValue').textContent) || 0;
+    const cpuValue = parseInt(document.getElementById('kpiLatenciaValue').textContent) || 0;
+    const memoriaValue = parseInt(document.getElementById('kpiJitterValue').textContent) || 0;
+    const discoValue = parseInt(document.getElementById('kpiPacoteValue').textContent) || 0;
+    const redeValue = parseInt(document.getElementById('kpiDownloadValue').textContent) || 0;
 
     // Verifica se algum componente está em estado crítico (baseado na sua legenda)
     const hasCriticalAlert =
