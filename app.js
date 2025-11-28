@@ -1,5 +1,5 @@
 var ambiente_processo = 'producao';
-//var ambiente_processo = 'desenvolvimento';
+// var ambiente_processo = 'desenvolvimento';
 
 var caminho_env = ambiente_processo === 'producao' ? '.env' : '.env.dev';
 require("dotenv").config({ path: caminho_env });
@@ -13,12 +13,11 @@ var indexRouter = require("./src/routes/index");
 var usuarioRouter = require("./src/routes/usuarios");
 var avisosRouter = require("./src/routes/avisos");
 var medidasRouter = require("./src/routes/medidas");
+var aquariosRouter = require("./src/routes/aquarios");
 var empresasRouter = require("./src/routes/empresas");
 var segurancaRouter = require("./src/routes/segurancaRoutes");
 var memoriaRouter = require("./src/routes/memoria");
-var alertaRouter = require("./src/routes/alertas-route");
-var redeRouter = require("./src/routes/redeRoute");
-var latenciaRouter = require("./src/routes/latencia");
+var cpuRouter = require("./src/routes/cpu");
 
 var app = express();
 app.use(express.json());
@@ -31,14 +30,12 @@ app.use("/", indexRouter);
 app.use("/usuarios", usuarioRouter);
 app.use("/avisos", avisosRouter);
 app.use("/medidas", medidasRouter);
+app.use("/aquarios", aquariosRouter);
 app.use("/empresas", empresasRouter);
 app.use("/api/seguranca", segurancaRouter);
-app.use("/usuarios", segurancaRouter);
 app.use("/api/memoria", memoriaRouter);
+app.use("/api/cpu", cpuRouter);
 
-app.use("/alertas-route", alertaRouter);
-app.use("/redeRoute", redeRouter);
-app.use("/api", latenciaRouter);
 
 app.use("/api/leituras", leiturasRouter);
 

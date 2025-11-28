@@ -20,19 +20,19 @@
             <nav class="nav">
                 <button data-view="overview" class="nav-item active">
                     <i class="fas fa-gauge"></i>
-                    <a href="./dashboard.html"><span>Painel</span></a>
+                    <span>Painel</span>
                 </button>
                 <button data-view="monitor" class="nav-item">
                     <i class="fas fa-chart-line"></i>
-                    <a href="./dashboard.html#view-monitor"><span>Monitoramento</span></a>
+                    <span>Monitoramento</span>
                 </button>
                 <button data-view="cadastro" class="nav-item">
                     <i class="fas fa-pen-to-square"></i>
-                   <a href="./dashboard.html#view-cadastro"><span>Cadastro</span></a> 
+                    <span>Cadastro</span>
                 </button>
                 <button data-view="historico" class="nav-item">
                     <i class="fas fa-clock-rotate-left"></i>
-                    <a href="./dashboard-alertas.html"><span>Histórico de Alertas</span></a>
+                    <span>Histórico de Alertas</span>
                 </button>
             </nav>
 
@@ -101,6 +101,7 @@
                 </div>
 
                 <div class="kpis-grid">
+
                     <div class="kpi-card" id="kpiCpu">
                         <div class="kpi-header">
                             <div class="kpi-icon cpu">
@@ -131,18 +132,18 @@
                         </div>
                     </div>
 
-                    <div class="kpi-card" id="KpiLatencia">
+                    <div class="kpi-card" id="KpiTempo">
                         <div class="kpi-header">
-                            <div class="kpi-icon latencia">
+                            <div class="kpi-icon tempo">
                                 <i class="fas fa-stopwatch"></i>
                             </div>
                             <div class="kpi-info">
-                                <span class="kpi-label">Latencia</span>
+                                <span class="kpi-label">Tempo Ocioso</span>
                             </div>
                         </div>
-                        <div class="kpi-value" id="KpiLatenciaValue">215 ms</div>
+                        <div class="kpi-value" id="KpiTempoValue">21%</div>
                         <div class="kpi-progress">
-                            <div class="progress-bar latencia" id="latenciaProgress"></div>
+                            <div class="progress-bar tempo" id="tempoProgress"></div>
                         </div>
                     </div>
 
@@ -160,466 +161,89 @@
                             <div class="progress-bar rede" id="redeProgress"></div>
                         </div>
                     </div>
+
                 </div>
 
                 <div class="charts-grid">
+
+                    <!-- GRÁFICO CPU + IDLE (CORRIGIDO — APENAS 1 CANVAS) -->
                     <div class="chart-container">
                         <div class="chart-header">
                             <h3 class="chart-title">
                                 <i class="fas fa-chart-line"></i>
-                                CPU x Latência
+                                CPU x Tempo ocioso
                             </h3>
-                            <canvas id="cpuLatenciaChart"></canvas>
+
+                            <div class="kpi-info-icon">
+                                <i class="fas fa-info-circle"></i>
+
+                                <div class="parametro">
+                                    <strong>Parâmetros CPU:</strong><br>
+                                    • 20% – 45% → Saudável<br>
+                                    • 45% – 85% → Monitorar<br>
+                                    • > 85% → Crítico<br><br>
+
+                                    <strong>Parâmetros Idle:</strong><br>
+                                    • 70% – 100% → Saudável <br>
+                                    • 30% – 70% → Monitorar <br>
+                                    • 0% – 30% → Crítico
+                                </div>
+                            </div>
                         </div>
+
                         <div class="chart-content">
-                            <canvas id="cpuLatencyChart"></canvas>
+                            <canvas id="cpuLatenciaChart"></canvas>
                         </div>
                     </div>
 
+                    <!-- GRÁFICO PROCESSOS (CORRIGIDO — APENAS 1 CANVAS) -->
                     <div class="chart-container">
                         <div class="chart-header">
                             <h3 class="chart-title">
                                 <i class="fas fa-microchip"></i>
                                 Processos em Execução
                             </h3>
+
+                            <div class="kpi-info-icon">
+                                <i class="fas fa-info-circle"></i>
+
+                                <div class="parametro">
+                                    <strong>Processos:</strong><br>
+                                    • 0 – 250 → Saudável <br>
+                                    • 250 – 400 → Monitorar <br>
+                                    • > 400 → Crítico <br>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-content">
                             <canvas id="processosChart"></canvas>
                         </div>
-                        <div class="chart-content">
-                            <canvas id="processChart"></canvas>
-                        </div>
                     </div>
+
                 </div>
 
             </section>
 
-            <section id="view-monitor" class="view">
-                <div class="view-header">
-                    <h1 class="view-title">
-                        <i class="fas fa-chart-line"></i>
-                        Monitoramento (Histórico de Registros)
-                    </h1>
-                </div>
-
-                <div class="table-section">
-                    <div class="table-header">
-                        <h3 class="table-title">
-                            <i class="fas fa-table"></i>
-                            Últimas Leituras
-                        </h3>
-                        <div class="table-actions">
-                            <button id="exportMonitorCsv" class="btn btn-export">
-                                <i class="fas fa-download"></i>
-                                Exportar CSV
-                            </button>
-                        </div>
-                    </div>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th><i class="fas fa-server"></i> Pórtico</th>
-                                    <th><i class="fas fa-clock"></i> Horário</th>
-                                    <th><i class="fas fa-microchip"></i> CPU (%)</th>
-                                    <th><i class="fas fa-memory"></i> Memória (%)</th>
-                                    <th><i class="fas fa-hdd"></i> Disco (%)</th>
-                                    <th><i class="fas fa-network-wired"></i> Rede (Mbps)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="monitorTableBody">
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="table-pagination">
-                        <div class="pagination-info">
-                            <span id="monitorPaginationInfo">Mostrando 0 de 0 registros</span>
-                        </div>
-                        <div class="pagination-controls">
-                            <button id="monitorPrevPage" class="btn btn-pagination" disabled>
-                                <i class="fas fa-chevron-left"></i>
-                                Anterior
-                            </button>
-                            <span id="monitorPageInfo">Página 0 de 0</span>
-                            <button id="monitorNextPage" class="btn btn-pagination" disabled>
-                                Próxima
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="view-cadastro" class="view">
-                <div class="view-header">
-                    <h1 class="view-title">
-                        <i class="fas fa-pen-to-square"></i>
-                        Cadastro
-                    </h1>
-                </div>
-
-                <div class="cadastro-tabs">
-                    <button class="tab-btn active" data-tab="usuario">
-                        <i class="fas fa-user"></i>
-                        Usuário
-                    </button>
-                    <button class="tab-btn" data-tab="maquina">
-                        <i class="fas fa-server"></i>
-                        Máquina
-                    </button>
-                </div>
-
-                <div class="cadastro-content">
-                    <div id="tab-usuario" class="tab-content active">
-                        <form class="cadastro-form" id="usuarioForm">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="usuarioNome">Nome</label>
-                                    <input type="text" id="usuarioNome" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="usuarioEmail">E-mail</label>
-                                    <input type="email" id="usuarioEmail" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="usuarioTipo">Tipo</label>
-                                    <select id="tipo_permissao" required>
-                                        <option value="0">Selecione uma opção</option>
-                                        <option value="1">Administrador</option>
-                                        <option value="2">Comum</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="usuarioSenha">Senha</label>
-                                    <input type="password" id="usuarioSenha" required>
-                                </div>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" onclick="cadastrarUser()" class="btn btn-primary">
-                                    <i class="fas fa-save"></i>
-                                    Salvar
-                                </button>
-                                <button type="reset" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i>
-                                    Cancelar
-                                </button>
-                            </div>
-                        </form>
-
-                        <div class="listar-users">
-                            <div class="titulo">
-                                <i class="bi bi-person-fill-add controlador"></i>
-                                <h1>Usuários Cadastrados</h1>
-                            </div>
-
-                            <div class="barra-infos">
-                                <p>ID</p>
-                                <p>Nome</p>
-                                <p>Email</p>
-                                <p>Acesso</p>
-                                <p>Ações</p>
-                            </div>
-
-                            <div class="infos-user">
-                                <p>1</p>
-                                <p>Vinicius Melo</p>
-                                <p>viniciusmelo@ecorodovias.com</p>
-                                <p>Comum</p>
-                                <div class="acoes">
-                                    <button onclick="edit_user()" class="btn_actions"><i
-                                            class="bi bi-pencil-square"></i></button>
-                                    <button onclick="delete_user()" class="btn_actions"><i
-                                            class="bi bi-trash3-fill"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="infos-user">
-                                <p>2</p>
-                                <p>Rafael Brandão</p>
-                                <p>rafaelbrandão@ecorodovias.com</p>
-                                <p>Comum</p>
-                                <div class="acoes">
-                                    <button onclick="edit_user()" class="btn_actions"><i
-                                            class="bi bi-pencil-square"></i></button>
-                                    <button onclick="delete_user()" class="btn_actions"><i
-                                            class="bi bi-trash3-fill"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="infos-user">
-                                <p>3</p>
-                                <p>Mariana Silva</p>
-                                <p>marianasilva@ecorodovias.com</p>
-                                <p>Comum</p>
-                                <div class="acoes">
-                                    <button onclick="edit_user()" class="btn_actions"><i
-                                            class="bi bi-pencil-square"></i></button>
-                                    <button onclick="delete_user()" class="btn_actions"><i
-                                            class="bi bi-trash3-fill"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="infos-user">
-                                <p>4</p>
-                                <p>Marcelo Noronha</p>
-                                <p>marcelonoronha@ecorodovias.com</p>
-                                <p>Comum</p>
-                                <div class="acoes">
-                                    <button onclick="edit_user()" class="btn_actions"><i
-                                            class="bi bi-pencil-square"></i></button>
-                                    <button onclick="delete_user()" class="btn_actions"><i
-                                            class="bi bi-trash3-fill"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="infos-user">
-                                <p>5</p>
-                                <p>Vivian Silva</p>
-                                <p>viviansilva@ecorodovias.com</p>
-                                <p>Comum</p>
-                                <div class="acoes">
-                                    <button onclick="edit_user()" class="btn_actions"><i
-                                            class="bi bi-pencil-square"></i></button>
-                                    <button onclick="delete_user()" class="btn_actions"><i
-                                            class="bi bi-trash3-fill"></i></button>
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div id="tab-maquina" class="tab-content">
-                        <form class="cadastro-form" id="maquinaForm">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="maquinaNome">Nome</label>
-                                    <input type="text" id="maquinaNome" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="maquinaSo">Sistema Operacional</label>
-                                    <input type="text" id="maquinaSo" required>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="maquinaLocalizacao">Localização</label>
-                                    <input type="text" id="maquinaLocalizacao" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="maquinaKm">KM</label>
-                                    <input type="number" id="maquinaKm" step="0.1">
-                                </div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i>
-                                    Salvar
-                                </button>
-                                <button type="reset" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i>
-                                    Cancelar
-                                </button>
-                            </div>
-                        </form>
-
-                        <div class="listar-maquinas">
-                            <div class="titulo">
-                                <i class="bi bi-hdd-stack controlador"></i>
-                                <h1>Pórticos Cadastrados</h1>
-                            </div>
-
-                            <div class="barra-infos-maq">
-                                <p>ID</p>
-                                <p>Nome</p>
-                                <p>Sistema Op.</p>
-                                <p>Localização</p>
-                                <p>KM</p>
-                                <p>Ações</p>
-                            </div>
-
-                            <div class="infos-maquina">
-                                <p>1</p>
-                                <p>INFRA-EDGE-01-Itápolis</p>
-                                <p>Ubuntu 22.04</p>
-                                <p>SP-333</p>
-                                <p>101</p>
-                                <div class="acoes">
-                                    <button onclick="edit_user()" class="btn_actions"><i
-                                            class="bi bi-pencil-square"></i></button>
-                                    <button onclick="delete_user()" class="btn_actions"><i
-                                            class="bi bi-trash3-fill"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="infos-maquina">
-                                <p>2</p>
-                                <p>INFRA-EDGE-02-Jaboticabal</p>
-                                <p>Ubuntu 22.04</p>
-                                <p>SP-099</p>
-                                <p>15</p>
-                                <div class="acoes">
-                                    <button onclick="edit_user()" class="btn_actions"><i
-                                            class="bi bi-pencil-square"></i></button>
-                                    <button onclick="delete_user()" class="btn_actions"><i
-                                            class="bi bi-trash3-fill"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="infos-maquina">
-                                <p>3</p>
-                                <p>INFRA-EDGE-03-São José dos Santos</p>
-                                <p>Ubuntu 22.04</p>
-                                <p>KM-414</p>
-                                <p>414</p>
-                                <div class="acoes">
-                                    <button onclick="edit_user()" class="btn_actions"><i
-                                            class="bi bi-pencil-square"></i></button>
-                                    <button onclick="delete_user()" class="btn_actions"><i
-                                            class="bi bi-trash3-fill"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="infos-maquina">
-                                <p>4</p>
-                                <p>INFRA-EDGE-04-Itaguaí</p>
-                                <p>Ubuntu 22.04</p>
-                                <p>SP-050</p>
-                                <p>221</p>
-                                <div class="acoes">
-                                    <button onclick="edit_user()" class="btn_actions"><i
-                                            class="bi bi-pencil-square"></i></button>
-                                    <button onclick="delete_user()" class="btn_actions"><i
-                                            class="bi bi-trash3-fill"></i></button>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
-            <section id="view-historico" class="view">
-                <div class="view-header">
-                    <h1 class="view-title">
-                        <i class="fas fa-clock-rotate-left"></i>
-                        Histórico de Alertas
-                    </h1>
-                </div>
-
-                <div class="filters-section">
-                    <div class="filter-group">
-                        <label for="historicoPeriodo">Período</label>
-                        <select id="historicoPeriodo">
-                            <option value="5min">Últimos 5 minutos</option>
-                            <option value="1h" selected>Última 1 hora</option>
-                            <option value="24h">Últimas 24 horas</option>
-                            <option value="custom">Personalizado</option>
-                        </select>
-                    </div>
-                    <div class="filter-group custom-period" id="customPeriodInputs" style="display: none;">
-                        <div class="period-inputs">
-                            <div class="period-input">
-                                <label for="historicoInicio">Início</label>
-                                <input type="datetime-local" id="historicoInicio">
-                            </div>
-                            <div class="period-input">
-                                <label for="historicoFim">Fim</label>
-                                <input type="datetime-local" id="historicoFim">
-                            </div>
-                        </div>
-                    </div>
-                    <button id="aplicarFiltroHistorico" class="btn btn-primary">
-                        <i class="fas fa-filter"></i>
-                        Aplicar Filtro
-                    </button>
-                </div>
-
-                <div class="kpis-historico">
-                    <div class="kpi-card">
-                        <h4>Alertas no Período</h4>
-                        <p>36</p>
-                    </div>
-                    <div class="kpi-card">
-                        <h4>Horário de Pico de Utilização</h4>
-                        <p>17h às 18h • Maior carga simultânea registrada</p>
-                        <small style="display:block;font-size:12px;color:#64748b;margin-top:4px">
-                            CPU média 82% • Rede 96 Mbps - Tráfego intenso em 2 pórticos
-                        </small>
-                    </div>
-                    <div class="kpi-card">
-                        <h4>Pórticos Afetados</h4>
-                        <p>2 de 4</p>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">
-                            <i class="fas fa-chart-area"></i>
-                            Alertas
-                        </h3>
-                    </div>
-                    <div class="chart-content">
-                        <canvas id="historicalChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="table-section">
-                    <div class="table-header">
-                        <h3 class="table-title">
-                            <i class="fas fa-list"></i>
-                            Ocorrências
-                        </h3>
-                        <div class="table-actions">
-                            <button id="exportHistoricoCsv" class="btn btn-export">
-                                <i class="fas fa-download"></i>
-                                Exportar CSV
-                            </button>
-                        </div>
-                    </div>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th><i class="fas fa-server"></i> Pórtico</th>
-                                    <th><i class="fas fa-clock"></i> Período</th>
-                                    <th><i class="fas fa-microchip"></i> CPU (%)</th>
-                                    <th><i class="fas fa-memory"></i> Memória (%)</th>
-                                    <th><i class="fas fa-hdd"></i> Disco (%)</th>
-                                    <th><i class="fas fa-network-wired"></i> Rede (Mbps)</th>
-                                    <th><i class="fas fa-clipboard-check"></i> Ação/Laudo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="historicoTableBody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
+            <!-- SLACK -->
             <div class="slack-painel" id="slackpainel">
                 <div class="slack-painel-header">
-                    <h4>Alertas Ativos (Todos os Pórticos)</h4>
+                    <h4>Alertas Ativos da CPU</h4>
                     <button id="closeSlack" class="close-slack">×</button>
                 </div>
 
                 <div class="slack-painel-body">
-                    <!-- Aqui você coloca sua lista de alertas -->
                     <p>Carregando alertas CPU...</p>
                 </div>
             </div>
+
         </main>
     </div>
 
     <script src="../js/exemplo.js"></script>
-    <script src="../js/cpu.js"></script>
+    <script src="../js/cpuDashboard.js"></script>
 
     <script>
-
         document.getElementById("logoutBtn").addEventListener("click", function () {
             window.location.href = "login.html";
         });
@@ -632,7 +256,6 @@
         }
 
         select.addEventListener("change", atualizarMonitor);
-
         atualizarMonitor();
 
         const slackBtn = document.getElementById("btnSlack");
@@ -641,12 +264,15 @@
 
         slackBtn.addEventListener("click", () => {
             slackpainel.classList.add("open");
+            document.body.classList.add("slack-open");
         });
 
         closeSlack.addEventListener("click", () => {
             slackpainel.classList.remove("open");
+            document.body.classList.remove("slack-open");
         });
     </script>
+
 </body>
 
 </html>

@@ -26,7 +26,7 @@
     --gray-900: #0f172a;
     --cpu-color: #3b82f6;
     --processos-color: #10b981;
-    --latencia-color: #f59e0b;
+    --tempo-color: #f59e0b;
     --rede-color: #8b5cf6;
     --sidebar-width: 280px;
     --topbar-height: 70px;
@@ -497,11 +497,77 @@ body {
 /* Quando o Slack abrir → dashboard fica MENOR */
 body.slack-open #contentWrapper {
     transform: scale(0.85);
-    /* ajuste o tamanho aqui */
     filter: blur(1px);
-    /* opcional, fica bonito */
     opacity: 0.95;
-    /* opcional */
+}
+
+.kpi-icon-vermelho {
+    background: #dc2626 !important;
+    color: white !important;
+}
+
+.kpi-text-vermelho {
+    color: #dc2626 !important;
+    font-weight: 800 !important;
+}
+
+.progress-bar-vermelho {
+    background: #dc2626 !important;
+}
+
+
+.alerta-item {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: white;
+}
+
+.alerta-item {
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    color: #fff !important;
+    font-weight: 500;
+}
+
+.alerta-vermelho {
+    background-color: #e02424 !important; 
+}
+
+.alerta-amarelo {
+    background-color: #fbbf24 !important; 
+    color: #000 !important; 
+}
+
+.slack-painel.open ~ .content,
+.slack-painel.open ~ #contentWrapper {
+    margin-right: 360px !important;
+    transition: margin-right 0.3s ease;
+}
+
+.slack-painel.open ~ .content .charts-grid {
+    transform: scale(0.92);
+    transform-origin: right center;
+    transition: 0.3s ease;
+}
+
+.slack-painel.open ~ .content .kpis-grid {
+    transform: scale(0.95);
+    transform-origin: right center;
+    transition: 0.3s ease;
+}
+
+.content {
+    transition: margin-right 0.35s ease;
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: calc(var(--topbar-height) - 8px);
+    transition: margin-right 0.35s ease;
 }
 
 .view {
@@ -637,7 +703,7 @@ body.slack-open #contentWrapper {
 }
 
 .slack-icon {
-    position: fixed; 
+    position: fixed;
     width: 50px;
     height: 50px;
     background: white;
@@ -659,8 +725,8 @@ body.slack-open #contentWrapper {
 .slack-painel {
     position: fixed;
     top: 70px;
-    right: -400px;
-    width: 360px;
+    right: -330px;
+    width: 240px;
     height: 90vh;
     background: #fff;
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
@@ -670,6 +736,10 @@ body.slack-open #contentWrapper {
     flex-direction: column;
     padding: 15px;
     border-left: 1px solid #eee;
+}
+
+.slack-painel.open {
+    right: 0;
 }
 
 .slack-painel.open {
@@ -712,6 +782,66 @@ body.slack-open #contentWrapper {
     font-size: 1.75rem;
 }
 
+/* Linha contendo o valor + o ícone */
+.kpi-value-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+/* Valor da KPI */
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-900);
+}
+
+/* Ícone */
+.kpi-info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gray-600);
+    font-size: 18px;
+    position: relative;
+    margin-left: 50px;
+    margin-top: -15px;
+}
+
+.kpi-info-icon:hover {
+    z-index: 9999;
+    /* sobe para frente de tudo */
+    transform: scale(1.03);
+    /* leve zoom para destacar */
+    color: var(--primary-color);
+}
+
+/* Tooltip */
+.parametro {
+    display: none;
+    position: absolute;
+    top: 28px;
+    left: 0;
+    width: 210px;
+    background: white;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.8rem;
+    color: var(--gray-700);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    z-index: 9999 !important;
+}
+
+.kpi-info-icon:hover .parametro {
+    display: block;
+}
+
+
 .kpis-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -720,6 +850,7 @@ body.slack-open #contentWrapper {
 }
 
 .kpi-card {
+    z-index: 1;
     background: white;
     border-radius: var(--radius-lg);
     padding: 1.5rem;
@@ -729,7 +860,7 @@ body.slack-open #contentWrapper {
     position: relative;
     overflow: hidden;
     animation: slideInUp 0.6s ease-out;
-    height: 160px;
+    height: 150px;
 }
 
 .kpi-card::before {
@@ -744,8 +875,10 @@ body.slack-open #contentWrapper {
 }
 
 .kpi-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 999999;  
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.18);
 }
 
 .kpi-header {
@@ -774,8 +907,8 @@ body.slack-open #contentWrapper {
     background: linear-gradient(135deg, var(--processos-color), #059669);
 }
 
-.kpi-icon.latencia {
-    background: linear-gradient(135deg, var(--latencia-color), #d97706);
+.kpi-icon.tempo {
+    background: linear-gradient(135deg, var(--tempo-color), #d97706);
 }
 
 .kpi-icon.rede {
@@ -798,7 +931,7 @@ body.slack-open #contentWrapper {
 }
 
 .kpi-value {
-    font-size: 2.5rem;
+    font-size: 1.8rem;
     font-weight: 700;
     color: var(--gray-800);
     line-height: 1;
@@ -813,6 +946,13 @@ body.slack-open #contentWrapper {
     overflow: hidden;
 }
 
+.chart-container,
+.chart-content,
+canvas {
+    z-index: 1 !important;
+    position: relative;
+}
+
 .progress-bar {
     height: 100%;
     border-radius: 3px;
@@ -824,12 +964,17 @@ body.slack-open #contentWrapper {
     background: linear-gradient(90deg, var(--cpu-color), #2563eb);
 }
 
-.progress-bar.latencia {
+.progress-bar.progress {
     background: linear-gradient(90deg, var(--processos-color), #059669);
 }
 
-.progress-bar.latencia {
-    background: linear-gradient(90deg, var(--latencia-color), #d97706);
+#processosProgress {
+    width: 100% !important;
+    background: linear-gradient(90deg, var(--processos-color), #059669) !important;
+}
+
+.progress-bar.tempo {
+    background: linear-gradient(90deg, var(--tempo-color), #d97706);
 }
 
 .progress-bar.rede {
@@ -940,7 +1085,7 @@ body.slack-open #contentWrapper {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     border: 1px solid var(--gray-200);
-    overflow: hidden;
+    overflow: visible !important;
 }
 
 .chart-container.full-bleed {
@@ -970,9 +1115,10 @@ body.slack-open #contentWrapper {
 }
 
 .chart-content {
-    height: 26px !important;
-    overflow: hidden !important;
-    padding: 0.5rem 1rem;
+    height: auto !important;
+    overflow: visible !important;
+    position: relative;
+    z-index: 1;
 }
 
 .chart-content canvas {
@@ -1740,14 +1886,9 @@ body.slack-open #contentWrapper {
     }
 }
 
-#cpuLatenciaChart,
+#cputempoChart,
 #processosChart {
     height: 100% !important;
-    max-height: 200px !important; 
+    max-height: 200px !important;
     width: 100% !important;
-}
-
-a {
-    text-decoration: none;
-    color: white;
 }
