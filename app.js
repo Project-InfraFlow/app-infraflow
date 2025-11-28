@@ -1,5 +1,5 @@
-var ambiente_processo = 'producao';
-//var ambiente_processo = 'desenvolvimento';
+//var ambiente_processo = 'producao';
+var ambiente_processo = 'desenvolvimento';
 
 var caminho_env = ambiente_processo === 'producao' ? '.env' : '.env.dev';
 require("dotenv").config({ path: caminho_env });
@@ -19,6 +19,7 @@ var memoriaRouter = require("./src/routes/memoria");
 var alertaRouter = require("./src/routes/alertas-route");
 var redeRouter = require("./src/routes/redeRoute");
 var latenciaRouter = require("./src/routes/latencia");
+var iaRouter = require("./src/routes/ia");
 
 var app = express();
 app.use(express.json());
