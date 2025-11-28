@@ -410,6 +410,12 @@ body {
     transition: var(--transition);
 }
 
+
+#insight-bobia {
+    font-size: 1.35rem;
+    line-height: 1.7;
+}
+
 .card:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
@@ -434,9 +440,16 @@ body {
     grid-column: 1;
 }
 
+#ia-insight {
+    max-width: 70%;
+    font-size: 1rem;
+}
+
 .card.full-width {
     grid-column: auto;
 }
+
+
 
 .camera-placeholder {
     display: flex;

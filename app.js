@@ -17,7 +17,9 @@ var aquariosRouter = require("./src/routes/aquarios");
 var empresasRouter = require("./src/routes/empresas");
 var segurancaRouter = require("./src/routes/segurancaRoutes");
 var memoriaRouter = require("./src/routes/memoria");
-var cpuRouter = require("./src/routes/cpu");
+var alertaRouter = require("./src/routes/alertas-route");
+var redeRouter = require("./src/routes/redeRoute");
+var latenciaRouter = require("./src/routes/latencia");
 
 var app = express();
 app.use(express.json());
@@ -34,10 +36,13 @@ app.use("/aquarios", aquariosRouter);
 app.use("/empresas", empresasRouter);
 app.use("/api/seguranca", segurancaRouter);
 app.use("/api/memoria", memoriaRouter);
-app.use("/api/cpu", cpuRouter);
 
+app.use("/alertas-route", alertaRouter);
+app.use("/redeRoute", redeRouter);
+app.use("/api", latenciaRouter);
 
 app.use("/api/leituras", leiturasRouter);
+app.use("/ia", iaRouter); 
 
 app.get("/dashboard/dashboard_CPU", function(req, res) {
     res.sendFile(path.join(__dirname, "public/dashboard_CPU.html"));
