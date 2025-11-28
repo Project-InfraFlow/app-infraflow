@@ -47,8 +47,8 @@ app.get("/dashboard/dashboard_CPU", function(req, res) {
     res.sendFile(path.join(__dirname, "public/dashboard_CPU.html"));
 });
 
-app.get("/dashboard/memoria.html", function(req, res) {
-    res.sendFile(path.join(__dirname, "public/memoria.html"));
+app.get("/dashboard/memoria", function(req, res) {
+    res.sendFile(path.join(__dirname, "public/dashboard/memoria.html"));
 });
 
 app.get("/dashboard/disco", function(req, res) {

@@ -239,8 +239,6 @@ router.post("/log-tentativa", async (req, res) => {
 
 router.get('/alertas-operacionais', async (req, res) => {
     try {
-        console.log('Buscando alertas operacionais...');
-
         const query = `
             SELECT 
                 a.id_alerta,

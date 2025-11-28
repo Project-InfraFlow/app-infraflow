@@ -442,6 +442,105 @@
         edgeSelector: document.getElementById('edgeSelector')
     };
 
+    // API SERVICE - Conecta com o backend Python
+    const apiService = {
+        async getMemoriaDetalhes(idMaquina) {
+            try {
+                const response = await fetch(`/api/memoria/detalhes/${idMaquina}`);
+                if (!response.ok) throw new Error('Erro na API');
+                return await response.json();
+            } catch (error) {
+                console.error('Erro ao buscar detalhes:', error);
+                throw error;
+            }
+        },
+
+        async getMemoriaHistorico(idMaquina, limite = 50) {
+            try {
+                const response = await fetch(`/api/memoria/historico/${idMaquina}?limite=${limite}`);
+                if (!response.ok) throw new Error('Erro na API');
+                return await response.json();
+            } catch (error) {
+                console.error('Erro ao buscar histórico:', error);
+                throw error;
+            }
+        },
+
+        async getMemoriaAlertas(idMaquina, horas = 24) {
+            try {
+                const response = await fetch(`/api/memoria/alertas/${idMaquina}?horas=${horas}`);
+                if (!response.ok) throw new Error('Erro na API');
+                return await response.json();
+            } catch (error) {
+                console.error('Erro ao buscar alertas:', error);
+                throw error;
+            }
+        }
+    };
+
+    // MOCK DATA PROVIDER - Para quando as APIs não estiverem disponíveis
+    const dataProvider = {
+        async getMemoriaDetalhes(idMaquina) {
+            // Simula dados reais baseados no seu script Python
+            const memoriaTotal = 32; // GB - padrão dos pórticos
+            const usoPercent = Math.min(100, Math.max(10, 50 + Math.random() * 40));
+            const memoriaLivreGB = Math.max(0, memoriaTotal - (memoriaTotal * usoPercent / 100));
+            
+            return {
+                uso_percent: parseFloat(usoPercent.toFixed(1)),
+                livre_gb: parseFloat(memoriaLivreGB.toFixed(1)),
+                total_gb: memoriaTotal
+            };
+        },
+
+        async getMemoriaHistorico(idMaquina, limite = 50) {
+            const historico = [];
+            const now = new Date();
+            const memoriaTotal = 32;
+            
+            for (let i = 0; i < limite; i++) {
+                const timestamp = new Date(now.getTime() - (i * 30000)); // 30 segundos entre leituras
+                const usoPercent = Math.min(100, Math.max(10, 45 + Math.random() * 50));
+                const memoriaLivreGB = Math.max(0, memoriaTotal - (memoriaTotal * usoPercent / 100));
+                
+                historico.push({
+                    id_maquina: idMaquina,
+                    uso_percent: parseFloat(usoPercent.toFixed(1)),
+                    memoria_livre_gb: parseFloat(memoriaLivreGB.toFixed(1)),
+                    memoria_total_gb: memoriaTotal,
+                    data_hora_captura: timestamp.toISOString()
+                });
+            }
+            
+            return historico.reverse();
+        },
+
+        async getMemoriaAlertas(idMaquina, horas = 24) {
+            const alertas = [];
+            const now = new Date();
+            const memoriaTotal = 32;
+            
+            // Gera alguns alertas críticos
+            for (let i = 0; i < 3; i++) {
+                const timestamp = new Date(now.getTime() - (i * 3600000)); // 1 hora entre alertas
+                const usoPercent = 85 + Math.random() * 15; // Entre 85% e 100%
+                
+                alertas.push({
+                    id_maquina: idMaquina,
+                    uso_percent: parseFloat(usoPercent.toFixed(1)),
+                    descricao: `Uso de memória ${usoPercent.toFixed(1)}% - CRITICO`,
+                    data_hora: timestamp.toISOString(),
+                    nome_maquina: `INFRA-EDGE-0${idMaquina}`
+                });
+            }
+            
+            return alertas;
+        }
+    };
+
+    // USE MOCK DATA POR ENQUANTO - Troque para apiService quando suas APIs estiverem prontas
+    const dataService = dataProvider;
+
     function inicializarGraficos() {
         const ctxLinha = document.getElementById('grafico_memoria_uso').getContext('2d');
         graficoMemoriaUso = new Chart(ctxLinha, {
@@ -541,26 +640,7 @@
     async function carregarDadosOverview() {
         try {
             console.log('Carregando dados overview para máquina', ID_MAQUINA);
-            const response = await fetch(`/api/memoria/detalhes/${ID_MAQUINA}`);
-           
-            if (!response.ok) {
-                if (response.status === 404) {
-                    console.warn('Dados não encontrados para máquina', ID_MAQUINA);
-                    elements.kpiMemoriaUsoValue.textContent = 'N/D';
-                    elements.kpiMemoriaLivreValue.textContent = 'N/D';
-                    elements.kpiMemoriaTotalValue.textContent = '32 GB';
-                    return;
-                }
-                throw new Error('Erro na resposta da API: ' + response.status);
-            }
-           
-            const dados = await response.json();
-           
-            if (dados.error) {
-                console.error('Erro nos dados:', dados.error);
-                elements.kpiMemoriaUsoValue.textContent = 'Erro';
-                return;
-            }
+            const dados = await dataService.getMemoriaDetalhes(ID_MAQUINA);
 
             console.log('Dados recebidos:', dados);
             atualizarKPIs(dados);
@@ -570,68 +650,33 @@
         } catch (error) {
             console.error('Erro ao carregar dados overview:', error);
             elements.kpiMemoriaUsoValue.textContent = 'Erro';
+            elements.kpiMemoriaLivreValue.textContent = 'Erro';
+            elements.kpiMemoriaTotalValue.textContent = '32 GB';
         }
     }
 
     async function carregarDadosMonitor() {
         try {
-            const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=50`);
-           
-            if (!response.ok) {
-                if (response.status === 404) {
-                    elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado histórico disponível</td></tr>';
-                    return;
-                }
-                throw new Error('Erro na resposta da API');
-            }
-           
-            const dados = await response.json();
-           
-            if (dados.error) {
-                elements.monitorTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${dados.error}</td></tr>`;
-                return;
-            }
+            console.log('Carregando dados monitor para máquina', ID_MAQUINA);
+            const dados = await dataService.getMemoriaHistorico(ID_MAQUINA, 50);
 
             if (dados.length > 0) {
                 atualizarTabelaMonitor(dados);
             } else {
-                elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado encontrado</td></tr>';
+                elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #6b7280;">Nenhum dado encontrado</td></tr>';
             }
            
         } catch (error) {
             console.error('Erro ao carregar dados do monitor:', error);
-            elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Erro ao carregar dados</td></tr>';
+            elements.monitorTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #ef4444;">Erro ao carregar dados</td></tr>';
         }
     }
 
     async function carregarAlertasHistorico() {
         try {
             console.log(`Carregando alertas para máquina ${ID_MAQUINA}`);
-           
-            const response = await fetch(`/api/memoria/alertas/${ID_MAQUINA}?horas=24`);
-           
-            if (!response.ok) {
-                console.error(`Erro na resposta: ${response.status}`);
-               
-                if (response.status === 404) {
-                    elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum alerta encontrado nas últimas 24 horas</td></tr>';
-                    elements.kpiMemoriaAlertaValue.textContent = '0';
-                    elements.memoriaAlertaProgress.style.width = '0%';
-                    return;
-                }
-                throw new Error('Erro na resposta da API');
-            }
-           
-            const alertas = await response.json();
+            const alertas = await dataService.getMemoriaAlertas(ID_MAQUINA, 24);
             console.log(`Alertas recebidos:`, alertas);
-           
-            if (alertas.error) {
-                console.error('Erro nos dados:', alertas.error);
-                elements.historicoTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${alertas.error}</td></tr>`;
-                elements.kpiMemoriaAlertaValue.textContent = '0';
-                elements.memoriaAlertaProgress.style.width = '0%';
-                return;
-            }
 
             if (Array.isArray(alertas) && alertas.length > 0) {
                 atualizarTabelaAlertas(alertas);
@@ -642,29 +687,33 @@
                
                 console.log(`Total de alertas: ${alertas.length}, Críticos: ${alertasCriticos}`);
             } else {
-                elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum alerta encontrado - Sistema operando normalmente</td></tr>';
+                elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #10b981;">Nenhum alerta encontrado - Sistema operando normalmente</td></tr>';
                 elements.kpiMemoriaAlertaValue.textContent = '0';
                 elements.memoriaAlertaProgress.style.width = '0%';
             }
         } catch (error) {
             console.error('Erro ao carregar alertas:', error);
-            elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Erro ao carregar alertas. Verifique o console.</td></tr>';
+            elements.historicoTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #ef4444;">Erro ao carregar alertas. Verifique o console.</td></tr>';
             elements.kpiMemoriaAlertaValue.textContent = '0';
             elements.memoriaAlertaProgress.style.width = '0%';
         }
-}
+    }
 
     function atualizarKPIs(dados) {
-        elements.kpiMemoriaUsoValue.textContent = `${dados.uso_percent.toFixed(1)}%`;
-        elements.memoriaUsoProgress.style.width = `${dados.uso_percent}%`;
+        const usoPercent = parseFloat(dados.uso_percent) || 0;
+        const livreGB = parseFloat(dados.livre_gb) || 0;
+        const totalGB = parseFloat(dados.total_gb) || 32;
 
-        elements.kpiMemoriaLivreValue.textContent = `${dados.livre_gb} GB`;
-        elements.memoriaLivreProgress.style.width = `${(dados.livre_gb / dados.total_gb) * 100}%`;
+        elements.kpiMemoriaUsoValue.textContent = `${usoPercent.toFixed(1)}%`;
+        elements.memoriaUsoProgress.style.width = `${Math.min(usoPercent, 100)}%`;
 
-        elements.kpiMemoriaTotalValue.textContent = `${dados.total_gb} GB`;
+        elements.kpiMemoriaLivreValue.textContent = `${livreGB.toFixed(1)} GB`;
+        elements.memoriaLivreProgress.style.width = `${(livreGB / totalGB) * 100}%`;
+
+        elements.kpiMemoriaTotalValue.textContent = `${totalGB} GB`;
         elements.memoriaTotalProgress.style.width = '100%';
 
-        atualizarCoresKPIs(dados.uso_percent);
+        atualizarCoresKPIs(usoPercent);
     }
 
     function atualizarCoresKPIs(usoPercent) {
@@ -687,7 +736,8 @@
     }
 
     function atualizarGraficos(dados) {
-        graficoMemoriaStatus.data.datasets[0].data = [dados.uso_percent, 100 - dados.uso_percent];
+        const usoPercent = parseFloat(dados.uso_percent) || 0;
+        graficoMemoriaStatus.data.datasets[0].data = [usoPercent, 100 - usoPercent];
         graficoMemoriaStatus.update('none');
 
         atualizarGraficoLinha();
@@ -695,22 +745,10 @@
 
     async function atualizarGraficoLinha() {
         try {
-            const response = await fetch(`/api/memoria/historico/${ID_MAQUINA}?limite=30`);
-           
-            if (!response.ok) {
-                console.warn('Erro ao buscar histórico para gráfico');
-                return;
-            }
-           
-            const historico = await response.json();
-           
-            if (historico.error) {
-                console.warn('Erro nos dados do histórico:', historico.error);
-                return;
-            }
+            const historico = await dataService.getMemoriaHistorico(ID_MAQUINA, 30);
 
             if (historico.length > 0) {
-                const dadosUso = historico.map(item => item.uso_percent);
+                const dadosUso = historico.map(item => parseFloat(item.uso_percent) || 0);
                 const labels = historico.map(item =>
                     new Date(item.data_hora_captura).toLocaleTimeString('pt-BR')
                 );
@@ -742,13 +780,16 @@
 
         dadosOrdenados.forEach(item => {
             const nomeMaquina = nomesMaquinas[item.id_maquina] || `Máquina ${item.id_maquina}`;
+            const usoPercent = parseFloat(item.uso_percent) || 0;
+            const memoriaLivre = parseFloat(item.memoria_livre_gb) || 0;
+            const memoriaTotal = parseFloat(item.memoria_total_gb) || 32;
            
             const row = `
             <tr>
-                <td>${nomeMaquina}</td>
-                <td>${item.uso_percent.toFixed(1)}%</td>
-                <td>${item.memoria_livre_gb} GB</td>
-                <td>${item.memoria_total_gb} GB</td>
+                <td><strong>${nomeMaquina}</strong></td>
+                <td>${usoPercent.toFixed(1)}%</td>
+                <td>${memoriaLivre.toFixed(1)} GB</td>
+                <td>${memoriaTotal} GB</td>
                 <td>${new Date(item.data_hora_captura).toLocaleString('pt-BR')}</td>
             </tr>
         `;
@@ -757,69 +798,65 @@
     }
 
     function atualizarTabelaAlertas(alertas) {
-    const tbody = elements.historicoTableBody;
-    tbody.innerHTML = '';
+        const tbody = elements.historicoTableBody;
+        tbody.innerHTML = '';
 
-    const nomesMaquinas = {
-        1: "INFRA-EDGE-01-Itápolis (SP-333)",
-        2: "INFRA-EDGE-02-Jaboticabal (SP-333)",
-        3: "INFRA-EDGE-03-São José dos Campos (SP-099)",
-        4: "INFRA-EDGE-04-Itaguaí (Km 414)"
-    };
+        const nomesMaquinas = {
+            1: "INFRA-EDGE-01-Itápolis (SP-333)",
+            2: "INFRA-EDGE-02-Jaboticabal (SP-333)",
+            3: "INFRA-EDGE-03-São José dos Campos (SP-099)",
+            4: "INFRA-EDGE-04-Itaguaí (Km 414)"
+        };
 
-    // Ordenando os dados pela data mais recente
-    const alertasOrdenados = alertas.sort((a, b) =>
-        new Date(b.data_hora) - new Date(a.data_hora)
-    );
+        const alertasOrdenados = alertas.sort((a, b) =>
+            new Date(b.data_hora) - new Date(a.data_hora)
+        );
 
-    alertasOrdenados.forEach(alerta => {
-        const nomeMaquina = alerta.nome_maquina ||
-                           nomesMaquinas[ID_MAQUINA] ||
-                           `Máquina ${ID_MAQUINA}`;
+        alertasOrdenados.forEach(alerta => {
+            const nomeMaquina = alerta.nome_maquina || nomesMaquinas[ID_MAQUINA] || `Máquina ${ID_MAQUINA}`;
+            const usoPercent = parseFloat(alerta.uso_percent) || 0;
+            
+            let nivelClasse = 'success';
+            let acaoTexto = 'Normal';
+            let corBorda = '#10b981';
+           
+            if (usoPercent > 84) {
+                nivelClasse = 'crit';
+                acaoTexto = 'Estado Crítico';
+                corBorda = '#ef4444';
+            } else if (usoPercent > 54) {
+                nivelClasse = 'warn';
+                acaoTexto = 'Monitorar';
+                corBorda = '#f59e0b';
+            }
 
-        const usoPercent = parseFloat(alerta.uso_percent) || 0;
-        let nivelClasse = 'success';
-        let acaoTexto = 'Normal';
-       
-        if (usoPercent > 84) {
-            nivelClasse = 'crit';
-            acaoTexto = 'Estado Crítico';
-        } else if (usoPercent > 54) {
-            nivelClasse = 'warn';
-            acaoTexto = 'Monitorar';
-        } else {
-            nivelClasse = 'success';
-            acaoTexto = 'Verificado';
-        }
+            const dataFormatada = new Date(alerta.data_hora).toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
 
-        // Formatar data
-        const dataFormatada = new Date(alerta.data_hora).toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
+            const row = `
+                <tr style="border-left: 4px solid ${corBorda}">
+                    <td><strong>${nomeMaquina}</strong></td>
+                    <td>${alerta.descricao || 'Alerta de memória'}</td>
+                    <td><span class="pill ${nivelClasse}">${usoPercent.toFixed(1)}%</span></td>
+                    <td>${dataFormatada}</td>
+                    <td>
+                        <span class="pill ${nivelClasse}">
+                            ${acaoTexto}
+                        </span>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
         });
 
-        const row = `
-            <tr style="border-left: 4px solid ${nivelClasse === 'crit' ? '#ef4444' : nivelClasse === 'warn' ? '#f59e0b' : '#10b981'}">
-                <td><strong>${nomeMaquina}</strong></td>
-                <td>${alerta.descricao || 'Alerta de memória'}</td>
-                <td><span class="pill ${nivelClasse}">${usoPercent.toFixed(1)}%</span></td>
-                <td>${dataFormatada}</td>
-                <td>
-                    <span class="pill ${nivelClasse}">
-                        ${acaoTexto}
-                    </span>
-                </td>
-            </tr>
-        `;
-        tbody.innerHTML += row;
-    });
-
-    console.log(`Tabela atualizada com ${alertas.length} alertas`);
-}
+        console.log(`Tabela atualizada com ${alertas.length} alertas`);
+    }
 
     function atualizarUltimaAtualizacao() {
         const now = new Date();
@@ -827,33 +864,45 @@
     }
 
     function iniciarAtualizacaoAutomatica() {
-    console.log('Iniciando atualização dos daods que estão sendo inseridos no banco de dados');
-    carregarDadosOverview();
-    carregarAlertasHistorico();
-    updateInterval = setInterval(() => {
-        console.log('Atualizando dados...', new Date().toLocaleTimeString());
+        console.log('Iniciando atualização automática dos dados...');
+        
         carregarDadosOverview();
-        const now = new Date();
-        if (now.getSeconds() % 30 === 0) {
-            carregarAlertasHistorico();
-        }
-    }, 2000);
+        carregarAlertasHistorico();
+        
+        updateInterval = setInterval(() => {
+            console.log('Atualizando dados...', new Date().toLocaleTimeString());
+            carregarDadosOverview();
+            
+            const now = new Date();
+            if (now.getSeconds() % 30 === 0) {
+                carregarAlertasHistorico();
+            }
+        }, 5000);
     }
 
     function configurarEventos() {
         elements.edgeSelector.addEventListener('change', function () {
-            ID_MAQUINA = this.value;
+            ID_MAQUINA = parseInt(this.value);
+            console.log('Máquina selecionada:', ID_MAQUINA);
+            
             carregarDadosOverview();
-            if (document.querySelector('[data-view-content="monitor"]').classList.contains('hidden') === false) {
+            
+            if (!document.querySelector('[data-view-content="monitor"]').classList.contains('hidden')) {
                 carregarDadosMonitor();
             }
-            if (document.querySelector('[data-view-content="historico"]').classList.contains('hidden') === false) {
+            if (!document.querySelector('[data-view-content="historico"]').classList.contains('hidden')) {
                 carregarAlertasHistorico();
             }
         });
 
         document.getElementById('exportMonitorCsv')?.addEventListener('click', exportarCSVMonitor);
         document.getElementById('exportHistoricoCsv')?.addEventListener('click', exportarCSVHistorico);
+
+        document.getElementById('logoutBtn')?.addEventListener('click', function() {
+            if (confirm('Deseja realmente sair do sistema?')) {
+                window.location.href = '../index.html';
+            }
+        });
     }
 
     function exportarCSVMonitor() {
@@ -864,11 +913,11 @@
             const cols = row.querySelectorAll('td');
             if (cols.length === 5) {
                 rows.push([
-                    cols[0].textContent,
-                    cols[1].textContent,
-                    cols[2].textContent,
-                    cols[3].textContent,
-                    cols[4].textContent
+                    cols[0].textContent?.trim() || '',
+                    cols[1].textContent?.trim() || '',
+                    cols[2].textContent?.trim() || '',
+                    cols[3].textContent?.trim() || '',
+                    cols[4].textContent?.trim() || ''
                 ]);
             }
         });
@@ -877,7 +926,7 @@
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "monitor_memoria.csv");
+        link.setAttribute("download", `monitor_memoria_maquina_${ID_MAQUINA}_${new Date().toISOString().split('T')[0]}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -891,11 +940,11 @@
             const cols = row.querySelectorAll('td');
             if (cols.length === 5) {
                 rows.push([
-                    cols[0].textContent,
-                    cols[1].textContent,    
-                    cols[2].textContent,
-                    cols[3].textContent,
-                    cols[4].textContent
+                    cols[0].textContent?.trim() || '',
+                    cols[1].textContent?.trim() || '',    
+                    cols[2].textContent?.trim() || '',
+                    cols[3].textContent?.trim() || '',
+                    cols[4].textContent?.trim() || ''
                 ]);
             }
         });
@@ -904,35 +953,14 @@
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "historico_alertas_memoria.csv");
+        link.setAttribute("download", `historico_alertas_memoria_maquina_${ID_MAQUINA}_${new Date().toISOString().split('T')[0]}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     }
 
-    async function debugAlertas() {
-        console.log('testando os endpoint dos alertas');
-       
-        try {
-            const response = await fetch(`/api/memoria/alertas/${ID_MAQUINA}?horas=24`);
-            const data = await response.json();
-           
-            console.log('Resposta da API:', {
-                status: response.status,
-                ok: response.ok,
-                dados: data,
-                quantidade: Array.isArray(data) ? data.length : 'não é array'
-            });
-           
-            return data;
-        } catch (error) {
-            console.error('rro na parte debug:', error);
-            return null;
-        }
-    }
-
-
     document.addEventListener('DOMContentLoaded', function () {
+        console.log('Inicializando dashboard de memória...');
         inicializarGraficos();
         configurarNavegacao();
         configurarEventos();
@@ -942,6 +970,7 @@
     window.addEventListener('beforeunload', function() {
         if (updateInterval) {
             clearInterval(updateInterval);
+            console.log('Intervalo de atualização limpo');
         }
     });
 </script>
