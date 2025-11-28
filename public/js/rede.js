@@ -25,6 +25,41 @@ let estadoApp = {
 let dadosTempoReal = [];
 let graficos = {};
 let timerDB = null;
+let timerLatencia = null;
+let dadosLatencia = [];
+
+async function buscarLatenciaDB() {
+    try {
+        const dados = await fetchLatenciaDB({ maquinaId: 1, limite: 1 });
+        
+        if (dados) {
+            dadosLatencia = dados;
+            atualizarKPILatencia(dados);
+            
+            if (graficos.tempoReal && document.getElementById('componentSelector')?.value === 'latency') {
+                atualizarGraficoTempoReal();
+            }
+        }
+    } catch (error) {
+        console.error('Erro no polling de latência:', error);
+    }
+}
+
+// Iniciar polling de latência
+function iniciarPollingLatencia() {
+    pararPollingLatencia();
+    buscarLatenciaDB();
+    timerLatencia = setInterval(buscarLatenciaDB, 2000);
+}
+
+// Parar polling de latência
+function pararPollingLatencia() {
+    if (timerLatencia) {
+        clearInterval(timerLatencia);
+        timerLatencia = null;
+    }
+}
+
 
 async function fetchLeiturasDB(params = { maquinaId: 1, limite: 50 }) {
     try {
@@ -502,6 +537,53 @@ function atualizarTabelaMonitoramento() {
     }
 }
 
+function atualizarKPILatencia(latenciaData) {
+    const kpiLatenciaValue = document.getElementById('kpiCpuValue');
+    const kpiLatenciaProgress = document.getElementById('cpuProgress');
+    const kpiLatenciaCard = document.getElementById('kpiCpu');
+
+    if (!kpiLatenciaValue || !kpiLatenciaProgress) return;
+
+    const latencia = latenciaData.latencia;
+    
+    kpiLatenciaValue.textContent = `${latencia.toFixed(1)} ms`;
+
+    const maxLatencia = 200;
+    const latenciaPct = Math.max(0, Math.min(100, (latencia / maxLatencia) * 100));
+    
+    kpiLatenciaProgress.style.width = `${latenciaPct}%`;
+
+    let estado = 'Saudável';
+    let cor = '#22c55e';
+
+    if (latencia > 50 && latencia <= 200) {
+        estado = 'Alta Utilização';
+        cor = '#facc15';
+    } else if (latencia > 200) {
+        estado = 'Saturação';
+        cor = '#ef4444';
+    }
+
+    let stateEl = kpiLatenciaCard.querySelector('.kpi-state');
+    if (!stateEl) {
+        stateEl = document.createElement('span');
+        stateEl.className = 'kpi-state';
+        stateEl.style.cssText = `
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 12px;
+            margin-left: 8px;
+        `;
+        const labelHost = kpiLatenciaCard.querySelector('.kpi-info') || kpiLatenciaCard.querySelector('.kpi-header') || kpiLatenciaCard;
+        labelHost.appendChild(stateEl);
+    }
+    stateEl.innerHTML = `<i class="fas fa-circle" style="font-size:8px;color:${cor}"></i><span>${estado}</span>`;
+
+    kpiLatenciaProgress.style.backgroundColor = cor;
+}
+
 function configurarNavegacao() {
     document.querySelectorAll('.nav-item').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -572,6 +654,9 @@ function inicializarDashboard() {
     configurarCadastro();
 
     iniciarPollingDB();
+    iniciarPollingLatencia();
+
+    iniciarPollingDB();
 
     const selectMonitor = document.getElementById("edgeSelector");
     const monitorSpan = document.getElementById("monitor-selecionado");
@@ -594,6 +679,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 window.addEventListener('beforeunload', function () {
     pararPollingDB();
+    pararPollingLatencia();
 });
 
 function exportarCSV(dados, nomeArquivo) {
@@ -1325,3 +1411,43 @@ document.addEventListener('DOMContentLoaded', function() {
         configurarExportCSV();
     }
 });
+
+// Adicione esta função ao seu arquivo rede.js
+
+async function fetchLatenciaDB(params = { maquinaId: 1, limite: 1 }) {
+    try {
+        const qs = new URLSearchParams(params).toString();
+        const resp = await fetch(`/api/latencia?${qs}`);
+
+        if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+        }
+
+        const data = await resp.json();
+        
+        // Supondo que a API retorne um array com o último registro de latência
+        if (Array.isArray(data) && data.length > 0) {
+            const ultimoRegistro = data[0];
+            
+            // Extrai o valor de latência - ajuste conforme a estrutura do seu banco
+            const latencia = Number(
+                ultimoRegistro.latencia ??
+                ultimoRegistro.latency ??
+                ultimoRegistro.valor ??
+                ultimoRegistro.value ??
+                0
+            );
+            
+            return {
+                latencia: latencia,
+                timestamp: ultimoRegistro.timestamp || ultimoRegistro.horario || new Date()
+            };
+        }
+        
+        return { latencia: 0, timestamp: new Date() };
+        
+    } catch (error) {
+        console.error('Erro ao buscar latência:', error);
+        return { latencia: 0, timestamp: new Date() };
+    }
+}
