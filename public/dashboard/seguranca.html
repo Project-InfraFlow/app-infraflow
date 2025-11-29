@@ -585,13 +585,33 @@
     let ultimoInsightChamadaMs = -Infinity;
     let cyberAccessChart = null;
 
-    document.getElementById('logoutBtn').addEventListener('click', function () {
+    document.getElementById('logoutBtn').addEventListener('click', async function () {
+      try {
+        const idUsuario =
+          sessionStorage.ID_USUARIO ||
+          sessionStorage.id_usuario ||
+          sessionStorage.ID_USUARIO_LOGADO ||
+          null;
+
+        if (idUsuario) {
+          await fetch('/usuarios/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_usuario: idUsuario })
+          });
+        }
+      } catch (e) {
+        console.error("Erro ao chamar logout backend:", e);
+      }
+
       try {
         sessionStorage.clear();
         localStorage.removeItem('login_email');
       } catch (e) { }
+
       window.location.replace('../login.html');
     });
+
 
     const btnTelefones = document.getElementById('btnTelefones');
     const modalTelefones = document.getElementById('modalTelefones');
@@ -637,21 +657,31 @@
       });
     }
 
-    function getStatusOperacao() {
-      const userAgent = navigator.userAgent;
-      let baseSistema = 'Linux';
+    async function atualizarKernelReal() {
+      const el = document.getElementById('status-operacao');
+      if (!el) return;
 
-      if (userAgent.includes('Windows')) baseSistema = 'Windows';
-      else if (userAgent.includes('Mac')) baseSistema = 'macOS';
+      try {
+        const resp = await fetch('/api/seguranca/kernel');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
 
-      const versoes = {
-        Linux: ['6.8.0', '6.5.0', '5.15.0', '6.2.0'],
-        Windows: ['10.0.22621', '10.0.19045', '10.0.20348'],
-        macOS: ['23.0.0', '22.0.0', '21.0.0']
-      };
+        const data = await resp.json();
+        el.textContent = data.kernel || 'Indisponível';
+      } catch (e) {
+        console.error('Erro ao buscar kernel:', e);
+        el.textContent = 'Indisponível';
+      }
+    }
 
-      const versao = versoes[baseSistema][Math.floor(Math.random() * versoes[baseSistema].length)];
-      return `${baseSistema} ${versao}`;
+    function atualizarInformacoes() {
+      const userEmail = localStorage.getItem('login_email');
+      if (userEmail) {
+        document.getElementById('sidebarUser').textContent = userEmail.split('@')[0];
+      }
+      atualizarKernelReal();
+
+      document.getElementById('lastUpdateTime').textContent =
+        new Date().toLocaleTimeString('pt-BR');
     }
 
     function atualizarHoraLive() {
@@ -805,6 +835,11 @@
         contadorTentativas = stats.tentativasAtaque;
         document.getElementById('tentativas-ataque').textContent = contadorTentativas;
 
+        var kpiUsuarios = document.getElementById('usuarios-logados');
+        if (kpiUsuarios) {
+          kpiUsuarios.textContent = Number(stats.usuariosLogados || 0);
+        }
+
         const responseLogs = await fetch('/usuarios/logs-aws');
         const logs = await responseLogs.json();
 
@@ -887,13 +922,25 @@
       if (userEmail) {
         document.getElementById('sidebarUser').textContent = userEmail.split('@')[0];
       }
-
-      const statusOperacao = getStatusOperacao();
-      document.getElementById('status-operacao').textContent = statusOperacao;
+      atualizarKernelReal();
 
       document.getElementById('lastUpdateTime').textContent =
         new Date().toLocaleTimeString('pt-BR');
     }
+
+    function atualizarKpiUsuarios() {
+      fetch('/usuarios/estatisticas-seguranca')
+        .then(r => r.json())
+        .then(stats => {
+          var kpi = document.getElementById('usuarios-logados');
+          if (kpi) {
+            kpi.textContent = Number(stats.usuariosLogados || 0);
+          }
+        })
+        .catch(() => { });
+    }
+
+    atualizarKpiUsuarios();
 
     document.addEventListener('DOMContentLoaded', function () {
       atualizarInformacoes();
@@ -906,6 +953,7 @@
     setInterval(carregarDadosSeguranca, 30000);
     setInterval(carregarAlertasOperacionais, 30000);
     setInterval(atualizarHoraLive, 1000);
+    setInterval(atualizarKpiUsuarios, 5000);
   </script>
 </body>
 

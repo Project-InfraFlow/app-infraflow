@@ -122,11 +122,65 @@ function verificarEmail(email) {
     return database.executar(instrucaoSql); 
 }
 
+//=========================== Models dashboard de Segurança ==========================================
+
+function contarUsuariosLogados() {
+    var instrucao = `
+        SELECT COUNT(*) AS usuariosLogados
+        FROM seguranca_sessao
+        WHERE status = 'ONLINE';
+    `;
+    return database.executar(instrucao);
+}
+
+function registrarSessaoLogin(idUsuario, idEmpresa, ip, userAgent, tokenUsado) {
+    var instrucao = `
+        INSERT INTO seguranca_sessao (
+            fk_usuario,
+            fk_empresa,
+            status,
+            data_login,
+            ip_acesso,
+            user_agent,
+            token_usado,
+            risco
+        ) VALUES (
+            ${idUsuario},
+            ${idEmpresa},
+            'ONLINE',
+            NOW(),
+            ${ip ? `'${ip}'` : 'NULL'},
+            ${userAgent ? `'${userAgent.replace(/'/g, "''")}'` : 'NULL'},
+            ${tokenUsado ? `'${tokenUsado}'` : 'NULL'},
+            0
+        );
+    `;
+    return database.executar(instrucao);
+}
+
+function registrarSessaoLogout(idUsuario) {
+    var instrucao = `
+        UPDATE seguranca_sessao
+        SET status = 'OFFLINE',
+            data_logout = NOW()
+        WHERE fk_usuario = ${idUsuario}
+          AND status = 'ONLINE'
+        ORDER BY id_sessao DESC
+        LIMIT 1;
+    `;
+    console.log("SQL LOGOUT =>", instrucao);
+    return database.executar(instrucao);
+}
+
+
 module.exports = {
     autenticar,
     cadastrar,
     listarEmpresas,
     cadastrarUser,
     pesquisarUser,
-    verificarEmail
+    verificarEmail,
+    contarUsuariosLogados,
+    registrarSessaoLogin,
+    registrarSessaoLogout
 };

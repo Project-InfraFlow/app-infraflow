@@ -1,5 +1,4 @@
 var usuarioModel = require("../models/usuarioModel");
-
 let tentativasAtaque = 1;
 let usbConectado = false;
 
@@ -19,6 +18,19 @@ function autenticar(req, res) {
             .then(function (resultadoAutenticar) {
                 if (Array.isArray(resultadoAutenticar) && resultadoAutenticar.length == 1) {
                     const r = resultadoAutenticar[0];
+
+
+                    const ip = req.ip || (req.connection && req.connection.remoteAddress) || null;
+                    const userAgent = req.headers['user-agent'] || null;
+
+                    usuarioModel.registrarSessaoLogin(
+                        r.id_usuario,
+                        r.id_empresa,
+                        ip,
+                        userAgent,
+                        token
+                    ).catch(() => { });
+
                     res.json({
                         id: r.id_usuario,
                         id_usuario: r.id_usuario,
@@ -162,6 +174,9 @@ function enviarCodigoReset(req, res) {
         });
 }
 
+//=========================== Controller dashboard de Segurança  ==========================================
+
+
 function buscarLogsAWS(req, res) {
     const { exec } = require('child_process');
 
@@ -249,17 +264,17 @@ function buscarLogsAWS(req, res) {
 function registrarTentativaAtaque(req, res) {
     try {
         const { ip, rota, metodo } = req.body;
-        
+
         tentativasAtaque++;
-        
-        console.log(`🚨 Tentativa de ataque registrada: ${ip} -> ${rota} (${metodo})`);
-        
+
+        console.log(`Tentativa de ataque registrada: ${ip} -> ${rota} (${metodo})`);
+
         res.json({
             success: true,
             tentativas: tentativasAtaque,
             message: "Tentativa de acesso não autorizado identificada!"
         });
-        
+
     } catch (error) {
         console.error("Erro ao registrar tentativa:", error);
         res.status(500).json({ success: false, error: error.message });
@@ -267,10 +282,46 @@ function registrarTentativaAtaque(req, res) {
 }
 
 function getEstatisticasSeguranca(req, res) {
-    res.json({
-        tentativasAtaque: tentativasAtaque,
-        status: "ativo"
-    });
+    usuarioModel.contarUsuariosLogados()
+        .then(function (resultado) {
+            var usuariosLogados = 0;
+
+            if (Array.isArray(resultado) && resultado.length > 0 && resultado[0].usuariosLogados != null) {
+                usuariosLogados = Number(resultado[0].usuariosLogados);
+            }
+
+            res.json({
+                tentativasAtaque: tentativasAtaque,
+                usuariosLogados: usuariosLogados,
+                status: "ativo"
+            });
+        })
+        .catch(function (erro) {
+            console.error("Erro ao buscar usuários logados:", erro);
+
+            res.json({
+                tentativasAtaque: tentativasAtaque,
+                usuariosLogados: 0,
+                status: "degradado"
+            });
+        });
+}
+
+function logout(req, res) {
+    const idUsuario = req.body && (req.body.id_usuario || req.body.idUsuario);
+
+    if (!idUsuario) {
+        return res.status(400).send("id_usuario não informado para logout");
+    }
+
+    usuarioModel.registrarSessaoLogout(idUsuario)
+        .then(() => {
+            res.status(200).json({ message: "Logout registrado com sucesso" });
+        })
+        .catch((erro) => {
+            console.error("Erro ao registrar logout:", erro);
+            res.status(500).json(erro.sqlMessage || "Erro interno ao registrar logout");
+        });
 }
 
 module.exports = {
@@ -282,5 +333,6 @@ module.exports = {
     enviarCodigoReset,
     buscarLogsAWS,
     registrarTentativaAtaque,
-    getEstatisticasSeguranca
+    getEstatisticasSeguranca,
+    logout
 };

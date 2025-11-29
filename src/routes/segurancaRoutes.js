@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var leituraModel = require('../models/leituraModel');
 const conexao = require('../database/config');
+const os = require('os');
 
 // Status da operação baseado em alertas críticos
 router.get("/status-operacao", async (req, res) => {
@@ -277,6 +278,20 @@ router.get('/alertas-operacionais', async (req, res) => {
             details: error.message
         });
     }
+});
+
+router.get('/kernel', (req, res) => {
+  try {
+    const tipo = os.type();      
+    const release = os.release(); 
+    const plataforma = os.platform(); 
+
+    const kernel = `${tipo} ${release} (${plataforma})`;
+    res.json({ kernel });
+  } catch (err) {
+    console.error('Erro ao obter kernel:', err);
+    res.status(500).json({ kernel: null, error: 'Kernel não encontrado.' });
+  }
 });
 
 module.exports = router;
