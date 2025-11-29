@@ -22,6 +22,8 @@ var redeRouter = require("./src/routes/redeRoute");
 var latenciaRouter = require("./src/routes/latencia");
 var iaRouter = require("./src/routes/ia");
 var contatoRouter = require("./src/routes/contato");
+var maquinaRouter = require("./src/routes/maquinas");
+
 
 
 var app = express();
@@ -43,7 +45,7 @@ app.use("/contato", contatoRouter);
 app.use("/alertas-route", alertaRouter);
 app.use("/redeRoute", redeRouter);
 app.use("/api", latenciaRouter);
-
+app.use("/maquinas", maquinaRouter);
 app.use("/api/leituras", leiturasRouter);
 app.use("/ia", iaRouter); 
 

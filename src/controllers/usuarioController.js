@@ -103,6 +103,77 @@ function listarEmpresas(req, res) {
         });
 }
 
+function obterEmpresaPorId(req, res) {
+    var id = req.params.id;
+
+    if (!id) {
+        return res.status(400).send("ID da empresa não informado!");
+    }
+
+    usuarioModel.obterEmpresaPorId(id)
+        .then(function (resultado) {
+            if (Array.isArray(resultado) && resultado.length === 1) {
+                res.status(200).json(resultado[0]);
+            } else {
+                res.status(404).send("Empresa não encontrada");
+            }
+        })
+        .catch(function (erro) {
+            console.error("Erro ao buscar empresa por ID:", erro);
+            res.status(500).json(erro.sqlMessage || "Erro interno ao buscar empresa");
+        });
+}
+
+function atualizarEmpresa(req, res) {
+    var id = req.params.id;
+
+    var razao = req.body.razaoServer;
+    var cnpj = req.body.CNPJServer;
+    var emailEmpresa = req.body.emailEmpresaServer;
+    var telefone = req.body.telefoneServer;
+
+    var responsavel = req.body.tecnicoServer;
+    var emailResp = req.body.emailUserServer;
+    var token = req.body.tokenServer;
+    var senha = req.body.senhaServer;
+
+    if (!id) {
+        return res.status(400).send("ID da empresa não informado!");
+    }
+
+    if (!razao || !cnpj || !responsavel || !emailResp || !senha || !token) {
+        return res.status(400).send("Campos obrigatórios não preenchidos para atualização!");
+    }
+
+    usuarioModel.atualizarEmpresa(id, razao, cnpj, emailEmpresa, telefone, responsavel, emailResp, senha, token)
+        .then(function (resultado) {
+            res.status(200).json({ message: "Empresa atualizada com sucesso!", resultado });
+        })
+        .catch(function (erro) {
+            console.error("Erro ao atualizar empresa:", erro);
+            res.status(500).json(erro.sqlMessage || "Erro interno ao atualizar empresa");
+        });
+}
+
+function deletarEmpresa(req, res) {
+    var id = req.params.id;
+
+    if (!id) {
+        return res.status(400).send("ID da empresa não informado!");
+    }
+
+    usuarioModel.deletarEmpresa(id)
+        .then(function () {
+            res.status(200).json({ message: "Empresa e dados relacionados deletados com sucesso!" });
+        })
+        .catch(function (erro) {
+            console.error("Erro ao deletar empresa:", erro);
+            res.status(500).json(erro.sqlMessage || "Erro interno ao deletar empresa");
+        });
+}
+
+
+
 function cadastrarUser(req, res) {
     var nome = req.body.nomeServer;
     var email = req.body.emailUserServer;
@@ -397,5 +468,9 @@ module.exports = {
     logout,
     listar,
     atualizarUser,
-    deletarUser
+    deletarUser,
+    obterEmpresaPorId,
+    atualizarEmpresa,
+    deletarEmpresa
 };
+

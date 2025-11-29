@@ -121,7 +121,8 @@
 
                 <div class="barra-pesquisa">
                     <button class="btn-search"><i class="bi bi-search"></i></button>
-                    <input type="text" class="ipt-barra" placeholder="Encontrar empresa" id="ipt_pesquisa" onkeydown="pesquisarUser()">
+                    <input type="text" class="ipt-barra" placeholder="Encontrar empresa" id="ipt_pesquisa"
+                        onkeydown="pesquisarUser()">
                 </div>
 
                 <div class="titulo-itens">
@@ -142,16 +143,22 @@
 </html>
 
 <script>
-    let nome_user = sessionStorage.NOME_USUARIO
+    let nome_user = sessionStorage.NOME_USUARIO;
+    let nome = document.getElementById("nome_user");
+    if (!nome_user || nome_user === "undefined") {
+        nome.innerText = "Admin";
+    } else {
+        nome.innerText = nome_user;
+    }
+    let empresaEditandoId = null;
 
-   let nome = document.getElementById("nome_user") 
 
-   nome.innerText = nome_user
+    nome.innerText = nome_user
 
-   function logout() {
-    sessionStorage.clear()
-    window.location = "./login.html";
-   }
+    function logout() {
+        sessionStorage.clear()
+        window.location = "./login.html";
+    }
 
     document.getElementById("generateToken").addEventListener("click", () => {
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -215,12 +222,8 @@
     }
 
     function cadastrar() {
-        // aguardar();
-
-        //Recupere o valor da nova input pelo nome do id
-        // Agora vá para o método fetch logo abaixo
         var razaoVar = razao_social.value;
-        var CNPJVar = cnpj.value;
+        var CNPJVar = cnpj.value.replace(/\D/g, "");
         var emailEmpresaVar = email_empresa.value;
         var telefoneVar = telefone.value;
 
@@ -229,97 +232,79 @@
         var tokenVar = token.value;
         var senhaVar = senha_senha.value;
 
-        // Verificando se há algum campo em branco
         if (
             razaoVar == "" ||
             CNPJVar == "" ||
             tecnicoVar == "" ||
             senhaVar == "" ||
             emailUserVar == "" ||
-            tokenVar == "" ||
-            senhaVar == ""
+            tokenVar == ""
         ) {
-            cardErro.style.display = "block";
-            mensagem_erro.innerHTML =
-                "(Mensagem de erro para todos os campos em branco)";
-
-            finalizarAguardar();
+            alert("Preencha todos os campos obrigatórios!");
             return false;
         } else if (emailEmpresaVar == "" && telefoneVar == "") {
-            cardErro.style.display = "block";
-            alert("Insira ao menos um meio de contato da empresa (E-mail ou telefone)")
-
-            finalizarAguardar();
+            alert("Insira pelo menos um meio de contato da empresa (E-mail ou telefone)");
             return false;
         }
 
-        if (!validarSenhaMicrosoft(senhaVar)) {
-            alert(
-                "A senha deve seguir o formato da Microsoft:\n\n" +
-                "• Mínimo de 8 caracteres\n" +
-                "• Pelo menos 1 letra maiúscula\n" +
-                "• Pelo menos 1 letra minúscula\n" +
-                "• Pelo menos 1 número\n" +
-                "• Pelo menos 1 caractere especial (!@#$%^&* etc.)"
-            );
-            return false;
-        }
+        const payload = {
+            razaoServer: razaoVar,
+            CNPJServer: CNPJVar,
+            emailEmpresaServer: emailEmpresaVar,
+            telefoneServer: telefoneVar,
 
-        else {
-            setInterval(sumirMensagem, 5000);
-        }
+            tecnicoServer: tecnicoVar,
+            emailUserServer: emailUserVar,
+            tokenServer: tokenVar,
+            senhaServer: senhaVar
+        };
 
-
-        fetch("/usuarios/cadastrar", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                // crie um atributo que recebe o valor recuperado aqui
-                // Agora vá para o arquivo routes/usuario.js
-                razaoServer: razaoVar,
-                CNPJServer: CNPJVar,
-                emailEmpresaServer: emailEmpresaVar,
-                telefoneServer: telefoneVar,
-
-                tecnicoServer: tecnicoVar,
-                emailUserServer: emailUserVar,
-                tokenServer: tokenVar,
-                senhaServer: senhaVar,
-            }),
-        })
-            .then(async resposta => {
-                var migramos = await resposta.json()
-
-                console.log("testando..." + migramos)
-
-                if (resposta.ok) {
-
-                    alert("Empresa cadastrada com sucesso!")
-
-                    razao_social.value = "";
-                    cnpj.value = "";
-                    email_empresa.value = "";
-                    telefone.value = "";
-
-                    resp_user.value = "";
-                    email_user.value = "";
-                    token.value = "";
-                    senha_senha.value = "";
-
-                    //   setTimeout(() => {
-                    //     window.location = "login.html";
-                    //   }, "2000");
-
-                } else {
-                    alert("Houve um erro ao tentar realizar o cadastro!");
-                }
+        // Se tiver ID em edição -> UPDATE
+        if (empresaEditandoId) {
+            fetch(`/usuarios/empresa/${empresaEditandoId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
             })
-            .catch(function (resposta) {
-                console.log(`#ERRO: ${resposta}`);
-
-            });
+                .then(async (resposta) => {
+                    if (resposta.ok) {
+                        alert("Empresa atualizada com sucesso!");
+                        limparFormularioEmpresa();
+                        document.getElementById('txt_users').innerHTML = "";
+                        listarEmpresas();
+                    } else {
+                        const erro = await resposta.text();
+                        alert("Erro ao atualizar empresa: " + erro);
+                    }
+                })
+                .catch(function (resposta) {
+                    console.log(`#ERRO: ${resposta}`);
+                });
+        } else {
+            // Senão -> CREATE (fluxo que já existia)
+            fetch("/usuarios/cadastrar", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            })
+                .then(async resposta => {
+                    if (resposta.ok) {
+                        alert("Empresa cadastrada com sucesso!");
+                        limparFormularioEmpresa();
+                        document.getElementById('txt_users').innerHTML = "";
+                        listarEmpresas();
+                    } else {
+                        alert("Houve um erro ao tentar realizar o cadastro!");
+                    }
+                })
+                .catch(function (resposta) {
+                    console.log(`#ERRO: ${resposta}`);
+                });
+        }
 
         return false;
     }
@@ -333,26 +318,100 @@
     function listarEmpresas() {
         fetch('/usuarios/listarEmpresas', {
             method: "GET"
-        }).then(async resposta => {
-            let empresasGerais = await resposta.json();
+        })
+            .then(async resposta => {
+                let empresasGerais = await resposta.json();
 
-            var divUserInfos = document.getElementById('txt_users');
+                var divUserInfos = document.getElementById('txt_users');
+                divUserInfos.innerHTML = "";
 
-            for (let i = empresasGerais.length - 1; i >= 0; i--) {
-                var txt_users = `
+                for (let i = empresasGerais.length - 1; i >= 0; i--) {
+                    var emp = empresasGerais[i];
+
+                    var linha = `
                 <div class="linha-empresa">
-                    <p class="item-linha">${empresasGerais[i].id_empresa}</p>
-                    <p class="item-linha">${empresasGerais[i].razao_social}</p>
-                    <p class="item-linha">${empresasGerais[i].cnpj}</p>
-                    <p class="item-linha">${empresasGerais[i].nome}</p>
-                    <p class="item-linha">${empresasGerais[i].status}</p>
+                    <p class="item-linha">${emp.id_empresa}</p>
+                    <p class="item-linha">${emp.razao_social}</p>
+                    <p class="item-linha">${emp.cnpj}</p>
+                    <p class="item-linha">${emp.nome}</p>
+                    <p class="item-linha">${emp.status}</p>
+
+                    <div class="acoes-empresa">
+                        <button class="btn-acao btn-editar" onclick="editarEmpresa(${emp.id_empresa})">
+                            Editar
+                        </button>
+                        <button class="btn-acao btn-excluir" onclick="deletarEmpresa(${emp.id_empresa})">
+                            Excluir
+                        </button>
+                    </div>
                 </div>
             `;
 
-                divUserInfos.innerHTML += txt_users;
-            }
-        });
+                    divUserInfos.innerHTML += linha;
+                }
+            });
     }
+
+
+    function editarEmpresa(id) {
+        fetch(`/usuarios/empresa/${id}`, {
+            method: "GET"
+        })
+            .then(async resposta => {
+                if (!resposta.ok) {
+                    alert("Não foi possível carregar os dados da empresa.");
+                    return;
+                }
+
+                const emp = await resposta.json();
+
+                empresaEditandoId = emp.id_empresa;
+
+                razao_social.value = emp.razao_social || "";
+                cnpj.value = emp.cnpj || "";
+                telefone.value = emp.telefone || "";
+                email_empresa.value = emp.emailEmpresa || "";
+
+                resp_user.value = emp.responsavel || "";
+                email_user.value = emp.emailResponsavel || "";
+                senha_senha.value = emp.senhaResponsavel || "";
+                token.value = emp.token || "";
+
+                document.querySelector(".btn-cadastrar button").innerText = "Salvar alterações";
+            })
+            .catch(erro => {
+                console.log("Erro ao editar empresa:", erro);
+            });
+    }
+
+    function deletarEmpresa(id) {
+        if (!confirm("Tem certeza que deseja excluir esta empresa e todos os dados relacionados?")) {
+            return;
+        }
+
+        fetch(`/usuarios/empresa/${id}`, {
+            method: "DELETE"
+        })
+            .then(async resposta => {
+                if (resposta.ok) {
+                    alert("Empresa deletada com sucesso!");
+
+                    if (empresaEditandoId === id) {
+                        limparFormularioEmpresa();
+                    }
+
+                    document.getElementById('txt_users').innerHTML = "";
+                    listarEmpresas();
+                } else {
+                    const erro = await resposta.text();
+                    alert("Erro ao deletar empresa: " + erro);
+                }
+            })
+            .catch(erro => {
+                console.log("Erro ao deletar empresa:", erro);
+            });
+    }
+
 
     function pesquisarUser() {
         let parametroBusca = ipt_pesquisa.value;
@@ -365,10 +424,10 @@
                 var divUserInfos = document.getElementById('txt_users');
                 let htmlUsers = ''; // acumula aqui
 
-                 var divUserInfos = document.getElementById('txt_users');
+                var divUserInfos = document.getElementById('txt_users');
 
-            for (let i = empresasGerais.length - 1; i >= 0; i--) {
-                var txt_users = `
+                for (let i = empresasGerais.length - 1; i >= 0; i--) {
+                    var txt_users = `
                 <div class="linha-empresa">
                     <p class="item-linha">${empresasGerais[i].id_empresa}</p>
                     <p class="item-linha">${empresasGerais[i].razao_social}</p>
@@ -378,10 +437,26 @@
                 </div>
             `;
 
-                divUserInfos.innerHTML += txt_users;
-            }
+                    divUserInfos.innerHTML += txt_users;
+                }
             });
     }
+
+    function limparFormularioEmpresa() {
+        razao_social.value = "";
+        cnpj.value = "";
+        email_empresa.value = "";
+        telefone.value = "";
+
+        resp_user.value = "";
+        email_user.value = "";
+        token.value = "";
+        senha_senha.value = "";
+
+        empresaEditandoId = null;
+        document.querySelector(".btn-cadastrar button").innerText = "Cadastrar nova empresa";
+    }
+
 
     function carregarPage() {
         listarEmpresas()

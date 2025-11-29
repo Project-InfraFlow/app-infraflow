@@ -19,6 +19,18 @@ router.post("/cadastrarUser", function (req, res) {
     usuarioController.cadastrarUser(req, res);
 });
 
+router.get("/empresa/:id", function (req, res) {
+    usuarioController.obterEmpresaPorId(req, res);
+});
+
+router.put("/empresa/:id", function (req, res) {
+    usuarioController.atualizarEmpresa(req, res);
+});
+
+router.delete("/empresa/:id", function (req, res) {
+    usuarioController.deletarEmpresa(req, res);
+});
+
 router.get("/pesquisarUser/:pesquisa", function (req, res) {
     usuarioController.pesquisarUser(req, res);
 });

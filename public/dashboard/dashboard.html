@@ -472,110 +472,63 @@
 
           <div id="tab-maquina" class="tab-content">
 
-            <!-- Formulário de cadastro -->
-            <form class="cadastro-form" id="maquinaForm">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="maquinaNome">Nome</label>
-                  <input type="text" id="maquinaNome" required>
-                </div>
-                <div class="form-group">
-                  <label for="maquinaSo">Sistema Operacional</label>
-                  <input type="text" id="maquinaSo" required>
-                </div>
-              </div>
+  <!-- Formulário de cadastro -->
+  <form class="cadastro-form" id="maquinaForm">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="maquinaNome">Nome</label>
+        <input type="text" id="maquinaNome" required>
+      </div>
+      <div class="form-group">
+        <label for="maquinaSo">Sistema Operacional</label>
+        <input type="text" id="maquinaSo" required>
+      </div>
+    </div>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="maquinaLocalizacao">Localização</label>
-                  <input type="text" id="maquinaLocalizacao" required>
-                </div>
-                <div class="form-group">
-                  <label for="maquinaKm">KM</label>
-                  <input type="number" id="maquinaKm" step="0.1">
-                </div>
-              </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="maquinaLocalizacao">Localização</label>
+        <input type="text" id="maquinaLocalizacao" required>
+      </div>
+      <div class="form-group">
+        <label for="maquinaKm">KM</label>
+        <input type="number" id="maquinaKm" step="0.1">
+      </div>
+    </div>
 
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save"></i>
-                  <span id="textoBotaoUsuario">Salvar</span>
-                </button>
-                <button type="reset" class="btn btn-secondary">
-                  <i class="fas fa-times"></i>
-                  Cancelar
-                </button>
-              </div>
-            </form>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i>
+        <span id="textoBotaoMaquina">Salvar</span>
+      </button>
+      <button type="reset" class="btn btn-secondary" id="cancelarEdicaoMaquinaBtn">
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
+    </div>
+  </form>
 
-            <!-- Listagem de máquinas -->
-            <div class="listar-maquinas">
+  <!-- Listagem de máquinas -->
+  <div class="listar-maquinas">
 
-              <div class="titulo">
-                <i class="bi bi-hdd-stack controlador"></i>
-                <h1>Pórticos Cadastrados</h1>
-              </div>
+    <div class="titulo">
+      <i class="bi bi-hdd-stack controlador"></i>
+      <h1>Pórticos Cadastrados</h1>
+    </div>
 
-              <div class="barra-infos-maq">
-                <p>ID</p>
-                <p>Nome</p>
-                <p>Sistema Op.</p>
-                <p>Localização</p>
-                <p>KM</p>
-                <p>Ações</p>
-              </div>
+    <div class="barra-infos-maq">
+      <p>ID</p>
+      <p>Nome</p>
+      <p>Sistema Op.</p>
+      <p>Localização</p>
+      <p>KM</p>
+      <p>Ações</p>
+    </div>
 
-              <!-- Registros -->
-              <div class="infos-maquina">
-                <p>1</p>
-                <p>INFRA-EDGE-01-Itápolis</p>
-                <p>Ubuntu 22.04</p>
-                <p>SP-333</p>
-                <p>101</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-              <!-- 
-              <div class="infos-maquina">
-                <p>2</p>
-                <p>INFRA-EDGE-02-Jaboticabal</p>
-                <p>Ubuntu 22.04</p>
-                <p>SP-099</p>
-                <p>15</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
+    <div id="maquinasContainer"></div>
+  </div>
+</div>
 
-              <div class="infos-maquina">
-                <p>3</p>
-                <p>INFRA-EDGE-03-São José dos Santos</p>
-                <p>Ubuntu 22.04</p>
-                <p>KM-414</p>
-                <p>414</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div> -->
-
-              <!-- <div class="infos-maquina">
-                <p>4</p>
-                <p>INFRA-EDGE-04-Itaguaí</p>
-                <p>Ubuntu 22.04</p>
-                <p>SP-050</p>
-                <p>221</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div> -->
-
-            </div>
-          </div>
 
         </div>
       </section>
@@ -586,22 +539,18 @@
   <script src="../js/dash.js"></script>
 
   <script>
-  // =========================
+    
   // VALIDAÇÕES
-  // =========================
   function validarEmail(email) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   }
 
-  // =========================
   // ESTADO GLOBAL DE EDIÇÃO
-  // =========================
-  var usuarioEditandoId = null; // null = criando, número = editando
+  var usuarioEditandoId = null; 
+  var maquinaEditandoId = null; 
 
-  // =========================
   // CRUD - LISTAR USUÁRIOS
-  // =========================
   function carregarUsuarios() {
     fetch("/usuarios/listar")
       .then(function (resposta) {
@@ -622,7 +571,6 @@
 
           var tipoTexto = user.tipo_permissao == 1 ? "Administrador" : "Comum";
 
-          // Monta colunas básicas
           div.innerHTML = `
             <p>${user.idusuario}</p>
             <p>${user.nome}</p>
@@ -633,7 +581,6 @@
 
           var acoesDiv = div.querySelector(".acoes");
 
-          // Botão Editar
           var btnEditar = document.createElement("button");
           btnEditar.className = "btn_actions";
           btnEditar.innerHTML = `<i class="bi bi-pencil-square"></i>`;
@@ -641,7 +588,6 @@
             prepararEdicaoUsuario(user);
           });
 
-          // Botão Excluir
           var btnExcluir = document.createElement("button");
           btnExcluir.className = "btn_actions";
           btnExcluir.innerHTML = `<i class="bi bi-trash3-fill"></i>`;
@@ -661,9 +607,7 @@
       });
   }
 
-  // =========================
-  // CRUD - PREPARAR EDIÇÃO
-  // =========================
+  // CRUD - PREPARAR EDIÇÃO USUÁRIO
   function prepararEdicaoUsuario(user) {
     var inputNome = document.getElementById("usuarioNome");
     var inputEmail = document.getElementById("usuarioEmail");
@@ -676,15 +620,13 @@
     inputNome.value = user.nome;
     inputEmail.value = user.email;
     selectTipo.value = user.tipo_permissao;
-    inputSenha.value = ""; // força definir senha ao editar, se quiser outro fluxo a gente ajusta depois
+    inputSenha.value = "";
 
     usuarioEditandoId = user.idusuario;
     textoBotao.textContent = "Atualizar";
   }
 
-  // =========================
-  // CRUD - CANCELAR EDIÇÃO
-  // =========================
+  // CRUD - CANCELAR EDIÇÃO USUÁRIO
   function cancelarEdicaoUsuario() {
     var inputNome = document.getElementById("usuarioNome");
     var inputEmail = document.getElementById("usuarioEmail");
@@ -701,11 +643,10 @@
     usuarioEditandoId = null;
   }
 
-  // =========================
-  // CRUD - SALVAR / ATUALIZAR
-  // =========================
+  // CRUD - SALVAR / ATUALIZAR USUÁRIO
+  
   function enviarFormularioUsuario(event) {
-    event.preventDefault(); // impede reload da página
+    event.preventDefault();
 
     var inputNome = document.getElementById("usuarioNome");
     var inputEmail = document.getElementById("usuarioEmail");
@@ -717,7 +658,6 @@
     var tipoUserVar = selectTipo.value;
     var senhaUserVar = inputSenha.value;
 
-    // Validações
     if (!nomeVar || !emailUserVar || !tipoUserVar || !senhaUserVar || tipoUserVar === "0") {
       alert("Preencha todos os campos obrigatórios!");
       return;
@@ -732,11 +672,9 @@
     var metodo;
 
     if (usuarioEditandoId) {
-      // UPDATE
       url = `/usuarios/${usuarioEditandoId}`;
       metodo = "PUT";
     } else {
-      // INSERT
       url = "/usuarios/cadastrarUser";
       metodo = "POST";
     }
@@ -775,9 +713,9 @@
       });
   }
 
-  // =========================
-  // CRUD - EXCLUIR
-  // =========================
+  
+  // CRUD - EXCLUIR USUÁRIO
+  
   function excluirUsuario(id) {
     if (!confirm("Deseja realmente excluir este usuário?")) {
       return;
@@ -805,9 +743,209 @@
       });
   }
 
-  // =========================
-  // BOTÃO DE SUPORTE JIRA
-  // =========================
+  // ========================= CRUD MÁQUINA ===============================
+
+  // LISTAR MÁQUINAS DA EMPRESA LOGADA
+  function carregarMaquinas() {
+    var idEmpresa = sessionStorage.ID_EMPRESA || 1; // fallback 1 se algo vier vazio
+
+    fetch(`/maquinas/listar/${idEmpresa}`)
+      .then(function (resposta) {
+        if (resposta.status === 204) {
+          return [];
+        }
+        if (!resposta.ok) {
+          throw new Error("Erro ao listar máquinas");
+        }
+        return resposta.json();
+      })
+      .then(function (lista) {
+        var container = document.getElementById("maquinasContainer");
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        lista.forEach(function (maq) {
+          var div = document.createElement("div");
+          div.className = "infos-maquina";
+
+          div.innerHTML = `
+            <p>${maq.id_maquina}</p>
+            <p>${maq.nome_maquina}</p>
+            <p>${maq.so}</p>
+            <p>${maq.localizacao}</p>
+            <p>${maq.km}</p>
+            <div class="acoes"></div>
+          `;
+
+          var acoesDiv = div.querySelector(".acoes");
+
+          var btnEditar = document.createElement("button");
+          btnEditar.className = "btn_actions";
+          btnEditar.innerHTML = `<i class="bi bi-pencil-square"></i>`;
+          btnEditar.addEventListener("click", function () {
+            prepararEdicaoMaquina(maq);
+          });
+
+          var btnExcluir = document.createElement("button");
+          btnExcluir.className = "btn_actions";
+          btnExcluir.innerHTML = `<i class="bi bi-trash3-fill"></i>`;
+          btnExcluir.addEventListener("click", function () {
+            excluirMaquina(maq.id_maquina);
+          });
+
+          acoesDiv.appendChild(btnEditar);
+          acoesDiv.appendChild(btnExcluir);
+
+          container.appendChild(div);
+        });
+      })
+      .catch(function (erro) {
+        console.error(erro);
+        alert("Não foi possível carregar as máquinas.");
+      });
+  }
+
+  // PREPARAR EDIÇÃO MÁQUINA
+  function prepararEdicaoMaquina(maq) {
+    var inputNome = document.getElementById("maquinaNome");
+    var inputSo = document.getElementById("maquinaSo");
+    var inputLocal = document.getElementById("maquinaLocalizacao");
+    var inputKm = document.getElementById("maquinaKm");
+    var textoBotao = document.getElementById("textoBotaoMaquina");
+
+    if (!inputNome || !inputSo || !inputLocal || !inputKm || !textoBotao) return;
+
+    inputNome.value = maq.nome_maquina;
+    inputSo.value = maq.so;
+    inputLocal.value = maq.localizacao;
+    inputKm.value = maq.km;
+
+    maquinaEditandoId = maq.id_maquina;
+    textoBotao.textContent = "Atualizar";
+  }
+
+  // CANCELAR EDIÇÃO MÁQUINA
+  function cancelarEdicaoMaquina() {
+    var inputNome = document.getElementById("maquinaNome");
+    var inputSo = document.getElementById("maquinaSo");
+    var inputLocal = document.getElementById("maquinaLocalizacao");
+    var inputKm = document.getElementById("maquinaKm");
+    var textoBotao = document.getElementById("textoBotaoMaquina");
+
+    if (inputNome) inputNome.value = "";
+    if (inputSo) inputSo.value = "";
+    if (inputLocal) inputLocal.value = "";
+    if (inputKm) inputKm.value = "";
+    if (textoBotao) textoBotao.textContent = "Salvar";
+
+    maquinaEditandoId = null;
+  }
+
+  // SALVAR / ATUALIZAR MÁQUINA
+  function enviarFormularioMaquina(event) {
+    event.preventDefault();
+
+    var inputNome = document.getElementById("maquinaNome");
+    var inputSo = document.getElementById("maquinaSo");
+    var inputLocal = document.getElementById("maquinaLocalizacao");
+    var inputKm = document.getElementById("maquinaKm");
+
+    var nomeVar = inputNome.value.trim();
+    var soVar = inputSo.value.trim();
+    var localVar = inputLocal.value.trim();
+    var kmVar = inputKm.value.trim();
+    var idEmpresa = sessionStorage.ID_EMPRESA || 1;
+
+    if (!nomeVar || !soVar || !localVar) {
+      alert("Preencha pelo menos Nome, Sistema Operacional e Localização da máquina.");
+      return;
+    }
+
+    var url;
+    var metodo;
+    var body;
+
+    if (maquinaEditandoId) {
+      // UPDATE
+      url = `/maquinas/${maquinaEditandoId}`;
+      metodo = "PUT";
+      body = {
+        nome_maquina: nomeVar,
+        so: soVar,
+        localizacao: localVar,
+        km: kmVar
+      };
+    } else {
+      // INSERT
+      url = "/maquinas/cadastrar";
+      metodo = "POST";
+      body = {
+        nome_maquina: nomeVar,
+        so: soVar,
+        localizacao: localVar,
+        km: kmVar,
+        fk_empresa_maquina: idEmpresa
+      };
+    }
+
+    fetch(url, {
+      method: metodo,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
+      .then(async function (resposta) {
+        if (resposta.ok) {
+          if (maquinaEditandoId) {
+            alert("Máquina atualizada com sucesso!");
+          } else {
+            alert("Máquina cadastrada com sucesso!");
+          }
+
+          cancelarEdicaoMaquina();
+          carregarMaquinas();
+        } else {
+          var erro = await resposta.text();
+          console.error(erro);
+          alert("Houve um erro ao tentar salvar a máquina.");
+        }
+      })
+      .catch(function (erro) {
+        console.error(erro);
+        alert("Erro de comunicação com o servidor.");
+      });
+  }
+
+  // EXCLUIR MÁQUINA
+  function excluirMaquina(id) {
+    if (!confirm("Deseja realmente excluir esta máquina?")) {
+      return;
+    }
+
+    fetch(`/maquinas/${id}`, {
+      method: "DELETE"
+    })
+      .then(function (resposta) {
+        if (resposta.ok) {
+          alert("Máquina excluída com sucesso!");
+
+          if (maquinaEditandoId === id) {
+            cancelarEdicaoMaquina();
+          }
+
+          carregarMaquinas();
+        } else {
+          alert("Não foi possível excluir a máquina.");
+        }
+      })
+      .catch(function (erro) {
+        console.error(erro);
+        alert("Erro de comunicação com o servidor.");
+      });
+  }
+
   function criarBotaoSuporteJira() {
     const linkBotao = document.createElement('a');
     linkBotao.innerHTML = `
@@ -861,9 +999,6 @@
     document.body.appendChild(linkBotao);
   }
 
-  // =========================
-  // NAVEGAÇÃO / TABS / LOGOUT
-  // =========================
   (function () {
     function initNav() {
       const navItems = Array.from(document.querySelectorAll('.nav-item'));
@@ -872,14 +1007,18 @@
       navItems.forEach(btn => {
         btn.addEventListener('click', () => {
           const view = btn.getAttribute('data-view');
+          if (!view) return;
+
           navItems.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           views.forEach(v => v.classList.remove('active'));
           const target = document.getElementById('view-' + view);
           if (target) target.classList.add('active');
 
-          // se entrou na aba de cadastro, podemos recarregar a lista se quiser
-          // if (view === "cadastro") carregarUsuarios();
+          if (view === "cadastro") {
+            carregarUsuarios();
+            carregarMaquinas();
+          }
         });
       });
     }
@@ -895,6 +1034,12 @@
           tabs.forEach(t => t.classList.remove('active'));
           const target = document.getElementById('tab-' + tab);
           if (target) target.classList.add('active');
+
+          if (tab === "usuario") {
+            carregarUsuarios();
+          } else if (tab === "maquina") {
+            carregarMaquinas();
+          }
         });
       });
     }
@@ -914,13 +1059,11 @@
       initLogout();
       criarBotaoSuporteJira();
 
-      // Liga o submit do formulário de usuário
       var formUsuario = document.getElementById("usuarioForm");
       if (formUsuario) {
         formUsuario.addEventListener("submit", enviarFormularioUsuario);
       }
 
-      // Botão cancelar também cancela a edição
       var btnCancelar = document.getElementById("cancelarEdicaoBtn");
       if (btnCancelar) {
         btnCancelar.addEventListener("click", function () {
@@ -928,12 +1071,23 @@
         });
       }
 
-      // Carrega lista de usuários ao abrir a página
+      var formMaquina = document.getElementById("maquinaForm");
+      if (formMaquina) {
+        formMaquina.addEventListener("submit", enviarFormularioMaquina);
+      }
+
+      var btnCancelarMaq = document.getElementById("cancelarEdicaoMaquinaBtn");
+      if (btnCancelarMaq) {
+        btnCancelarMaq.addEventListener("click", function () {
+          cancelarEdicaoMaquina();
+        });
+      }
+
       carregarUsuarios();
+      carregarMaquinas();
     });
   })();
 </script>
-
 
 
 </body>
