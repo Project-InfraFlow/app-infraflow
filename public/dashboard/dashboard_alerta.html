@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfraFlow - Sistema de Monitoramento</title>
+    <link rel="stylesheet" href="../css/dashboard_alerta.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="../assets/imgs/estrada.png">
+</head>
+<script src="../js/dash.js"></script>
+
+<body>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard">
+        <aside class="sidebar">
+
+            <nav class="nav">
+                <button data-view="overview" class="nav-item">
+                    <a href="dashboard.html">
+                        <i class="fas fa-gauge"></i>
+                        <span>Painel</span>
+                    </a>
+
+                </button>
+                <button data-view="monitor" class="nav-item">
+                    <a href="dashboard.html#monitor">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Monitoramento</span>
+                    </a>
+
+                </button>
+                <button data-view="cadastro" class="nav-item">
+                    <a href="dashboard.html#cadastro"></a>
+                    <i class="fas fa-pen-to-square"></i>
+                    <span>Cadastro</span>
+                </button>
+                <a href="dashboard_alerta.html" class="nav-item active" style="text-decoration: none;">
+                    <i class="fas fa-clock-rotate-left"></i>
+                    <span>Histórico de Alertas</span>
+                </a>
+            </nav>
+
+            <div class="divider"></div>
+
+            <!-- <div class="filters">
+        <div class="filters-title">
+          <i class="fas fa-filter"></i>
+          <span>Componentes</span>
+        </div>
+        <label class="filter-item">
+          <input type="checkbox" class="flt-comp" value="cpu" checked>
+          <span class="checkmark"></span>
+          <i class="fas fa-microchip"></i>
+          <span>CPU</span>
+        </label>
+        <label class="filter-item">
+          <input type="checkbox" class="flt-comp" value="memoria" checked>
+          <span class="checkmark"></span>
+          <i class="fas fa-memory"></i>
+          <span>Memória</span>
+        </label>
+        <label class="filter-item">
+          <input type="checkbox" class="flt-comp" value="disco" checked>
+          <span class="checkmark"></span>
+          <i class="fas fa-hdd"></i>
+          <span>Disco</span>
+        </label>
+        <label class="filter-item">
+          <input type="checkbox" class="flt-comp" value="rede" checked>
+          <span class="checkmark"></span>
+          <i class="fas fa-network-wired"></i>
+          <span>Rede</span>
+        </label>
+      </div> -->
+
+            <div class="user-section">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="sidebarUser">Admin</span>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Topbar -->
+            <header class="topbar">
+
+                <div class="brand">
+                    <a href="dashboard.html" title="Voltar para o painel principal">
+                        <img src="../assets/infra-parafundobranco.png" alt="InfraFlow">
+                    </a>
+                </div>
+                <div class="topbar-left">
+                    <div class="machine-select">
+                        <i class="fas fa-server"></i>
+                        <label for="edgeSelector"
+                            style="display:block; font-size:14px; margin-bottom:4px; color: gray;">
+                            Selecione um pórtico FreeFlow:
+                        </label>
+                        <select id="edgeSelector">
+                            <option value="INFRA-EDGE-01-Itápolis (SP-333)">INFRA-EDGE-01-Itápolis (SP-333)</option>
+                            <!-- <option value="INFRA-EDGE-02-Jaboticabal (SP-333)">INFRA-EDGE-02-Jaboticabal (SP-333)</option>
+              <option value="INFRA-EDGE-03-São José dos Campos (SP-099)">INFRA-EDGE-03-São José dos Campos (SP-099)
+              </option>
+              <option value="INFRA-EDGE-04-Itaguaí (Km 414)">INFRA-EDGE-04-Itaguaí (Km 414)</option> -->
+                        </select>
+                    </div>
+                    <div class="os-info">
+                        <i class="fab fa-ubuntu"></i>
+                        <span>Ubuntu 22.04 LTS</span>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="security-indicator">
+                        <a href="seguranca.html" class="nocsec-link" title="NOC/SOC - Centro de Segurança">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>NOC/SOC</span>
+                        </a>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Online</span>
+                    </div>
+                    <div class="last-update">
+                        <span class="update-label">Última atualização:</span>
+                        <span class="update-time" id="lastUpdateTime">--:--:--</span>
+                    </div>
+                </div>
+
+
+
+            </header>
+
+            <!-- Visão Geral -->
+            <section id="view-overview" class="view active">
+                <div class="view-header">
+                    <h1 class="view-title">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Visão analítica de alertas <span id="monitor-selecionado"></span>
+                    </h1>
+                </div>
+
+
+
+
+                <div class="kpis-grid">
+                    <div class="kpi-card" id="kpiCpu">
+                        <div class="kpi-header">
+                            <div class="kpi-icon cpu">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Quantidade de alertas (Geral)</span>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpiCpuValue">0%</div>
+
+
+                    </div>
+
+                    <div class="kpi-card" id="kpiDisco">
+                        <div class="kpi-header">
+                            <div class="kpi-info">
+                                <span class="kpi-label">Tipos dos alertas</span>
+                            </div>
+                        </div>
+
+                        <div class="tipo-alerta atencao" style="background-color: rgb(247, 226, 0);">
+                            <div id="qtd_atencao"></div>
+                            <div>
+                                <p>Atenção</p>
+                            </div>
+                        </div>
+                        <div class="tipo-alerta critico" style="background-color: rgb(152, 0, 0)">
+                            <div id="qtd_critico"></div>
+                            <div>
+                                <p style="color: white;">Critíco</p>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div class="kpi-card" id="kpiDisco">
+                        <div class="kpi-header">
+                            <div class="kpi-icon disco">
+                                <i class="bi bi-alarm-fill"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Atendimentos dentro da SLA</span>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpiDiscoValue">0%</div>
+
+
+                    </div>
+
+                    <div class="kpi-card" id="kpiRede">
+                        <div class="kpi-header">
+                            <div class="kpi-icon rede">
+                                <i class="bi bi-collection-fill"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">Status de andamento dos alertas</span>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpiRedeValue">0 Mbps</div>
+
+
+                    </div>
+                </div>
+
+
+                <div class="charts-grid">
+                    <div class="chart-container full-bleed">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <i class="fas fa-pulse"></i>
+                                Atividade ao Vivo
+                            </h3>
+                        </div>
+                        <div class="chart-content">
+                            <div id="heatmap-chart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="other-things">
+                    <div class="componentes-grid">
+                        <div class="chart-container-componentes full-bleed">
+                            <div class="chart-header">
+                                <h3 class="chart-title">
+                                    <i class="bi bi-cpu-fill"></i>
+                                    Alertas por componentes
+                                </h3>
+                            </div>
+                            <div class="chart-content-componente">
+                                <div id="componentes-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="alertas-list-grid">
+
+                        <div class="conteudo ocorrencias-box" id="ocorrenciasBox">
+
+                            <div class="ocorrencias-header">
+                                <h3 class="chart-title">
+                                    <i class="bi bi-clipboard-data-fill"></i>
+                                    Ocorrências
+                                </h3>
+
+                                <div class="ocorrencias-actions">
+                                    <button class="btn-exportar" id="btnExportarCSV">Exportar CSV</button>
+                                </div>
+                            </div>
+
+                            <!-- CABEÇALHO DAS COLUNAS — ADICIONADO -->
+                            <div class="ocorrencias-head">
+                                <div>Pórtico</div>
+                                <div>Período</div>
+                                <div>Componente</div>
+                                <div>Métrica Reg.</div>
+                                <div>Tipo</div>
+                                <div>Ação/Laudo</div>
+                            </div>
+
+                            <div class="list-ocorrencias" id="listaOcorrencias">
+
+                                <div class="ocorrencia-item critico">
+                                    <div class="col">SSP-001</div>
+                                    <div class="col">
+                                        17/11/2025<br>
+                                        <span class="sub">12:29 – 13:29</span>
+                                    </div>
+                                    <div class="col">CPU</div>
+                                    <div class="col">85%</div>
+                                    <div class="col tipo">Crítico</div>
+                                    <div class="col acao">
+                                        <button class="btn-registrar">
+                                            Registrar <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="ocorrencia-item atencao">
+                                    <div class="col">SSP-001</div>
+                                    <div class="col">
+                                        17/11/2025<br>
+                                        <span class="sub">12:29 – 13:29</span>
+                                    </div>
+                                    <div class="col">RAM</div>
+                                    <div class="col">34%</div>
+                                    <div class="col tipo">Atenção</div>
+                                    <div class="col acao">
+                                        <button class="btn-registrar">
+                                            Registrar <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- <div class="alerts-section">
+          <h2 class="section-title">
+            <i class="fas fa-exclamation-triangle"></i>
+            Alertas
+          </h2>
+          <div class="alerts-grid" id="alertsGrid">
+            <!-- Alertas serão inseridos aqui assim que eu conseguir conectar o slack rs -->
+                <!-- </div>
+        </div> -->
+                <!-- Bloco combinado: Status + Legenda lado a lado -->
+
+
+
+
+        </main>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script>
+
+        // VALIDAÇÕES
+        function validarEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
+        // ESTADO GLOBAL DE EDIÇÃO
+        var usuarioEditandoId = null;
+        var maquinaEditandoId = null;
+
+        // CRUD - LISTAR USUÁRIOS
+        function carregarUsuarios() {
+            fetch("/usuarios/listar")
+                .then(function (resposta) {
+                    if (!resposta.ok) {
+                        throw new Error("Erro ao listar usuários");
+                    }
+                    return resposta.json();
+                })
+                .then(function (lista) {
+                    var container = document.getElementById("usuariosContainer");
+                    if (!container) return;
+
+                    container.innerHTML = "";
+
+                    lista.forEach(function (user) {
+                        var div = document.createElement("div");
+                        div.className = "infos-user";
+
+                        var tipoTexto = user.tipo_permissao == 1 ? "Administrador" : "Comum";
+
+                        div.innerHTML = `
+            <p>${user.idusuario}</p>
+            <p>${user.nome}</p>
+            <p>${user.email}</p>
+            <p>${tipoTexto}</p>
+            <div class="acoes"></div>
+          `;
+
+                        var acoesDiv = div.querySelector(".acoes");
+
+                        var btnEditar = document.createElement("button");
+                        btnEditar.className = "btn_actions";
+                        btnEditar.innerHTML = `<i class="bi bi-pencil-square"></i>`;
+                        btnEditar.addEventListener("click", function () {
+                            prepararEdicaoUsuario(user);
+                        });
+
+                        var btnExcluir = document.createElement("button");
+                        btnExcluir.className = "btn_actions";
+                        btnExcluir.innerHTML = `<i class="bi bi-trash3-fill"></i>`;
+                        btnExcluir.addEventListener("click", function () {
+                            excluirUsuario(user.idusuario);
+                        });
+
+                        acoesDiv.appendChild(btnEditar);
+                        acoesDiv.appendChild(btnExcluir);
+
+                        container.appendChild(div);
+                    });
+                })
+                .catch(function (erro) {
+                    console.error(erro);
+                    alert("Não foi possível carregar os usuários.");
+                });
+        }
+
+        // CRUD - PREPARAR EDIÇÃO USUÁRIO
+        function prepararEdicaoUsuario(user) {
+            var inputNome = document.getElementById("usuarioNome");
+            var inputEmail = document.getElementById("usuarioEmail");
+            var selectTipo = document.getElementById("tipo_permissao");
+            var inputSenha = document.getElementById("usuarioSenha");
+            var textoBotao = document.getElementById("textoBotaoUsuario");
+
+            if (!inputNome || !inputEmail || !selectTipo || !inputSenha || !textoBotao) return;
+
+            inputNome.value = user.nome;
+            inputEmail.value = user.email;
+            selectTipo.value = user.tipo_permissao;
+            inputSenha.value = "";
+
+            usuarioEditandoId = user.idusuario;
+            textoBotao.textContent = "Atualizar";
+        }
+
+        // CRUD - CANCELAR EDIÇÃO USUÁRIO
+        function cancelarEdicaoUsuario() {
+            var inputNome = document.getElementById("usuarioNome");
+            var inputEmail = document.getElementById("usuarioEmail");
+            var selectTipo = document.getElementById("tipo_permissao");
+            var inputSenha = document.getElementById("usuarioSenha");
+            var textoBotao = document.getElementById("textoBotaoUsuario");
+
+            if (inputNome) inputNome.value = "";
+            if (inputEmail) inputEmail.value = "";
+            if (selectTipo) selectTipo.value = "0";
+            if (inputSenha) inputSenha.value = "";
+            if (textoBotao) textoBotao.textContent = "Salvar";
+
+            usuarioEditandoId = null;
+        }
+
+        // CRUD - SALVAR / ATUALIZAR USUÁRIO
+
+        function enviarFormularioUsuario(event) {
+            event.preventDefault();
+
+            var inputNome = document.getElementById("usuarioNome");
+            var inputEmail = document.getElementById("usuarioEmail");
+            var selectTipo = document.getElementById("tipo_permissao");
+            var inputSenha = document.getElementById("usuarioSenha");
+
+            var nomeVar = inputNome.value;
+            var emailUserVar = inputEmail.value;
+            var tipoUserVar = selectTipo.value;
+            var senhaUserVar = inputSenha.value;
+
+            if (!nomeVar || !emailUserVar || !tipoUserVar || !senhaUserVar || tipoUserVar === "0") {
+                alert("Preencha todos os campos obrigatórios!");
+                return;
+            }
+
+            if (!validarEmail(emailUserVar)) {
+                alert("Informe um e-mail válido.");
+                return;
+            }
+
+            var url;
+            var metodo;
+
+            if (usuarioEditandoId) {
+                url = `/usuarios/${usuarioEditandoId}`;
+                metodo = "PUT";
+            } else {
+                url = "/usuarios/cadastrarUser";
+                metodo = "POST";
+            }
+
+            fetch(url, {
+                method: metodo,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    nomeServer: nomeVar,
+                    emailUserServer: emailUserVar,
+                    tipoUserServer: tipoUserVar,
+                    senhaUserServer: senhaUserVar
+                }),
+            })
+                .then(async function (resposta) {
+                    if (resposta.ok) {
+                        if (usuarioEditandoId) {
+                            alert("Usuário atualizado com sucesso!");
+                        } else {
+                            alert("Usuário cadastrado com sucesso!");
+                        }
+
+                        cancelarEdicaoUsuario();
+                        carregarUsuarios();
+                    } else {
+                        var erro = await resposta.text();
+                        console.error(erro);
+                        alert("Houve um erro ao tentar salvar o usuário.");
+                    }
+                })
+                .catch(function (erro) {
+                    console.error(erro);
+                    alert("Erro de comunicação com o servidor.");
+                });
+        }
+
+
+        // CRUD - EXCLUIR USUÁRIO
+
+        function excluirUsuario(id) {
+            if (!confirm("Deseja realmente excluir este usuário?")) {
+                return;
+            }
+
+            fetch(`/usuarios/${id}`, {
+                method: "DELETE"
+            })
+                .then(function (resposta) {
+                    if (resposta.ok) {
+                        alert("Usuário excluído com sucesso!");
+
+                        if (usuarioEditandoId === id) {
+                            cancelarEdicaoUsuario();
+                        }
+
+                        carregarUsuarios();
+                    } else {
+                        alert("Não foi possível excluir o usuário.");
+                    }
+                })
+                .catch(function (erro) {
+                    console.error(erro);
+                    alert("Erro de comunicação com o servidor.");
+                });
+        }
+
+        // ========================= CRUD MÁQUINA ===============================
+
+        // LISTAR MÁQUINAS DA EMPRESA LOGADA
+        function carregarMaquinas() {
+            var idEmpresa = sessionStorage.ID_EMPRESA || 1; // fallback 1 se algo vier vazio
+
+            fetch(`/maquinas/listar/${idEmpresa}`)
+                .then(function (resposta) {
+                    if (resposta.status === 204) {
+                        return [];
+                    }
+                    if (!resposta.ok) {
+                        throw new Error("Erro ao listar máquinas");
+                    }
+                    return resposta.json();
+                })
+                .then(function (lista) {
+                    var container = document.getElementById("maquinasContainer");
+                    if (!container) return;
+
+                    container.innerHTML = "";
+
+                    lista.forEach(function (maq) {
+                        var div = document.createElement("div");
+                        div.className = "infos-maquina";
+
+                        div.innerHTML = `
+            <p>${maq.id_maquina}</p>
+            <p>${maq.nome_maquina}</p>
+            <p>${maq.so}</p>
+            <p>${maq.localizacao}</p>
+            <p>${maq.km}</p>
+            <div class="acoes"></div>
+          `;
+
+                        var acoesDiv = div.querySelector(".acoes");
+
+                        var btnEditar = document.createElement("button");
+                        btnEditar.className = "btn_actions";
+                        btnEditar.innerHTML = `<i class="bi bi-pencil-square"></i>`;
+                        btnEditar.addEventListener("click", function () {
+                            prepararEdicaoMaquina(maq);
+                        });
+
+                        var btnExcluir = document.createElement("button");
+                        btnExcluir.className = "btn_actions";
+                        btnExcluir.innerHTML = `<i class="bi bi-trash3-fill"></i>`;
+                        btnExcluir.addEventListener("click", function () {
+                            excluirMaquina(maq.id_maquina);
+                        });
+
+                        acoesDiv.appendChild(btnEditar);
+                        acoesDiv.appendChild(btnExcluir);
+
+                        container.appendChild(div);
+                    });
+                })
+                .catch(function (erro) {
+                    console.error(erro);
+                    alert("Não foi possível carregar as máquinas.");
+                });
+        }
+
+        // PREPARAR EDIÇÃO MÁQUINA
+        function prepararEdicaoMaquina(maq) {
+            var inputNome = document.getElementById("maquinaNome");
+            var inputSo = document.getElementById("maquinaSo");
+            var inputLocal = document.getElementById("maquinaLocalizacao");
+            var inputKm = document.getElementById("maquinaKm");
+            var textoBotao = document.getElementById("textoBotaoMaquina");
+
+            if (!inputNome || !inputSo || !inputLocal || !inputKm || !textoBotao) return;
+
+            inputNome.value = maq.nome_maquina;
+            inputSo.value = maq.so;
+            inputLocal.value = maq.localizacao;
+            inputKm.value = maq.km;
+
+            maquinaEditandoId = maq.id_maquina;
+            textoBotao.textContent = "Atualizar";
+        }
+
+        // CANCELAR EDIÇÃO MÁQUINA
+        function cancelarEdicaoMaquina() {
+            var inputNome = document.getElementById("maquinaNome");
+            var inputSo = document.getElementById("maquinaSo");
+            var inputLocal = document.getElementById("maquinaLocalizacao");
+            var inputKm = document.getElementById("maquinaKm");
+            var textoBotao = document.getElementById("textoBotaoMaquina");
+
+            if (inputNome) inputNome.value = "";
+            if (inputSo) inputSo.value = "";
+            if (inputLocal) inputLocal.value = "";
+            if (inputKm) inputKm.value = "";
+            if (textoBotao) textoBotao.textContent = "Salvar";
+
+            maquinaEditandoId = null;
+        }
+
+        // SALVAR / ATUALIZAR MÁQUINA
+        function enviarFormularioMaquina(event) {
+            event.preventDefault();
+
+            var inputNome = document.getElementById("maquinaNome");
+            var inputSo = document.getElementById("maquinaSo");
+            var inputLocal = document.getElementById("maquinaLocalizacao");
+            var inputKm = document.getElementById("maquinaKm");
+
+            var nomeVar = inputNome.value.trim();
+            var soVar = inputSo.value.trim();
+            var localVar = inputLocal.value.trim();
+            var kmVar = inputKm.value.trim();
+            var idEmpresa = sessionStorage.ID_EMPRESA || 1;
+
+            if (!nomeVar || !soVar || !localVar) {
+                alert("Preencha pelo menos Nome, Sistema Operacional e Localização da máquina.");
+                return;
+            }
+
+            var url;
+            var metodo;
+            var body;
+
+            if (maquinaEditandoId) {
+                // UPDATE
+                url = `/maquinas/${maquinaEditandoId}`;
+                metodo = "PUT";
+                body = {
+                    nome_maquina: nomeVar,
+                    so: soVar,
+                    localizacao: localVar,
+                    km: kmVar
+                };
+            } else {
+                // INSERT
+                url = "/maquinas/cadastrar";
+                metodo = "POST";
+                body = {
+                    nome_maquina: nomeVar,
+                    so: soVar,
+                    localizacao: localVar,
+                    km: kmVar,
+                    fk_empresa_maquina: idEmpresa
+                };
+            }
+
+            fetch(url, {
+                method: metodo,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(body),
+            })
+                .then(async function (resposta) {
+                    if (resposta.ok) {
+                        if (maquinaEditandoId) {
+                            alert("Máquina atualizada com sucesso!");
+                        } else {
+                            alert("Máquina cadastrada com sucesso!");
+                        }
+
+                        cancelarEdicaoMaquina();
+                        carregarMaquinas();
+                    } else {
+                        var erro = await resposta.text();
+                        console.error(erro);
+                        alert("Houve um erro ao tentar salvar a máquina.");
+                    }
+                })
+                .catch(function (erro) {
+                    console.error(erro);
+                    alert("Erro de comunicação com o servidor.");
+                });
+        }
+
+        // EXCLUIR MÁQUINA
+        function excluirMaquina(id) {
+            if (!confirm("Deseja realmente excluir esta máquina?")) {
+                return;
+            }
+
+            fetch(`/maquinas/${id}`, {
+                method: "DELETE"
+            })
+                .then(function (resposta) {
+                    if (resposta.ok) {
+                        alert("Máquina excluída com sucesso!");
+
+                        if (maquinaEditandoId === id) {
+                            cancelarEdicaoMaquina();
+                        }
+
+                        carregarMaquinas();
+                    } else {
+                        alert("Não foi possível excluir a máquina.");
+                    }
+                })
+                .catch(function (erro) {
+                    console.error(erro);
+                    alert("Erro de comunicação com o servidor.");
+                });
+        }
+
+        function criarBotaoSuporteJira() {
+            const linkBotao = document.createElement('a');
+            linkBotao.innerHTML = `
+      <img src="../assets/icon/iconeJira.png" alt="Ícone de Suporte" width="24" height="24" />
+      Suporte
+    `;
+            linkBotao.title = "Acessar o Help Desk do Jira";
+            linkBotao.href = "https://infraflow-sptech.atlassian.net/servicedesk/customer/portal/2";
+            linkBotao.target = "_blank";
+            linkBotao.style.cssText = `
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 9999;
+      margin: 0;
+      padding: 12px 24px;
+      border-radius: 50px;
+      border: none;
+      text-decoration: none;
+      background-color: #0052CC;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      font-weight: 600;
+      font-size: 16px;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
+    `;
+
+            linkBotao.onmouseover = function () {
+                linkBotao.style.backgroundColor = '#0065FF';
+                linkBotao.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+            };
+            linkBotao.onmouseout = function () {
+                linkBotao.style.backgroundColor = '#0052CC';
+                linkBotao.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.25)';
+                linkBotao.style.transform = 'scale(1)';
+            };
+
+            linkBotao.onmousedown = function () {
+                linkBotao.style.transform = 'scale(0.98)';
+            };
+
+            linkBotao.onmouseup = function () {
+                linkBotao.style.transform = 'scale(1)';
+            };
+
+            document.body.appendChild(linkBotao);
+        }
+
+        (function () {
+            function initNav() {
+                const navItems = Array.from(document.querySelectorAll('.nav-item'));
+                const views = Array.from(document.querySelectorAll('.view'));
+
+                navItems.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const view = btn.getAttribute('data-view');
+                        if (!view) return;
+
+                        navItems.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        views.forEach(v => v.classList.remove('active'));
+                        const target = document.getElementById('view-' + view);
+                        if (target) target.classList.add('active');
+
+                        if (view === "cadastro") {
+                            carregarUsuarios();
+                            carregarMaquinas();
+                        }
+                    });
+                });
+            }
+
+            function initCadastroTabs() {
+                const btns = Array.from(document.querySelectorAll('.cadastro-tabs .tab-btn'));
+                const tabs = Array.from(document.querySelectorAll('.cadastro-content .tab-content'));
+                btns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tab = btn.getAttribute('data-tab');
+                        btns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        tabs.forEach(t => t.classList.remove('active'));
+                        const target = document.getElementById('tab-' + tab);
+                        if (target) target.classList.add('active');
+
+                        if (tab === "usuario") {
+                            carregarUsuarios();
+                        } else if (tab === "maquina") {
+                            carregarMaquinas();
+                        }
+                    });
+                });
+            }
+
+            function initLogout() {
+                const btn = document.getElementById('logoutBtn');
+                if (!btn) return;
+                btn.addEventListener('click', function () {
+                    try { sessionStorage.clear(); localStorage.removeItem('login_email'); } catch (e) { }
+                    window.location.replace('../login.html');
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                initNav();
+                initCadastroTabs();
+                initLogout();
+                criarBotaoSuporteJira();
+
+                var formUsuario = document.getElementById("usuarioForm");
+                if (formUsuario) {
+                    formUsuario.addEventListener("submit", enviarFormularioUsuario);
+                }
+
+                var btnCancelar = document.getElementById("cancelarEdicaoBtn");
+                if (btnCancelar) {
+                    btnCancelar.addEventListener("click", function () {
+                        cancelarEdicaoUsuario();
+                    });
+                }
+
+                var formMaquina = document.getElementById("maquinaForm");
+                if (formMaquina) {
+                    formMaquina.addEventListener("submit", enviarFormularioMaquina);
+                }
+
+                var btnCancelarMaq = document.getElementById("cancelarEdicaoMaquinaBtn");
+                if (btnCancelarMaq) {
+                    btnCancelarMaq.addEventListener("click", function () {
+                        cancelarEdicaoMaquina();
+                    });
+                }
+
+                carregarUsuarios();
+                carregarMaquinas();
+            });
+        })();
+
+
+        const box = document.getElementById("ocorrenciasBox");
+        const btnVerMais = document.getElementById("btnVerMais");
+        const btnCSV = document.getElementById("btnExportarCSV");
+
+        btnVerMais.addEventListener("click", () => {
+            box.classList.toggle("expandido");
+
+            btnVerMais.textContent =
+                box.classList.contains("expandido")
+                    ? "Ver menos"
+                    : "Ver mais";
+        });
+
+
+        btnCSV.addEventListener("click", () => {
+            const rows = [
+                ["Pórtico", "Data", "Horário", "Componente", "Métrica", "Tipo"],
+                ["SSP-001", "17/11/2025", "12:29 – 13:29", "CPU", "85%", "Crítico"],
+                ["SSP-001", "17/11/2025", "12:29 – 13:29", "RAM", "34%", "Atenção"],
+            ];
+
+            let csv = "";
+            rows.forEach(r => {
+                csv += r.join(";") + "\n";
+            });
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "ocorrencias.csv";
+            a.click();
+        });
+    </script>
+
+
+</body>
+
+</html>

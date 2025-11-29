@@ -96,7 +96,7 @@ var options = {
   ]
 };
 
-var chart = new ApexCharts(document.querySelector("#chart-heatmap"), options);
+var chart = new ApexCharts(document.querySelector("#heatmap-chart"), options);
 chart.render();
 
 
@@ -118,166 +118,6 @@ chart.render();
   <div id="alertsSidebarList" aria-live="polite"></div>
 `;
 
-    function mountSidebar() {
-        if (!document.body.contains(sidebar)) document.body.appendChild(sidebar);
-        document.body.classList.add('with-alerts-sidebar', 'has-fixed-topbar');
-        fixPositions();
-    }
-
-    function fixPositions() {
-        const tb = document.querySelector('.topbar') || document.getElementById('topbar');
-        const h = tb ? tb.offsetHeight : 64;
-        sidebar.style.top = h + 'px';
-        sidebar.style.height = `calc(100vh - ${h}px)`;
-        document.body.style.paddingTop = h + 'px';
-    }
-
-    window.addEventListener('resize', fixPositions);
-    document.addEventListener('DOMContentLoaded', () => {
-        mountSidebar();
-        setTimeout(fixPositions, 0);
-    });
-
-    const state = { feed: [], filterText: '' };
-
-    function normalizeLevel(l) {
-        const v = String(l || '').toUpperCase();
-        if (v === 'CRITICAL' || v === 'CRITICO' || v === 'CRÍTICO') return 'CRITICO';
-        return 'ATENCAO';
-    }
-
-    function setAlertCountFromDOM() {
-        const c = document.querySelectorAll('#alertsSidebarList .a-card:not([data-hidden="1"])').length;
-        const lbl = document.getElementById('alertCount');
-        if (lbl) lbl.textContent = String(c);
-    }
-
-    function applyFilter() {
-        const q = state.filterText.trim().toLowerCase();
-        const list = document.getElementById('alertsSidebarList');
-        if (!list) return;
-        const cards = list.querySelectorAll('.a-card');
-        cards.forEach(card => {
-            const txt = card.textContent.toLowerCase();
-            const match = q === '' ? true : txt.includes(q);
-            card.style.display = match ? '' : 'none';
-            card.dataset.hidden = match ? '' : '1';
-        });
-        setAlertCountFromDOM();
-    }
-
-    function prependAlertCard(item) {
-        const list = document.getElementById('alertsSidebarList');
-        if (!list) return;
-        const level = normalizeLevel(item.level);
-        const obj = { id: item.id || (Date.now() + ''), level, source: item.source, msg: item.msg, time: item.time || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) };
-        state.feed.unshift(obj);
-        if (state.feed.length > FEED_MAX) state.feed.pop();
-        const card = document.createElement('div');
-        card.className = 'a-card ' + obj.level;
-        card.dataset.alertId = obj.id;
-        card.innerHTML = `
-      <div class="a-head">
-        <span class="a-time">${obj.time}</span>
-        <span class="a-level" style="font-size:12px; font-weight:800; color:#0f172a">${obj.level === 'CRITICO' ? 'CRÍTICO' : 'ATENÇÃO'}</span>
-      </div>
-      <div class="a-source">${obj.source}</div>
-      <div class="a-msg">${obj.msg}</div>
-      <div class="a-action">
-        <button class="btn-action" data-id="${card.dataset.alertId}">Ação</button>
-      </div>
-    `;
-        list.prepend(card);
-        list.scrollTop = 0;
-        applyAlertsFilter();
-        syncAlertCount();
-    }
-
-    document.addEventListener('click', (e) => {
-        if (e.target && e.target.id === 'alertsSidebarClear') {
-            state.feed = [];
-            const list = document.getElementById('alertsSidebarList');
-            if (list) list.innerHTML = '';
-            setAlertCountFromDOM();
-        }
-    });
-
-    document.addEventListener('click', async (e) => {
-        const btn = e.target.closest('.btn-action');
-        if (!btn) return;
-        const id = btn.getAttribute('data-id');
-        const card = btn.closest('.a-card');
-        const item = state.feed.find(x => String(x.id) === String(id));
-        if (!item) return;
-        const acao = window.prompt('Descreva a ação tomada para este incidente:', '');
-        if (acao === null) return;
-        const payload = { alertId: id, source: item.source, level: item.level, message: item.msg, time: item.time, action: acao };
-        try {
-            const resp = await fetch(ENDPOINT_ACAO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!resp.ok) throw new Error('Falha ao salvar ação');
-            item.action = acao;
-            item.actionTime = new Date().toLocaleString('pt-BR');
-            btn.textContent = 'Registrado';
-            btn.disabled = true;
-            btn.style.background = '#0ea5e9';
-            btn.style.cursor = 'default';
-            const done = document.createElement('div');
-            done.className = 'a-done';
-            done.textContent = `Ação: ${item.action} • ${item.actionTime}`;
-            card.appendChild(done);
-        } catch (err) {
-            alert('Erro ao registrar ação: ' + err.message);
-        }
-    });
-
-    window.pushAlert = function ({ level = 'INFO', source = 'Pórtico', msg = '', time = null, id = null }) {
-        prependAlertCard({ id: id || Date.now() + Math.random().toString(16).slice(2), level, source, msg, time: time || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) });
-    };
-
-    function seedMany(qtd = 36) {
-        const fontes = ['INFRA-EDGE-01 (SP-333)', 'INFRA-EDGE-02 (SP-333)', 'INFRA-EDGE-03 (SP-099)', 'INFRA-EDGE-04 (Km 414)'];
-        const levels = ['ATENÇÃO', 'CRITICO'];
-        const msgs = [
-            'CPU ultrapassou 70% de uso, iniciar monitoramento intensivo.',
-            'CPU acima de 85%, risco de saturação iminente.',
-            'Memória RAM acima de 75%, desempenho pode ser afetado.',
-            'Memória RAM em 85%, limite crítico atingido.',
-            'Disco acima de 80%, espaço disponível em nível de atenção.',
-            'Disco acima de 90%, risco de saturação do armazenamento.',
-            'Rede com uso acima de 70%, tráfego em nível de atenção.',
-            'Rede acima de 85%, possível saturação no enlace.',
-            'CPU e Memória simultaneamente em alta utilização.'
-        ];
-        const now = new Date();
-        for (let i = qtd - 1; i >= 0; i--) {
-            const t = new Date(now.getTime() - i * 90 * 1000);
-            prependAlertCard({ id: 'seed-' + i, level: levels[Math.floor(Math.random() * levels.length)], source: fontes[Math.floor(Math.random() * fontes.length)], msg: msgs[Math.floor(Math.random() * msgs.length)], time: t.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) });
-        }
-    }
-
-    const lastCross = { cpu: false, memoria: false, disco: false, rede: false };
-    function evaluatePoint(ponto, fonte = "Sistema") {
-        if (!ponto) return;
-
-        const hora = new Date().toLocaleTimeString("pt-BR");
-        const last = window._lastCrossState || {};
-        window._lastCrossState = last;
-
-        function cross(key, cond, level, msg) {
-            if (cond && !last[key]) {
-                pushAlert({
-                    id: Date.now() + "-" + key,
-                    time: hora,
-                    level: level,
-                    source: fonte,
-                    msg: msg
-                });
-            }
-            last[key] = cond;
-        }
-      }
-
-
 // KPIS DA DASH 
 
 function kpiAlertasTotais() {
@@ -292,3 +132,5 @@ function kpiAlertasTotais() {
 
     })
 }
+
+
