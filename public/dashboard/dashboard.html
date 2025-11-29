@@ -405,6 +405,9 @@
 
 
           <div id="tab-usuario" class="tab-content active">
+
+
+
             <form class="cadastro-form" id="usuarioForm">
               <div class="form-row">
                 <div class="form-group">
@@ -416,6 +419,7 @@
                   <input type="email" id="usuarioEmail" required>
                 </div>
               </div>
+
               <div class="form-row">
                 <div class="form-group">
                   <label for="usuarioTipo">Tipo</label>
@@ -425,26 +429,28 @@
                     <option value="2">Comum</option>
                   </select>
                 </div>
+
                 <div class="form-group">
                   <label for="usuarioSenha">Senha</label>
                   <input type="password" id="usuarioSenha" required>
                 </div>
               </div>
+
               <div class="form-actions">
-                <button type="submit" onclick="cadastrarUser()" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary">
                   <i class="fas fa-save"></i>
-                  Salvar
+                  <span id="textoBotaoUsuario">Salvar</span>
                 </button>
-                <button type="reset" class="btn btn-secondary">
+
+                <button type="reset" class="btn btn-secondary" id="cancelarEdicaoBtn">
                   <i class="fas fa-times"></i>
                   Cancelar
                 </button>
               </div>
             </form>
 
+
             <div class="listar-users">
-
-
               <div class="titulo">
                 <i class="bi bi-person-fill-add controlador"></i>
                 <h1>Usuários Cadastrados</h1>
@@ -458,62 +464,9 @@
                 <p>Ações</p>
               </div>
 
-              <div class="infos-user">
-                <p>1</p>
-                <p>Vinicius Melo</p>
-                <p>viniciusmelo@ecorodovias.com</p>
-                <p>Comum</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-user">
-                <p>2</p>
-                <p>Rafael Brandão</p>
-                <p>rafaelbrandão@ecorodovias.com</p>
-                <p>Comum</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-user">
-                <p>3</p>
-                <p>Mariana Silva</p>
-                <p>marianasilva@ecorodovias.com</p>
-                <p>Comum</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-user">
-                <p>4</p>
-                <p>Marcelo Noronha</p>
-                <p>marcelonoronha@ecorodovias.com</p>
-                <p>Comum</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-user">
-                <p>5</p>
-                <p>Vivian Silva</p>
-                <p>viviansilva@ecorodovias.com</p>
-                <p>Comum</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-
-              </div>
+              <div id="usuariosContainer"></div>
             </div>
+
 
           </div>
 
@@ -546,7 +499,7 @@
               <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
                   <i class="fas fa-save"></i>
-                  Salvar
+                  <span id="textoBotaoUsuario">Salvar</span>
                 </button>
                 <button type="reset" class="btn btn-secondary">
                   <i class="fas fa-times"></i>
@@ -633,149 +586,354 @@
   <script src="../js/dash.js"></script>
 
   <script>
-    function validarEmail(email) {
-      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return regex.test(email);
-    }
+  // =========================
+  // VALIDAÇÕES
+  // =========================
+  function validarEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  }
 
-    // 🔐 Validação no estilo Microsoft
-    function validarSenhaMicrosoft(senha) {
-      // Pelo menos 8 caracteres, 1 maiúscula, 1 minúscula, 1 número e 1 símbolo
-      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
-      return regex.test(senha);
-    }
+  // =========================
+  // ESTADO GLOBAL DE EDIÇÃO
+  // =========================
+  var usuarioEditandoId = null; // null = criando, número = editando
 
-    function cadastrarUser() {
-
-      var nomeVar = usuarioNome.value;
-      var emailUserVar = usuarioEmail.value;
-      var tipoUserVar = tipo_permissao.value;
-      var senhaUserVar = usuarioSenha.value;
-
-
-      // === Validações principais ===
-      if (!nomeVar || !emailUserVar || !tipoUserVar || !senhaUserVar) {
-        alert("Preencha todos os campos obrigatórios!");
-        return false;
-      }
-
-      if (!validarSenhaMicrosoft(senhaUserVar)) {
-        alert(
-          "A senha deve seguir o formato da Microsoft:\n\n" +
-          "• Mínimo de 8 caracteres\n" +
-          "• Pelo menos 1 letra maiúscula\n" +
-          "• Pelo menos 1 letra minúscula\n" +
-          "• Pelo menos 1 número\n" +
-          "• Pelo menos 1 caractere especial (!@#$%^&* etc.)"
-        );
-        return false;
-      }
-
-
-      fetch("/usuarios/cadastrarUser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          // crie um atributo que recebe o valor recuperado aqui
-          // Agora vá para o arquivo routes/usuario.js
-          nomeServer: nomeVar,
-          emailUserServer: emailUserVar,
-          tipoUserServer: tipoUserVar,
-          senhaUserServer: senhaUserVar
-        }),
+  // =========================
+  // CRUD - LISTAR USUÁRIOS
+  // =========================
+  function carregarUsuarios() {
+    fetch("/usuarios/listar")
+      .then(function (resposta) {
+        if (!resposta.ok) {
+          throw new Error("Erro ao listar usuários");
+        }
+        return resposta.json();
       })
-        .then(async resposta => {
-          var migramos = await resposta.json()
+      .then(function (lista) {
+        var container = document.getElementById("usuariosContainer");
+        if (!container) return;
 
-          console.log("testando..." + migramos)
+        container.innerHTML = "";
 
-          if (resposta.ok) {
+        lista.forEach(function (user) {
+          var div = document.createElement("div");
+          div.className = "infos-user";
 
-            alert("Usuário cadastrada com sucesso!")
+          var tipoTexto = user.tipo_permissao == 1 ? "Administrador" : "Comum";
 
-            usuarioNome.value = "";
-            usuarioEmail.value = "";
-            usuarioSenha.value = "";
+          // Monta colunas básicas
+          div.innerHTML = `
+            <p>${user.idusuario}</p>
+            <p>${user.nome}</p>
+            <p>${user.email}</p>
+            <p>${tipoTexto}</p>
+            <div class="acoes"></div>
+          `;
 
-            //   setTimeout(() => {
-            //     window.location = "login.html";
-            //   }, "2000");
+          var acoesDiv = div.querySelector(".acoes");
 
-          } else {
-            alert("Houve um erro ao tentar realizar o cadastro!");
-          }
-        })
-        .catch(function (resposta) {
-          console.log(`#ERRO: ${resposta}`);
-
-        });
-
-      return false;
-    }
-
-
-
-    (function () {
-      function initNav() {
-        const navItems = Array.from(document.querySelectorAll('.nav-item'));
-        const views = Array.from(document.querySelectorAll('.view'));
-
-        navItems.forEach(btn => {
-          btn.addEventListener('click', () => {
-            const view = btn.getAttribute('data-view');
-            navItems.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            views.forEach(v => v.classList.remove('active'));
-            const target = document.getElementById('view-' + view);
-            if (target) target.classList.add('active');
+          // Botão Editar
+          var btnEditar = document.createElement("button");
+          btnEditar.className = "btn_actions";
+          btnEditar.innerHTML = `<i class="bi bi-pencil-square"></i>`;
+          btnEditar.addEventListener("click", function () {
+            prepararEdicaoUsuario(user);
           });
-        });
-      }
 
-      function initCadastroTabs() {
-        const btns = Array.from(document.querySelectorAll('.cadastro-tabs .tab-btn'));
-        const tabs = Array.from(document.querySelectorAll('.cadastro-content .tab-content'));
-        btns.forEach(btn => {
-          btn.addEventListener('click', () => {
-            const tab = btn.getAttribute('data-tab');
-            btns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            tabs.forEach(t => t.classList.remove('active'));
-            const target = document.getElementById('tab-' + tab);
-            if (target) target.classList.add('active');
+          // Botão Excluir
+          var btnExcluir = document.createElement("button");
+          btnExcluir.className = "btn_actions";
+          btnExcluir.innerHTML = `<i class="bi bi-trash3-fill"></i>`;
+          btnExcluir.addEventListener("click", function () {
+            excluirUsuario(user.idusuario);
           });
-        });
-      }
 
-      function initLogout() {
-        const btn = document.getElementById('logoutBtn');
-        if (!btn) return;
-        btn.addEventListener('click', function () {
-          try { sessionStorage.clear(); localStorage.removeItem('login_email'); } catch (e) { }
-          window.location.replace('../login.html');
-        });
-      }
+          acoesDiv.appendChild(btnEditar);
+          acoesDiv.appendChild(btnExcluir);
 
-      document.addEventListener('DOMContentLoaded', function () {
-        initNav();
-        initCadastroTabs();
-        initLogout();
+          container.appendChild(div);
+        });
+      })
+      .catch(function (erro) {
+        console.error(erro);
+        alert("Não foi possível carregar os usuários.");
       });
-    })();
+  }
 
+  // =========================
+  // CRUD - PREPARAR EDIÇÃO
+  // =========================
+  function prepararEdicaoUsuario(user) {
+    var inputNome = document.getElementById("usuarioNome");
+    var inputEmail = document.getElementById("usuarioEmail");
+    var selectTipo = document.getElementById("tipo_permissao");
+    var inputSenha = document.getElementById("usuarioSenha");
+    var textoBotao = document.getElementById("textoBotaoUsuario");
 
-    function edit_user() {
-      alert("oieeeeee")
+    if (!inputNome || !inputEmail || !selectTipo || !inputSenha || !textoBotao) return;
+
+    inputNome.value = user.nome;
+    inputEmail.value = user.email;
+    selectTipo.value = user.tipo_permissao;
+    inputSenha.value = ""; // força definir senha ao editar, se quiser outro fluxo a gente ajusta depois
+
+    usuarioEditandoId = user.idusuario;
+    textoBotao.textContent = "Atualizar";
+  }
+
+  // =========================
+  // CRUD - CANCELAR EDIÇÃO
+  // =========================
+  function cancelarEdicaoUsuario() {
+    var inputNome = document.getElementById("usuarioNome");
+    var inputEmail = document.getElementById("usuarioEmail");
+    var selectTipo = document.getElementById("tipo_permissao");
+    var inputSenha = document.getElementById("usuarioSenha");
+    var textoBotao = document.getElementById("textoBotaoUsuario");
+
+    if (inputNome) inputNome.value = "";
+    if (inputEmail) inputEmail.value = "";
+    if (selectTipo) selectTipo.value = "0";
+    if (inputSenha) inputSenha.value = "";
+    if (textoBotao) textoBotao.textContent = "Salvar";
+
+    usuarioEditandoId = null;
+  }
+
+  // =========================
+  // CRUD - SALVAR / ATUALIZAR
+  // =========================
+  function enviarFormularioUsuario(event) {
+    event.preventDefault(); // impede reload da página
+
+    var inputNome = document.getElementById("usuarioNome");
+    var inputEmail = document.getElementById("usuarioEmail");
+    var selectTipo = document.getElementById("tipo_permissao");
+    var inputSenha = document.getElementById("usuarioSenha");
+
+    var nomeVar = inputNome.value;
+    var emailUserVar = inputEmail.value;
+    var tipoUserVar = selectTipo.value;
+    var senhaUserVar = inputSenha.value;
+
+    // Validações
+    if (!nomeVar || !emailUserVar || !tipoUserVar || !senhaUserVar || tipoUserVar === "0") {
+      alert("Preencha todos os campos obrigatórios!");
+      return;
     }
 
-    function delete_user() {
-      alert("aaaaaaaaa")
+    if (!validarEmail(emailUserVar)) {
+      alert("Informe um e-mail válido.");
+      return;
     }
 
+    var url;
+    var metodo;
 
-  </script>
+    if (usuarioEditandoId) {
+      // UPDATE
+      url = `/usuarios/${usuarioEditandoId}`;
+      metodo = "PUT";
+    } else {
+      // INSERT
+      url = "/usuarios/cadastrarUser";
+      metodo = "POST";
+    }
+
+    fetch(url, {
+      method: metodo,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nomeServer: nomeVar,
+        emailUserServer: emailUserVar,
+        tipoUserServer: tipoUserVar,
+        senhaUserServer: senhaUserVar
+      }),
+    })
+      .then(async function (resposta) {
+        if (resposta.ok) {
+          if (usuarioEditandoId) {
+            alert("Usuário atualizado com sucesso!");
+          } else {
+            alert("Usuário cadastrado com sucesso!");
+          }
+
+          cancelarEdicaoUsuario();
+          carregarUsuarios();
+        } else {
+          var erro = await resposta.text();
+          console.error(erro);
+          alert("Houve um erro ao tentar salvar o usuário.");
+        }
+      })
+      .catch(function (erro) {
+        console.error(erro);
+        alert("Erro de comunicação com o servidor.");
+      });
+  }
+
+  // =========================
+  // CRUD - EXCLUIR
+  // =========================
+  function excluirUsuario(id) {
+    if (!confirm("Deseja realmente excluir este usuário?")) {
+      return;
+    }
+
+    fetch(`/usuarios/${id}`, {
+      method: "DELETE"
+    })
+      .then(function (resposta) {
+        if (resposta.ok) {
+          alert("Usuário excluído com sucesso!");
+
+          if (usuarioEditandoId === id) {
+            cancelarEdicaoUsuario();
+          }
+
+          carregarUsuarios();
+        } else {
+          alert("Não foi possível excluir o usuário.");
+        }
+      })
+      .catch(function (erro) {
+        console.error(erro);
+        alert("Erro de comunicação com o servidor.");
+      });
+  }
+
+  // =========================
+  // BOTÃO DE SUPORTE JIRA
+  // =========================
+  function criarBotaoSuporteJira() {
+    const linkBotao = document.createElement('a');
+    linkBotao.innerHTML = `
+      <img src="../assets/icon/iconeJira.png" alt="Ícone de Suporte" width="24" height="24" />
+      Suporte
+    `;
+    linkBotao.title = "Acessar o Help Desk do Jira";
+    linkBotao.href = "https://infraflow-sptech.atlassian.net/servicedesk/customer/portal/2";
+    linkBotao.target = "_blank";
+    linkBotao.style.cssText = `
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 9999;
+      margin: 0;
+      padding: 12px 24px;
+      border-radius: 50px;
+      border: none;
+      text-decoration: none;
+      background-color: #0052CC;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      font-weight: 600;
+      font-size: 16px;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
+    `;
+
+    linkBotao.onmouseover = function () {
+      linkBotao.style.backgroundColor = '#0065FF';
+      linkBotao.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+    };
+    linkBotao.onmouseout = function () {
+      linkBotao.style.backgroundColor = '#0052CC';
+      linkBotao.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.25)';
+      linkBotao.style.transform = 'scale(1)';
+    };
+
+    linkBotao.onmousedown = function () {
+      linkBotao.style.transform = 'scale(0.98)';
+    };
+
+    linkBotao.onmouseup = function () {
+      linkBotao.style.transform = 'scale(1)';
+    };
+
+    document.body.appendChild(linkBotao);
+  }
+
+  // =========================
+  // NAVEGAÇÃO / TABS / LOGOUT
+  // =========================
+  (function () {
+    function initNav() {
+      const navItems = Array.from(document.querySelectorAll('.nav-item'));
+      const views = Array.from(document.querySelectorAll('.view'));
+
+      navItems.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const view = btn.getAttribute('data-view');
+          navItems.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          views.forEach(v => v.classList.remove('active'));
+          const target = document.getElementById('view-' + view);
+          if (target) target.classList.add('active');
+
+          // se entrou na aba de cadastro, podemos recarregar a lista se quiser
+          // if (view === "cadastro") carregarUsuarios();
+        });
+      });
+    }
+
+    function initCadastroTabs() {
+      const btns = Array.from(document.querySelectorAll('.cadastro-tabs .tab-btn'));
+      const tabs = Array.from(document.querySelectorAll('.cadastro-content .tab-content'));
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.getAttribute('data-tab');
+          btns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          tabs.forEach(t => t.classList.remove('active'));
+          const target = document.getElementById('tab-' + tab);
+          if (target) target.classList.add('active');
+        });
+      });
+    }
+
+    function initLogout() {
+      const btn = document.getElementById('logoutBtn');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        try { sessionStorage.clear(); localStorage.removeItem('login_email'); } catch (e) { }
+        window.location.replace('../login.html');
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      initNav();
+      initCadastroTabs();
+      initLogout();
+      criarBotaoSuporteJira();
+
+      // Liga o submit do formulário de usuário
+      var formUsuario = document.getElementById("usuarioForm");
+      if (formUsuario) {
+        formUsuario.addEventListener("submit", enviarFormularioUsuario);
+      }
+
+      // Botão cancelar também cancela a edição
+      var btnCancelar = document.getElementById("cancelarEdicaoBtn");
+      if (btnCancelar) {
+        btnCancelar.addEventListener("click", function () {
+          cancelarEdicaoUsuario();
+        });
+      }
+
+      // Carrega lista de usuários ao abrir a página
+      carregarUsuarios();
+    });
+  })();
+</script>
+
 
 
 </body>

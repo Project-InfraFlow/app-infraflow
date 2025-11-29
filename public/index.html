@@ -362,7 +362,6 @@
 
 </html>
 
-<!-- Script EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
   (function () {
@@ -372,22 +371,54 @@
   document.querySelector(".btn-msg").addEventListener("click", function (e) {
     e.preventDefault();
 
-    const params = {
-      nome: document.getElementById("nomecli").value,
-      email: document.getElementById("emailcli").value,
-      mensagem: document.getElementById("mensagem").value
-    };
+    const nome = document.getElementById("nomecli").value.trim();
+    const email = document.getElementById("emailcli").value.trim();
+    const mensagem = document.getElementById("mensagem").value.trim();
+    const msgStatus = document.getElementById("msg-status");
+
+    if (!nome || !email || !mensagem) {
+      if (msgStatus) msgStatus.textContent = "Preencha todos os campos antes de enviar.";
+      return;
+    }
+
+    const params = { nome, email, mensagem };
 
     emailjs.send("service_27efhms", "template_2si46yr", params)
-      .then(() => alert("Mensagem enviada com sucesso!"))
-      .catch(err => console.error("Erro:", err));
+      .then(() => {
+        alert("Mensagem enviada com sucesso!");
+
+        if (msgStatus) msgStatus.textContent = "Mensagem enviada. Obrigado pelo contato!";
+
+        document.getElementById("nomecli").value = "";
+        document.getElementById("emailcli").value = "";
+        document.getElementById("mensagem").value = "";
+      })
+      .catch(err => {
+        console.error("Erro ao enviar e-mail:", err);
+        if (msgStatus) msgStatus.textContent = "Não foi possível enviar o e-mail agora.";
+      });
+
+    fetch("/contato", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(params)
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("Falha ao salvar contato no banco");
+        }
+        console.log("Contato salvo no banco com sucesso.");
+      })
+      .catch(err => {
+        console.error("Erro ao salvar contato:", err);
+      });
   });
 
-  // Fecha o menu 
   document.querySelectorAll('.navbar a').forEach(link => {
     link.addEventListener('click', () => {
       document.getElementById('menu-toggle').checked = false;
     });
   });
-
 </script>

@@ -19,7 +19,6 @@ function autenticar(req, res) {
                 if (Array.isArray(resultadoAutenticar) && resultadoAutenticar.length == 1) {
                     const r = resultadoAutenticar[0];
 
-
                     const ip = req.ip || (req.connection && req.connection.remoteAddress) || null;
                     const userAgent = req.headers['user-agent'] || null;
 
@@ -130,14 +129,19 @@ function cadastrarUser(req, res) {
 }
 
 function pesquisarUser(req, res) {
-    let param_pesq = req.params.pesquisa
+    let param_pesq = req.params.pesquisa;
 
     usuarioModel.pesquisarUser(param_pesq)
         .then(resultado => {
             if (resultado.length > 0) {
-                res.status(200).json(resultado)
+                res.status(200).json(resultado);
+            } else {
+                res.status(204).send();
             }
         })
+        .catch(function (erro) {
+            res.status(500).json(erro.sqlMessage || "Erro ao pesquisar usuário");
+        });
 }
 
 function enviarCodigoReset(req, res) {
@@ -175,7 +179,6 @@ function enviarCodigoReset(req, res) {
 }
 
 //=========================== Controller dashboard de Segurança  ==========================================
-
 
 function buscarLogsAWS(req, res) {
     const { exec } = require('child_process');
@@ -324,6 +327,63 @@ function logout(req, res) {
         });
 }
 
+// ================== NOVAS FUNÇÕES DO CRUD (LISTAR / ATUALIZAR / DELETAR) ==================
+
+function listar(req, res) {
+    usuarioModel.listar()
+        .then(function (resultado) {
+            if (resultado.length > 0) {
+                res.status(200).json(resultado);
+            } else {
+                res.status(204).send();
+            }
+        })
+        .catch(function (erro) {
+            console.error("Erro ao listar usuários:", erro);
+            res.status(500).json(erro.sqlMessage || "Erro interno ao listar usuários");
+        });
+}
+
+function atualizarUser(req, res) {
+    var id = req.params.id;
+    var nome = req.body.nomeServer;
+    var email = req.body.emailUserServer;
+    var tipo_user = req.body.tipoUserServer;
+    var senha = req.body.senhaUserServer;
+
+    if (!id) {
+        res.status(400).send("ID do usuário não informado!");
+        return;
+    }
+
+    usuarioModel.atualizarUser(id, nome, email, senha, tipo_user)
+        .then(function (resultado) {
+            res.status(200).json(resultado);
+        })
+        .catch(function (erro) {
+            console.error("Erro ao atualizar usuário:", erro);
+            res.status(500).json(erro.sqlMessage || "Erro interno ao atualizar usuário");
+        });
+}
+
+function deletarUser(req, res) {
+    var id = req.params.id;
+
+    if (!id) {
+        res.status(400).send("ID do usuário não informado!");
+        return;
+    }
+
+    usuarioModel.deletarUser(id)
+        .then(function (resultado) {
+            res.status(200).json(resultado);
+        })
+        .catch(function (erro) {
+            console.error("Erro ao deletar usuário:", erro);
+            res.status(500).json(erro.sqlMessage || "Erro interno ao deletar usuário");
+        });
+}
+
 module.exports = {
     autenticar,
     cadastrar,
@@ -334,5 +394,8 @@ module.exports = {
     buscarLogsAWS,
     registrarTentativaAtaque,
     getEstatisticasSeguranca,
-    logout
+    logout,
+    listar,
+    atualizarUser,
+    deletarUser
 };

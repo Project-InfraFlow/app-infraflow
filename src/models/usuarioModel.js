@@ -53,9 +53,9 @@ async function cadastrar(razao, cnpj, emailEmpresa, telefone, tecnico, emailUser
         let idUsuario = resultadoUsuario.insertId;
 
         let insertToken = `
-    INSERT INTO token_acesso (data_criacao, data_expiracao, ativo, token, fk_id_empresa)
-    VALUES (NOW(), DATE_ADD(NOW(), INTERVAL 1 DAY), 1, '${token}', ${idEmpresa});
-`;
+            INSERT INTO token_acesso (data_criacao, data_expiracao, ativo, token, fk_id_empresa)
+            VALUES (NOW(), DATE_ADD(NOW(), INTERVAL 1 DAY), 1, '${token}', ${idEmpresa});
+        `;
         await database.executar(insertToken);
 
         console.log("Cadastro concluído com sucesso!");
@@ -97,10 +97,46 @@ function pesquisarUser(pesquisa) {
 
 //=========================== Models dashboard de Usuário comum ==========================================
 
+// LISTAR USUÁRIOS PARA A TELA DE CADASTRO
+function listar() {
+    var instrucaoSql = `
+        SELECT 
+            id_usuario AS idusuario,
+            nome,
+            email,
+            fk_id_tipo_usuario AS tipo_permissao
+        FROM usuario
+        WHERE fk_empresa = 1
+        ORDER BY id_usuario;
+    `;
+    return database.executar(instrucaoSql);
+}
+
+
 function cadastrarUser(nome, email, senha, tipo_user) {
     var instrucaoSql = `
         INSERT INTO usuario (nome, email, senha, fk_id_tipo_usuario, fk_empresa)
         VALUES ('${nome}', '${email}', '${senha}', ${tipo_user}, 1);
+    `;
+    return database.executar(instrucaoSql);
+}
+
+function atualizarUser(id, nome, email, senha, tipo_user) {
+    var instrucaoSql = `
+        UPDATE usuario
+        SET nome = '${nome}',
+            email = '${email}',
+            senha = '${senha}',
+            fk_id_tipo_usuario = ${tipo_user}
+        WHERE id_usuario = ${id};
+    `;
+    return database.executar(instrucaoSql);
+}
+
+function deletarUser(id) {
+    var instrucaoSql = `
+        DELETE FROM usuario
+        WHERE id_usuario = ${id};
     `;
     return database.executar(instrucaoSql);
 }
@@ -118,8 +154,7 @@ function verificarEmail(email) {
         WHERE email = '${email}'
         LIMIT 1;
     `;
-   
-    return database.executar(instrucaoSql); 
+    return database.executar(instrucaoSql);
 }
 
 //=========================== Models dashboard de Segurança ==========================================
@@ -172,7 +207,6 @@ function registrarSessaoLogout(idUsuario) {
     return database.executar(instrucao);
 }
 
-
 module.exports = {
     autenticar,
     cadastrar,
@@ -182,5 +216,8 @@ module.exports = {
     verificarEmail,
     contarUsuariosLogados,
     registrarSessaoLogin,
-    registrarSessaoLogout
+    registrarSessaoLogout,
+    listar,
+    atualizarUser,
+    deletarUser
 };

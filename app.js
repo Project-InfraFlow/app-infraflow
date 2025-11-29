@@ -21,6 +21,8 @@ var alertaRouter = require("./src/routes/alertas-route");
 var redeRouter = require("./src/routes/redeRoute");
 var latenciaRouter = require("./src/routes/latencia");
 var iaRouter = require("./src/routes/ia");
+var contatoRouter = require("./src/routes/contato");
+
 
 var app = express();
 app.use(express.json());
@@ -37,7 +39,7 @@ app.use("/empresas", empresasRouter);
 app.use("/api/seguranca", segurancaRouter);
 app.use("/api/memoria", memoriaRouter);
 app.use("/api/cpu", cpuRouter);
-
+app.use("/contato", contatoRouter);
 app.use("/alertas-route", alertaRouter);
 app.use("/redeRoute", redeRouter);
 app.use("/api", latenciaRouter);
