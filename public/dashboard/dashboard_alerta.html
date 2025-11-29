@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="../assets/imgs/estrada.png">
 </head>
-<script src="../js/dash.js"></script>
+<script src="../js/alertas.js"></script>
 
-<body>
+<body onload="iniciar()">
 
     <!-- Dashboard -->
     <div id="dashboard" class="dashboard">
@@ -164,7 +164,8 @@
                                 <span class="kpi-label">Quantidade de alertas (Geral)</span>
                             </div>
                         </div>
-                        <div class="kpi-value" id="kpiCpuValue">0%</div>
+                        <div class="kpi-value" id="total-alertas">
+                        </div>
 
 
                     </div>
@@ -306,7 +307,7 @@
                                     <div class="col">34%</div>
                                     <div class="col tipo">Atenção</div>
                                     <div class="col acao">
-                                        <button class="btn-registrar">
+                                        <button class="btn-registrar" >
                                             Registrar <i class="bi bi-pencil-square"></i>
                                         </button>
                                     </div>
@@ -342,424 +343,26 @@
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-    <script>
 
-        // VALIDAÇÕES
-        function validarEmail(email) {
-            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return regex.test(email);
-        }
 
-        // ESTADO GLOBAL DE EDIÇÃO
-        var usuarioEditandoId = null;
-        var maquinaEditandoId = null;
 
-        // CRUD - LISTAR USUÁRIOS
-        function carregarUsuarios() {
-            fetch("/usuarios/listar")
-                .then(function (resposta) {
-                    if (!resposta.ok) {
-                        throw new Error("Erro ao listar usuários");
-                    }
-                    return resposta.json();
-                })
-                .then(function (lista) {
-                    var container = document.getElementById("usuariosContainer");
-                    if (!container) return;
+</body>
 
-                    container.innerHTML = "";
+</html>
 
-                    lista.forEach(function (user) {
-                        var div = document.createElement("div");
-                        div.className = "infos-user";
 
-                        var tipoTexto = user.tipo_permissao == 1 ? "Administrador" : "Comum";
+<script>
 
-                        div.innerHTML = `
-            <p>${user.idusuario}</p>
-            <p>${user.nome}</p>
-            <p>${user.email}</p>
-            <p>${tipoTexto}</p>
-            <div class="acoes"></div>
-          `;
-
-                        var acoesDiv = div.querySelector(".acoes");
-
-                        var btnEditar = document.createElement("button");
-                        btnEditar.className = "btn_actions";
-                        btnEditar.innerHTML = `<i class="bi bi-pencil-square"></i>`;
-                        btnEditar.addEventListener("click", function () {
-                            prepararEdicaoUsuario(user);
-                        });
-
-                        var btnExcluir = document.createElement("button");
-                        btnExcluir.className = "btn_actions";
-                        btnExcluir.innerHTML = `<i class="bi bi-trash3-fill"></i>`;
-                        btnExcluir.addEventListener("click", function () {
-                            excluirUsuario(user.idusuario);
-                        });
-
-                        acoesDiv.appendChild(btnEditar);
-                        acoesDiv.appendChild(btnExcluir);
-
-                        container.appendChild(div);
-                    });
-                })
-                .catch(function (erro) {
-                    console.error(erro);
-                    alert("Não foi possível carregar os usuários.");
-                });
-        }
-
-        // CRUD - PREPARAR EDIÇÃO USUÁRIO
-        function prepararEdicaoUsuario(user) {
-            var inputNome = document.getElementById("usuarioNome");
-            var inputEmail = document.getElementById("usuarioEmail");
-            var selectTipo = document.getElementById("tipo_permissao");
-            var inputSenha = document.getElementById("usuarioSenha");
-            var textoBotao = document.getElementById("textoBotaoUsuario");
-
-            if (!inputNome || !inputEmail || !selectTipo || !inputSenha || !textoBotao) return;
-
-            inputNome.value = user.nome;
-            inputEmail.value = user.email;
-            selectTipo.value = user.tipo_permissao;
-            inputSenha.value = "";
-
-            usuarioEditandoId = user.idusuario;
-            textoBotao.textContent = "Atualizar";
-        }
-
-        // CRUD - CANCELAR EDIÇÃO USUÁRIO
-        function cancelarEdicaoUsuario() {
-            var inputNome = document.getElementById("usuarioNome");
-            var inputEmail = document.getElementById("usuarioEmail");
-            var selectTipo = document.getElementById("tipo_permissao");
-            var inputSenha = document.getElementById("usuarioSenha");
-            var textoBotao = document.getElementById("textoBotaoUsuario");
-
-            if (inputNome) inputNome.value = "";
-            if (inputEmail) inputEmail.value = "";
-            if (selectTipo) selectTipo.value = "0";
-            if (inputSenha) inputSenha.value = "";
-            if (textoBotao) textoBotao.textContent = "Salvar";
-
-            usuarioEditandoId = null;
-        }
-
-        // CRUD - SALVAR / ATUALIZAR USUÁRIO
-
-        function enviarFormularioUsuario(event) {
-            event.preventDefault();
-
-            var inputNome = document.getElementById("usuarioNome");
-            var inputEmail = document.getElementById("usuarioEmail");
-            var selectTipo = document.getElementById("tipo_permissao");
-            var inputSenha = document.getElementById("usuarioSenha");
-
-            var nomeVar = inputNome.value;
-            var emailUserVar = inputEmail.value;
-            var tipoUserVar = selectTipo.value;
-            var senhaUserVar = inputSenha.value;
-
-            if (!nomeVar || !emailUserVar || !tipoUserVar || !senhaUserVar || tipoUserVar === "0") {
-                alert("Preencha todos os campos obrigatórios!");
-                return;
-            }
-
-            if (!validarEmail(emailUserVar)) {
-                alert("Informe um e-mail válido.");
-                return;
-            }
-
-            var url;
-            var metodo;
-
-            if (usuarioEditandoId) {
-                url = `/usuarios/${usuarioEditandoId}`;
-                metodo = "PUT";
-            } else {
-                url = "/usuarios/cadastrarUser";
-                metodo = "POST";
-            }
-
-            fetch(url, {
-                method: metodo,
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    nomeServer: nomeVar,
-                    emailUserServer: emailUserVar,
-                    tipoUserServer: tipoUserVar,
-                    senhaUserServer: senhaUserVar
-                }),
-            })
-                .then(async function (resposta) {
-                    if (resposta.ok) {
-                        if (usuarioEditandoId) {
-                            alert("Usuário atualizado com sucesso!");
-                        } else {
-                            alert("Usuário cadastrado com sucesso!");
-                        }
-
-                        cancelarEdicaoUsuario();
-                        carregarUsuarios();
-                    } else {
-                        var erro = await resposta.text();
-                        console.error(erro);
-                        alert("Houve um erro ao tentar salvar o usuário.");
-                    }
-                })
-                .catch(function (erro) {
-                    console.error(erro);
-                    alert("Erro de comunicação com o servidor.");
-                });
-        }
-
-
-        // CRUD - EXCLUIR USUÁRIO
-
-        function excluirUsuario(id) {
-            if (!confirm("Deseja realmente excluir este usuário?")) {
-                return;
-            }
-
-            fetch(`/usuarios/${id}`, {
-                method: "DELETE"
-            })
-                .then(function (resposta) {
-                    if (resposta.ok) {
-                        alert("Usuário excluído com sucesso!");
-
-                        if (usuarioEditandoId === id) {
-                            cancelarEdicaoUsuario();
-                        }
-
-                        carregarUsuarios();
-                    } else {
-                        alert("Não foi possível excluir o usuário.");
-                    }
-                })
-                .catch(function (erro) {
-                    console.error(erro);
-                    alert("Erro de comunicação com o servidor.");
-                });
-        }
-
-        // ========================= CRUD MÁQUINA ===============================
-
-        // LISTAR MÁQUINAS DA EMPRESA LOGADA
-        function carregarMaquinas() {
-            var idEmpresa = sessionStorage.ID_EMPRESA || 1; // fallback 1 se algo vier vazio
-
-            fetch(`/maquinas/listar/${idEmpresa}`)
-                .then(function (resposta) {
-                    if (resposta.status === 204) {
-                        return [];
-                    }
-                    if (!resposta.ok) {
-                        throw new Error("Erro ao listar máquinas");
-                    }
-                    return resposta.json();
-                })
-                .then(function (lista) {
-                    var container = document.getElementById("maquinasContainer");
-                    if (!container) return;
-
-                    container.innerHTML = "";
-
-                    lista.forEach(function (maq) {
-                        var div = document.createElement("div");
-                        div.className = "infos-maquina";
-
-                        div.innerHTML = `
-            <p>${maq.id_maquina}</p>
-            <p>${maq.nome_maquina}</p>
-            <p>${maq.so}</p>
-            <p>${maq.localizacao}</p>
-            <p>${maq.km}</p>
-            <div class="acoes"></div>
-          `;
-
-                        var acoesDiv = div.querySelector(".acoes");
-
-                        var btnEditar = document.createElement("button");
-                        btnEditar.className = "btn_actions";
-                        btnEditar.innerHTML = `<i class="bi bi-pencil-square"></i>`;
-                        btnEditar.addEventListener("click", function () {
-                            prepararEdicaoMaquina(maq);
-                        });
-
-                        var btnExcluir = document.createElement("button");
-                        btnExcluir.className = "btn_actions";
-                        btnExcluir.innerHTML = `<i class="bi bi-trash3-fill"></i>`;
-                        btnExcluir.addEventListener("click", function () {
-                            excluirMaquina(maq.id_maquina);
-                        });
-
-                        acoesDiv.appendChild(btnEditar);
-                        acoesDiv.appendChild(btnExcluir);
-
-                        container.appendChild(div);
-                    });
-                })
-                .catch(function (erro) {
-                    console.error(erro);
-                    alert("Não foi possível carregar as máquinas.");
-                });
-        }
-
-        // PREPARAR EDIÇÃO MÁQUINA
-        function prepararEdicaoMaquina(maq) {
-            var inputNome = document.getElementById("maquinaNome");
-            var inputSo = document.getElementById("maquinaSo");
-            var inputLocal = document.getElementById("maquinaLocalizacao");
-            var inputKm = document.getElementById("maquinaKm");
-            var textoBotao = document.getElementById("textoBotaoMaquina");
-
-            if (!inputNome || !inputSo || !inputLocal || !inputKm || !textoBotao) return;
-
-            inputNome.value = maq.nome_maquina;
-            inputSo.value = maq.so;
-            inputLocal.value = maq.localizacao;
-            inputKm.value = maq.km;
-
-            maquinaEditandoId = maq.id_maquina;
-            textoBotao.textContent = "Atualizar";
-        }
-
-        // CANCELAR EDIÇÃO MÁQUINA
-        function cancelarEdicaoMaquina() {
-            var inputNome = document.getElementById("maquinaNome");
-            var inputSo = document.getElementById("maquinaSo");
-            var inputLocal = document.getElementById("maquinaLocalizacao");
-            var inputKm = document.getElementById("maquinaKm");
-            var textoBotao = document.getElementById("textoBotaoMaquina");
-
-            if (inputNome) inputNome.value = "";
-            if (inputSo) inputSo.value = "";
-            if (inputLocal) inputLocal.value = "";
-            if (inputKm) inputKm.value = "";
-            if (textoBotao) textoBotao.textContent = "Salvar";
-
-            maquinaEditandoId = null;
-        }
-
-        // SALVAR / ATUALIZAR MÁQUINA
-        function enviarFormularioMaquina(event) {
-            event.preventDefault();
-
-            var inputNome = document.getElementById("maquinaNome");
-            var inputSo = document.getElementById("maquinaSo");
-            var inputLocal = document.getElementById("maquinaLocalizacao");
-            var inputKm = document.getElementById("maquinaKm");
-
-            var nomeVar = inputNome.value.trim();
-            var soVar = inputSo.value.trim();
-            var localVar = inputLocal.value.trim();
-            var kmVar = inputKm.value.trim();
-            var idEmpresa = sessionStorage.ID_EMPRESA || 1;
-
-            if (!nomeVar || !soVar || !localVar) {
-                alert("Preencha pelo menos Nome, Sistema Operacional e Localização da máquina.");
-                return;
-            }
-
-            var url;
-            var metodo;
-            var body;
-
-            if (maquinaEditandoId) {
-                // UPDATE
-                url = `/maquinas/${maquinaEditandoId}`;
-                metodo = "PUT";
-                body = {
-                    nome_maquina: nomeVar,
-                    so: soVar,
-                    localizacao: localVar,
-                    km: kmVar
-                };
-            } else {
-                // INSERT
-                url = "/maquinas/cadastrar";
-                metodo = "POST";
-                body = {
-                    nome_maquina: nomeVar,
-                    so: soVar,
-                    localizacao: localVar,
-                    km: kmVar,
-                    fk_empresa_maquina: idEmpresa
-                };
-            }
-
-            fetch(url, {
-                method: metodo,
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(body),
-            })
-                .then(async function (resposta) {
-                    if (resposta.ok) {
-                        if (maquinaEditandoId) {
-                            alert("Máquina atualizada com sucesso!");
-                        } else {
-                            alert("Máquina cadastrada com sucesso!");
-                        }
-
-                        cancelarEdicaoMaquina();
-                        carregarMaquinas();
-                    } else {
-                        var erro = await resposta.text();
-                        console.error(erro);
-                        alert("Houve um erro ao tentar salvar a máquina.");
-                    }
-                })
-                .catch(function (erro) {
-                    console.error(erro);
-                    alert("Erro de comunicação com o servidor.");
-                });
-        }
-
-        // EXCLUIR MÁQUINA
-        function excluirMaquina(id) {
-            if (!confirm("Deseja realmente excluir esta máquina?")) {
-                return;
-            }
-
-            fetch(`/maquinas/${id}`, {
-                method: "DELETE"
-            })
-                .then(function (resposta) {
-                    if (resposta.ok) {
-                        alert("Máquina excluída com sucesso!");
-
-                        if (maquinaEditandoId === id) {
-                            cancelarEdicaoMaquina();
-                        }
-
-                        carregarMaquinas();
-                    } else {
-                        alert("Não foi possível excluir a máquina.");
-                    }
-                })
-                .catch(function (erro) {
-                    console.error(erro);
-                    alert("Erro de comunicação com o servidor.");
-                });
-        }
-
-        function criarBotaoSuporteJira() {
-            const linkBotao = document.createElement('a');
-            linkBotao.innerHTML = `
+    function criarBotaoSuporteJira() {
+        const linkBotao = document.createElement('a');
+        linkBotao.innerHTML = `
       <img src="../assets/icon/iconeJira.png" alt="Ícone de Suporte" width="24" height="24" />
       Suporte
     `;
-            linkBotao.title = "Acessar o Help Desk do Jira";
-            linkBotao.href = "https://infraflow-sptech.atlassian.net/servicedesk/customer/portal/2";
-            linkBotao.target = "_blank";
-            linkBotao.style.cssText = `
+        linkBotao.title = "Acessar o Help Desk do Jira";
+        linkBotao.href = "https://infraflow-sptech.atlassian.net/servicedesk/customer/portal/2";
+        linkBotao.target = "_blank";
+        linkBotao.style.cssText = `
       position: fixed;
       right: 16px;
       bottom: 16px;
@@ -782,154 +385,123 @@
       transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
     `;
 
-            linkBotao.onmouseover = function () {
-                linkBotao.style.backgroundColor = '#0065FF';
-                linkBotao.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
-            };
-            linkBotao.onmouseout = function () {
-                linkBotao.style.backgroundColor = '#0052CC';
-                linkBotao.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.25)';
-                linkBotao.style.transform = 'scale(1)';
-            };
+        linkBotao.onmouseover = function () {
+            linkBotao.style.backgroundColor = '#0065FF';
+            linkBotao.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+        };
+        linkBotao.onmouseout = function () {
+            linkBotao.style.backgroundColor = '#0052CC';
+            linkBotao.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.25)';
+            linkBotao.style.transform = 'scale(1)';
+        };
 
-            linkBotao.onmousedown = function () {
-                linkBotao.style.transform = 'scale(0.98)';
-            };
+        linkBotao.onmousedown = function () {
+            linkBotao.style.transform = 'scale(0.98)';
+        };
 
-            linkBotao.onmouseup = function () {
-                linkBotao.style.transform = 'scale(1)';
-            };
+        linkBotao.onmouseup = function () {
+            linkBotao.style.transform = 'scale(1)';
+        };
 
-            document.body.appendChild(linkBotao);
-        }
-
-        (function () {
-            function initNav() {
-                const navItems = Array.from(document.querySelectorAll('.nav-item'));
-                const views = Array.from(document.querySelectorAll('.view'));
-
-                navItems.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const view = btn.getAttribute('data-view');
-                        if (!view) return;
-
-                        navItems.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        views.forEach(v => v.classList.remove('active'));
-                        const target = document.getElementById('view-' + view);
-                        if (target) target.classList.add('active');
-
-                        if (view === "cadastro") {
-                            carregarUsuarios();
-                            carregarMaquinas();
-                        }
-                    });
-                });
-            }
-
-            function initCadastroTabs() {
-                const btns = Array.from(document.querySelectorAll('.cadastro-tabs .tab-btn'));
-                const tabs = Array.from(document.querySelectorAll('.cadastro-content .tab-content'));
-                btns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const tab = btn.getAttribute('data-tab');
-                        btns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        tabs.forEach(t => t.classList.remove('active'));
-                        const target = document.getElementById('tab-' + tab);
-                        if (target) target.classList.add('active');
-
-                        if (tab === "usuario") {
-                            carregarUsuarios();
-                        } else if (tab === "maquina") {
-                            carregarMaquinas();
-                        }
-                    });
-                });
-            }
-
-            function initLogout() {
-                const btn = document.getElementById('logoutBtn');
-                if (!btn) return;
-                btn.addEventListener('click', function () {
-                    try { sessionStorage.clear(); localStorage.removeItem('login_email'); } catch (e) { }
-                    window.location.replace('../login.html');
-                });
-            }
-
-            document.addEventListener('DOMContentLoaded', function () {
-                initNav();
-                initCadastroTabs();
-                initLogout();
-                criarBotaoSuporteJira();
-
-                var formUsuario = document.getElementById("usuarioForm");
-                if (formUsuario) {
-                    formUsuario.addEventListener("submit", enviarFormularioUsuario);
-                }
-
-                var btnCancelar = document.getElementById("cancelarEdicaoBtn");
-                if (btnCancelar) {
-                    btnCancelar.addEventListener("click", function () {
-                        cancelarEdicaoUsuario();
-                    });
-                }
-
-                var formMaquina = document.getElementById("maquinaForm");
-                if (formMaquina) {
-                    formMaquina.addEventListener("submit", enviarFormularioMaquina);
-                }
-
-                var btnCancelarMaq = document.getElementById("cancelarEdicaoMaquinaBtn");
-                if (btnCancelarMaq) {
-                    btnCancelarMaq.addEventListener("click", function () {
-                        cancelarEdicaoMaquina();
-                    });
-                }
-
-                carregarUsuarios();
-                carregarMaquinas();
-            });
-        })();
+        document.body.appendChild(linkBotao);
+    }
 
 
-        const box = document.getElementById("ocorrenciasBox");
-        const btnVerMais = document.getElementById("btnVerMais");
-        const btnCSV = document.getElementById("btnExportarCSV");
 
-        btnVerMais.addEventListener("click", () => {
-            box.classList.toggle("expandido");
 
-            btnVerMais.textContent =
-                box.classList.contains("expandido")
-                    ? "Ver menos"
-                    : "Ver mais";
+    const box = document.getElementById("ocorrenciasBox");
+    const btnVerMais = document.getElementById("btnVerMais");
+    const btnCSV = document.getElementById("btnExportarCSV");
+
+    btnVerMais.addEventListener("click", () => {
+        box.classList.toggle("expandido");
+
+        btnVerMais.textContent =
+            box.classList.contains("expandido")
+                ? "Ver menos"
+                : "Ver mais";
+    });
+
+
+    btnCSV.addEventListener("click", () => {
+        const rows = [
+            ["Pórtico", "Data", "Horário", "Componente", "Métrica", "Tipo"],
+            ["SSP-001", "17/11/2025", "12:29 – 13:29", "CPU", "85%", "Crítico"],
+            ["SSP-001", "17/11/2025", "12:29 – 13:29", "RAM", "34%", "Atenção"],
+        ];
+
+        let csv = "";
+        rows.forEach(r => {
+            csv += r.join(";") + "\n";
         });
 
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
 
-        btnCSV.addEventListener("click", () => {
-            const rows = [
-                ["Pórtico", "Data", "Horário", "Componente", "Métrica", "Tipo"],
-                ["SSP-001", "17/11/2025", "12:29 – 13:29", "CPU", "85%", "Crítico"],
-                ["SSP-001", "17/11/2025", "12:29 – 13:29", "RAM", "34%", "Atenção"],
-            ];
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "ocorrencias.csv";
+        a.click();
+    });
 
-            let csv = "";
-            rows.forEach(r => {
-                csv += r.join(";") + "\n";
-            });
+    // tentando funções aquiiiiiii
 
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
+    function kpiAlertasTotais() {
+        fetch('/alertas-route/kpiAlertasTotais', {
+            method: "GET"
+        }).then(res => res.json())
+            .then(function (resultado) {
+                console.log("oiiiiii")
+                var kpitotal = document.getElementById('total-alertas')
+                var alertasTotais = resultado[0].alertasTotais
+                kpitotal.innerHTML = `<div class="kpi-value" id="total-alertas"><p>${alertasTotais}</p></div>`
 
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "ocorrencias.csv";
-            a.click();
+            })
+    }
+
+     function kpiAlertasPorTipo() {
+    fetch('/alertas-route/kpiAlertasPorTipo', {
+        method: "GET"
+    }).then(res => res.json())
+    
+        .then(function (resultado) {
+            
+        console.log("foi? alertas p tipo")
+            if (resultado && resultado.length > 0) {
+                
+                const alertasAtencao = resultado[0].total_atencao;
+                const alertasCriticos = resultado[0].total_critico;
+    
+                var kpiAtencao = document.getElementById('qtd_atencao');
+                if (kpiAtencao) {
+                    kpiAtencao.innerHTML = `<div id="qtd_atencao">${alertasAtencao}</div>`;
+                }
+
+                
+                var kpiCritico = document.getElementById('qtd_critico');
+                if (kpiCritico) {
+                    kpiCritico.innerHTML = `<div id="qtd_critico" style="color: white;">${alertasCriticos}</div>`;
+                }
+            
+
+            } else {
+                console.warn("Nenhum resultado encontrado.");
+            }
+
+        })
+        .catch(erro => {
+            console.error("ERRO no fetch kpiAlertasPorTipo: ", erro);
         });
-    </script>
+}
 
 
-</body>
 
-</html>
+
+function iniciar() {
+    kpiAlertasPorComponente(), 
+    kpiAlertasTotais(), 
+    kpiAlertasPorTipo()
+}
+
+    
+</script>

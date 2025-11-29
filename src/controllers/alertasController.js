@@ -18,10 +18,9 @@ function kpiAlertasTotais (req, res){
     });
 }
 
-
-function kpiAtencao (req, res){
+function kpiAlertasPorTipo(req, res){
  
-    alertasModel.kpiAtencao() 
+    alertasModel.kpiAlertasPorTipo() 
     .then(resultado => {
         if(resultado.length > 0) {
             
@@ -32,31 +31,31 @@ function kpiAtencao (req, res){
         }
     })
     .catch(erro => {
-        console.error("ERRO no controller kpiAtencao: ", erro);
+        console.error("ERRO no controller kpiAlertasPorTipo: ", erro);
         res.status(500).json(erro.sqlMessage || erro.message || "Erro interno do servidor.");
     });
 }
 
-function kpiCritico (req, res){
- 
-    alertasModel.kpiCritico() 
+function kpiAlertasPorComponente(req, res){
+    // Renomeei para refletir o novo Model
+    alertasModel.kpiAlertasPorComponente() 
     .then(resultado => {
         if(resultado.length > 0) {
-            
+            // O resultado será um array de objetos, pronto para ser enviado ao JS
             res.status(200).json(resultado); 
         } else {
-            
             res.status(204).send("Nenhum resultado encontrado."); 
         }
     })
     .catch(erro => {
-        console.error("ERRO no controller kpiCritico: ", erro);
+        console.error("ERRO no controller kpiAlertasPorComponente: ", erro);
         res.status(500).json(erro.sqlMessage || erro.message || "Erro interno do servidor.");
     });
 }
+
 
 module.exports = {
-    kpiAlertasTotais,
-    kpiAtencao, 
-    kpiCritico
+    kpiAlertasTotais, 
+    kpiAlertasPorTipo, 
+    kpiAlertasPorComponente
 }

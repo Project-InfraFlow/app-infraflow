@@ -8,64 +8,68 @@ function kpiAlertasTotais() {
 FROM 
     alerta AS a 
 JOIN 
-    leitura AS l ON a.fk_id_leitura = l.id_leitura -- Assumindo que a ligação é feita assim
+    leitura AS l ON a.fk_id_leitura = l.id_leitura 
 WHERE 
     l.data_hora_captura >= NOW() - INTERVAL 24 HOUR;`
     return database.executar(instrucaoSql);
 }
 
-function kpiAtencao() {
+function kpiAlertasPorTipo() {
     var instrucaoSql = `
-   SELECT
-    COUNT(a.id_alerta) AS alertasAtencao
-FROM
-    alerta AS a
-JOIN
-    leitura AS l ON a.fk_id_leitura = l.id_leitura
-JOIN
-    componente AS c ON l.fk_id_componente = c.id_componente
-WHERE
+    SELECT
+        IFNULL(SUM(
+            CASE 
+                WHEN c.nome_componente = 'CPU' AND l.dados_float BETWEEN 45 AND 85 THEN 1
+                WHEN c.nome_componente = 'RAM' AND l.dados_float BETWEEN 54 AND 83 THEN 1
+                WHEN c.nome_componente = 'Disco' AND l.dados_float BETWEEN 80 AND 90 THEN 1
+                WHEN c.nome_componente = 'Rede' AND l.dados_float BETWEEN 50 AND 74 THEN 1
+                ELSE 0
+            END
+        ), 0) AS total_atencao,
+
+        IFNULL(SUM(
+            CASE 
+                WHEN c.nome_componente = 'CPU' AND l.dados_float > 85 THEN 1
+                WHEN c.nome_componente = 'RAM' AND l.dados_float > 84 THEN 1
+                WHEN c.nome_componente = 'Disco' AND l.dados_float > 90 THEN 1
+                WHEN c.nome_componente = 'Rede' AND l.dados_float >= 75 THEN 1
+                ELSE 0
+            END
+        ), 0) AS total_critico
+    FROM alerta AS a
+    JOIN leitura AS l ON a.fk_id_leitura = l.id_leitura
+    JOIN componente AS c ON a.fk_id_componente = c.id_componente
+    WHERE 
+        l.data_hora_captura >= NOW() - INTERVAL 24 HOUR;
+    `;
+    
+    return database.executar(instrucaoSql);
+}
+
+function kpiAlertasPorComponente() {
+
+    var instrucaoSql = `
+        SELECT 
+    c.nome_componente,
+    COUNT(a.id_alerta) AS total_alertas
+FROM componente AS c
+LEFT JOIN leitura AS l ON l.fk_id_componente = c.id_componente
+LEFT JOIN alerta AS a ON a.fk_id_leitura = l.id_leitura
+WHERE 
     l.data_hora_captura >= NOW() - INTERVAL 24 HOUR
-    AND (
-        -- Condição 1: Verifica se o alerta está na faixa de Atenção (Alta Utilização)
-        (c.nome_componente = 'CPU' AND l.dados_float >= 45 AND l.dados_float <= 85) OR
-        (c.nome_componente = 'Memória RAM' AND l.dados_float >= 54 AND l.dados_float <= 83) OR
-        (c.nome_componente = 'Disco' AND l.dados_float >= 80 AND l.dados_float <= 90) OR
-        (c.nome_componente = 'Rede' AND l.dados_float >= 50 AND l.dados_float <= 74)
-    );`
+    OR l.id_leitura IS NULL
+GROUP BY 
+    c.nome_componente
+ORDER BY 
+    c.nome_componente; 
+    `;
+    
     return database.executar(instrucaoSql);
 }
 
-
-function kpiCritico() {
-    var instrucaoSql = `
-   SELECT
-    COUNT(a.id_alerta) AS alertasCriticos
-FROM
-    alerta AS a
-JOIN
-    leitura AS l ON a.fk_id_leitura = l.id_leitura
-JOIN
-    componente AS c ON l.fk_id_componente = c.id_componente
-WHERE
-    l.data_hora_captura >= NOW() - INTERVAL 24 HOUR
-    AND (
-        (c.nome_componente = 'CPU' AND l.dados_float > 85) OR
-        (c.nome_componente = 'Memória RAM' AND l.dados_float > 84) OR
-        (c.nome_componente = 'Disco' AND l.dados_float > 90) OR
-        (c.nome_componente = 'Rede' AND l.dados_float >= 75)
-    );`
-    return database.executar(instrucaoSql);
-}
-
-function listarAlertas() {
-    var instrucaoSql = `
-    `
-    return database.executar(instrucaoSql);
-}
 
 module.exports = {
     kpiAlertasTotais, 
-    kpiAtencao, 
-    kpiCritico
+    kpiAlertasPorTipo, 
+    kpiAlertasPorComponente
 }
