@@ -65,9 +65,10 @@ function carregarAlertasSlack(dados) {
         painel.innerHTML += `
             <div class="alerta-item ${classe}">
                 <strong>${alerta}</strong><br>
-                CPU: ${linha.cpu.toFixed(1)}% <br>
-                • Idle: ${linha.cpuIdle.toFixed(1)}% <br>
-                • Proc: ${linha.processos.toFixed(0)}<br>
+                ------------------------
+                - CPU: ${linha.cpu.toFixed(1)}% <br>
+                - Idle: ${linha.cpuIdle.toFixed(1)}% <br>
+                - Proc: ${linha.processos.toFixed(0)}<br>
                 <small>${formatarHora(linha.horario)}</small>
             </div>
         `;

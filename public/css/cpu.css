@@ -487,20 +487,6 @@ body {
     padding-top: calc(var(--topbar-height) - 8px);
 }
 
-/* Dashboard normal */
-#contentWrapper {
-    transition: 0.35s ease;
-    transform-origin: left center;
-    /* diminui para o lado certo */
-}
-
-/* Quando o Slack abrir → dashboard fica MENOR */
-body.slack-open #contentWrapper {
-    transform: scale(0.85);
-    filter: blur(1px);
-    opacity: 0.95;
-}
-
 .kpi-icon-vermelho {
     background: #dc2626 !important;
     color: white !important;
@@ -1881,4 +1867,9 @@ canvas {
     .status-and-legend {
         grid-template-columns: 1fr;
     }
+}
+
+body.slack-open .content {
+    margin-right: 240px;
+    transition: margin-right 0.3s ease;
 }

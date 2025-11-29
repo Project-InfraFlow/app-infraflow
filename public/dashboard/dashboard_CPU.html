@@ -19,14 +19,16 @@
         <aside class="sidebar">
 
             <nav class="nav">
-                <button data-view="overview" class="nav-item active">
+                <button class="nav-item" data-view="overview" id="btnPainel">
                     <i class="fas fa-gauge"></i>
                     <span>Painel</span>
                 </button>
+
                 <button data-view="monitor" class="nav-item">
                     <i class="fas fa-chart-line"></i>
                     <span>Monitoramento</span>
                 </button>
+
                 <button data-view="cadastro" class="nav-item">
                     <i class="fas fa-pen-to-square"></i>
                     <span>Cadastro</span>
@@ -34,6 +36,10 @@
                 <button data-view="historico" class="nav-item">
                     <i class="fas fa-clock-rotate-left"></i>
                     <span>Histórico de Alertas</span>
+                </button>
+                                <button class="nav-item active" data-view="overview" onclick="window.location.href='dashboard_CPU.html'">
+                    <i class="fas fa-gauge"></i>
+                    <span>Painel CPU</span>
                 </button>
             </nav>
 
@@ -271,6 +277,11 @@
             slackpainel.classList.remove("open");
             document.body.classList.remove("slack-open");
         });
+
+        document.getElementById('btnPainel').addEventListener('click', function () {
+            window.location.href = 'dashboard.html';
+        });
+
     </script>
 
 </body>
