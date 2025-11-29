@@ -814,19 +814,16 @@ body.slack-open #contentWrapper {
 
 .kpi-info-icon:hover {
     z-index: 9999;
-    /* sobe para frente de tudo */
     transform: scale(1.03);
-    /* leve zoom para destacar */
     color: var(--primary-color);
 }
 
-/* Tooltip */
 .parametro {
     display: none;
     position: absolute;
-    top: 28px;
-    left: 0;
+    top: -65px;
     width: 210px;
+    right: 50px; 
     background: white;
     border: 1px solid var(--gray-300);
     border-radius: 8px;
@@ -835,6 +832,7 @@ body.slack-open #contentWrapper {
     color: var(--gray-700);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
     z-index: 9999 !important;
+    left: auto;
 }
 
 .kpi-info-icon:hover .parametro {
@@ -846,7 +844,7 @@ body.slack-open #contentWrapper {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
 }
 
 .kpi-card {
@@ -1086,6 +1084,7 @@ canvas {
     box-shadow: var(--shadow);
     border: 1px solid var(--gray-200);
     overflow: visible !important;
+    min-height: 370px;
 }
 
 .chart-container.full-bleed {
@@ -1122,13 +1121,11 @@ canvas {
 }
 
 .chart-content canvas {
-    width: 100% !important;
     height: 100% !important;
-    max-height: 100% !important;
-}
-
-.chart-content canvas {
-    max-height: 350px;
+    padding-top: 20px; 
+    width: 90% !important;  
+    margin: 0 auto;        
+    display: block;
 }
 
 .table-section {
@@ -1884,11 +1881,4 @@ canvas {
     .status-and-legend {
         grid-template-columns: 1fr;
     }
-}
-
-#cputempoChart,
-#processosChart {
-    height: 100% !important;
-    max-height: 200px !important;
-    width: 100% !important;
 }

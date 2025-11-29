@@ -16,6 +16,7 @@ var medidasRouter = require("./src/routes/medidas");
 var empresasRouter = require("./src/routes/empresas");
 var segurancaRouter = require("./src/routes/segurancaRoutes");
 var memoriaRouter = require("./src/routes/memoria");
+var cpuRouter = require("./src/routes/cpu");
 var alertaRouter = require("./src/routes/alertas-route");
 var redeRouter = require("./src/routes/redeRoute");
 var latenciaRouter = require("./src/routes/latencia");
@@ -35,6 +36,7 @@ app.use("/medidas", medidasRouter);
 app.use("/empresas", empresasRouter);
 app.use("/api/seguranca", segurancaRouter);
 app.use("/api/memoria", memoriaRouter);
+app.use("/api/cpu", cpuRouter);
 
 app.use("/alertas-route", alertaRouter);
 app.use("/redeRoute", redeRouter);

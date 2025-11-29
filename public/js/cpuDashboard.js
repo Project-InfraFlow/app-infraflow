@@ -86,7 +86,7 @@ async function getCpuData() {
 async function atualizarDashboard() {
     const response = await getCpuData();
     if (!response || !response.kpi) return;
-
+    console.log(response)
     document.getElementById("kpiCpuValue").textContent = `${response.kpi.cpuMedia.toFixed(1)}%`;
     document.getElementById("KpiProcessosValue").textContent = response.kpi.processos;
     document.getElementById("KpiTempoValue").textContent = `${response.kpi.cpuIdle.toFixed(1)}%`;

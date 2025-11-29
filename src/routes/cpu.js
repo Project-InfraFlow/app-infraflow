@@ -10,13 +10,15 @@ router.get('/', async function (req, res) {
     const sql = `
         SELECT 
             l.data_hora_captura AS horario,
-            MAX(CASE WHEN c.nome_componente = 'CPU' THEN l.dados_float END) AS cpu,
-            MAX(CASE WHEN c.nome_componente = 'CPU Idle' THEN l.dados_float END) AS cpu_idle,
-            MAX(CASE WHEN c.nome_componente = 'Processos' THEN l.dados_float END) AS processos
+            MAX(IF(c.nome_componente = 'CPU', l.dados_float, NULL)) AS cpu,
+            MAX(IF(c.nome_componente = 'CPU Idle', l.dados_float, NULL)) AS cpu_idle,
+            MAX(IF(c.nome_componente = 'Processos', l.dados_float, NULL)) AS processos
         FROM leitura l
         JOIN componente c 
             ON c.id_componente = l.fk_id_componente
-        WHERE l.fk_id_maquina = ${maquinaId}
+        WHERE 
+            l.fk_id_maquina = ${maquinaId}
+            AND c.nome_componente IN ('CPU', 'CPU Idle', 'Processos')
         GROUP BY l.data_hora_captura
         ORDER BY l.data_hora_captura DESC
         LIMIT ${limite};
