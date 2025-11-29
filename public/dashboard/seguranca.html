@@ -489,16 +489,31 @@
           <h3>
             Câmera Ao Vivo - Porta Principal
             <span class="info-icon"
-              data-tooltip="Feed simulado de vídeo do pórtico FreeFlow para apoio à operação e correlação com alertas.">i</span>
+              data-tooltip="Feed simulado de vídeo do pórtico FreeFlow ou, em modo demo, a webcam do operador.">i</span>
           </h3>
+
           <div class="camera-placeholder">
-            <div style="position: relative; width: 100%; border-radius: 8px; overflow: hidden; background: #000;">
-              <video width="100%" height="315" autoplay loop muted style="display: block;">
+
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px;">
+              <button id="btnModoMock"
+                style="padding: 4px 8px; font-size: 11px; border-radius: 6px; border: 1px solid #cbd5e1; background:#e2e8f0; cursor:pointer;">
+                Modo Simulado
+              </button>
+              <button id="btnModoWebcam"
+                style="padding: 4px 8px; font-size: 11px; border-radius: 6px; border: 1px solid #0f766e; background:#0d9488; color:#fff; cursor:pointer;">
+                Modo Webcam (Demo)
+              </button>
+            </div>
+
+            <!-- MODO VÍDEO MOCKADO -->
+            <div id="cameraMockContainer"
+              style="position: relative; width: 100%; border-radius: 8px; overflow: hidden; background: #000;">
+              <video id="videoMock" width="100%" height="315" autoplay loop muted style="display: block;">
                 <source src="../assets/freeflow.mp4" type="video/mp4">
               </video>
               <div
                 style="position: absolute; top: 10px; left: 10px; background: rgba(255,0,0,0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">
-                ● LIVE
+                ● LIVE (Simulado)
               </div>
               <div
                 style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">
@@ -509,11 +524,32 @@
                 🕒 <span id="live-time">--:--:--</span>
               </div>
             </div>
+
+            <!-- MODO WEBCAM -->
+            <div id="cameraWebcamContainer"
+              style="position: relative; width: 100%; border-radius: 8px; overflow: hidden; background: #000; display:none;">
+              <video id="videoWebcam" width="100%" height="315" autoplay playsinline muted
+                style="display:block;"></video>
+              <div
+                style="position: absolute; top: 10px; left: 10px; background: rgba(34,197,94,0.9); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">
+                ● LIVE (Webcam Demo)
+              </div>
+              <div
+                style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">
+                👤 Operador - Posição de Monitoramento
+              </div>
+              <div
+                style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">
+                🕒 <span id="live-time-webcam">--:--:--</span>
+              </div>
+            </div>
+
             <p style="margin-top: 10px; text-align: center; color: #666; font-size: 12px;">
-              Monitoramento ativo - Fluxo: 47 veículos/min
+              Modo demo: utilize a webcam do operador para simular monitoramento em tempo real.
             </p>
           </div>
         </article>
+
       </div>
 
     </section>
@@ -584,6 +620,8 @@
     let contadorTentativas = 0;
     let ultimoInsightChamadaMs = -Infinity;
     let cyberAccessChart = null;
+    let logsPainel = [];
+    let webcamStream = null;
 
     document.getElementById('logoutBtn').addEventListener('click', async function () {
       try {
@@ -840,27 +878,14 @@
           kpiUsuarios.textContent = Number(stats.usuariosLogados || 0);
         }
 
-        const responseLogs = await fetch('/usuarios/logs-aws');
-        const logs = await responseLogs.json();
-
-        const logsContainer = document.getElementById('cyberLogs');
-        logsContainer.innerHTML = '';
-
-        logs.forEach(log => {
-          const logElement = document.createElement('div');
-          logElement.className = `log-item ${log.type}`;
-          logElement.innerHTML = `
-        <div class="log-time">${new Date(log.timestamp).toLocaleTimeString()}</div>
-        <div class="log-message">${log.message}</div>
-      `;
-          logsContainer.appendChild(logElement);
-        });
-
-        await gerarInsightDeLogs(logs);
+        if (logsPainel.length) {
+          await gerarInsightDeLogs(logsPainel);
+        }
       } catch (error) {
         document.getElementById('tentativas-ataque').textContent = contadorTentativas;
       }
     }
+
 
     async function carregarAlertasOperacionais() {
       try {
@@ -942,11 +967,158 @@
 
     atualizarKpiUsuarios();
 
+    async function carregarLogsDaEc2() {
+      const logsContainer = document.getElementById('cyberLogs');
+      const endpoint = "http://ec2-3-94-244-74.compute-1.amazonaws.com:3001/logs";
+
+      if (!logsContainer) return;
+
+      try {
+        const resposta = await fetch(endpoint);
+        if (!resposta.ok) throw new Error("Erro ao acessar logs da EC2");
+
+        const textoBruto = await resposta.text();
+        const linhas = textoBruto.split("\n").filter(l => l.trim());
+
+        logsContainer.innerHTML = "";
+        logsPainel = [];
+
+        linhas.slice(-200).forEach(linha => {
+          const tipo =
+            linha.toLowerCase().includes("error") ? "error" :
+              linha.toLowerCase().includes("warn") ? "warning" :
+                "info";
+
+          const registro = {
+            timestamp: new Date(),
+            message: linha,
+            type: tipo
+          };
+
+          logsPainel.push(registro);
+
+          const logDiv = document.createElement("div");
+          logDiv.classList.add("log-item", tipo);
+          logDiv.innerHTML = `
+        <div class="log-time">${registro.timestamp.toLocaleTimeString('pt-BR')}</div>
+        <div class="log-message">${registro.message}</div>
+      `;
+          logsContainer.prepend(logDiv);
+        });
+
+        // alimenta o BobIA com os logs reais
+        await gerarInsightDeLogs(logsPainel);
+
+      } catch (e) {
+        console.warn("Falha ao buscar logs da EC2 — usando fallback:", e);
+
+        const fallback = [
+          "[FALLBACK] Não foi possível conectar à EC2.",
+          "[FALLBACK] Verifique a rede, security group ou porta.",
+          "[FALLBACK] Logs simulados ativados."
+        ];
+
+        logsContainer.innerHTML = "";
+        logsPainel = [];
+
+        fallback.forEach(msg => {
+          const registro = {
+            timestamp: new Date(),
+            message: msg,
+            type: "warning"
+          };
+
+          logsPainel.push(registro);
+
+          const logDiv = document.createElement("div");
+          logDiv.classList.add("log-item", "warning");
+          logDiv.innerHTML = `
+        <div class="log-time">${registro.timestamp.toLocaleTimeString('pt-BR')}</div>
+        <div class="log-message">${registro.message}</div>
+      `;
+          logsContainer.appendChild(logDiv);
+        });
+
+        await gerarInsightDeLogs(logsPainel);
+      }
+    }
+
+    function atualizarHoraWebcam() {
+      const el = document.getElementById('live-time-webcam');
+      if (!el) return;
+      el.textContent = new Date().toLocaleTimeString('pt-BR');
+    }
+
+    async function iniciarWebcamDemo() {
+      const webcamContainer = document.getElementById('cameraWebcamContainer');
+      const mockContainer = document.getElementById('cameraMockContainer');
+      const videoWebcam = document.getElementById('videoWebcam');
+      const videoMock = document.getElementById('videoMock');
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Seu navegador não suporta acesso à webcam.');
+        return;
+      }
+
+      try {
+        if (videoMock) {
+          videoMock.pause();
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        webcamStream = stream;
+
+        if (videoWebcam) {
+          videoWebcam.srcObject = stream;
+        }
+
+        if (mockContainer) mockContainer.style.display = 'none';
+        if (webcamContainer) webcamContainer.style.display = 'block';
+
+      } catch (err) {
+        console.error('Erro ao acessar webcam:', err);
+        alert('Não foi possível acessar a webcam. Verifique permissões do navegador.');
+      }
+    }
+
+    function pararWebcamDemo() {
+      const webcamContainer = document.getElementById('cameraWebcamContainer');
+      const mockContainer = document.getElementById('cameraMockContainer');
+      const videoWebcam = document.getElementById('videoWebcam');
+      const videoMock = document.getElementById('videoMock');
+
+      if (webcamStream) {
+        webcamStream.getTracks().forEach(track => track.stop());
+        webcamStream = null;
+      }
+
+      if (videoWebcam) {
+        videoWebcam.srcObject = null;
+      }
+
+      if (mockContainer) mockContainer.style.display = 'block';
+      if (webcamContainer) webcamContainer.style.display = 'none';
+
+      if (videoMock) {
+        videoMock.play().catch(() => { });
+      }
+    }
+
+
     document.addEventListener('DOMContentLoaded', function () {
+      const btnModoMock = document.getElementById('btnModoMock');
+      const btnModoWebcam = document.getElementById('btnModoWebcam');
+      if (btnModoWebcam) {
+        btnModoWebcam.addEventListener('click', iniciarWebcamDemo);
+      }
+      if (btnModoMock) {
+        btnModoMock.addEventListener('click', pararWebcamDemo);
+      }
       atualizarInformacoes();
       atualizarHoraLive();
       carregarDadosSeguranca();
       carregarAlertasOperacionais();
+      carregarLogsDaEc2();
     });
 
     setInterval(atualizarInformacoes, 60000);
@@ -954,6 +1126,8 @@
     setInterval(carregarAlertasOperacionais, 30000);
     setInterval(atualizarHoraLive, 1000);
     setInterval(atualizarKpiUsuarios, 5000);
+    setInterval(carregarLogsDaEc2, 5000);
+    setInterval(atualizarHoraWebcam, 1000);
   </script>
 </body>
 
