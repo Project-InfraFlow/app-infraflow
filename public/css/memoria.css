@@ -76,6 +76,8 @@ body {
     height: 100vh;
     z-index: 1000;
     box-shadow: var(--shadow-lg);
+    top: var(--topbar-height) !important;
+    height: calc(100vh - var(--topbar-height)) !important;
 }
 
 .brand {
@@ -183,24 +185,51 @@ body {
     width: calc(100% - var(--sidebar-width));
 }
 
-.topbar {
-    height: var(--topbar-height);
-    background: white;
-    border-bottom: 1px solid var(--gray-200);
+
+.layout {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2rem;
-    box-shadow: var(--shadow-sm);
-    position: sticky;
-    top: 0;
-    z-index: 999;
+    min-height: 100vh;
+}
+/* REGRAS FORÇADAS PARA TOPBAR - MEMÓRIA */
+header.topbar .brand {
+    display: flex !important;
+    align-items: center !important;
+    height: 60px !important;
+    padding: 0 20px !important;
+    visibility: visible !important;
 }
 
+header.topbar .brand a {
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+    text-decoration: none !important;
+}
+
+header.topbar .brand img {
+    height: 35px !important;
+    width: auto !important;
+    max-width: 180px !important;
+    object-fit: contain !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Garantir que o layout não quebre */
 .topbar-left {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 20px;
+    flex: 1;
+    margin-left: 20px;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-right: 20px;
 }
 
 .machine-select {
@@ -293,6 +322,7 @@ body {
     flex: 1;
     padding: 1.5rem;
     overflow-y: auto;
+    margin-top: 60px; 
 }
 
 .view-header {
@@ -710,3 +740,4 @@ body {
         grid-template-columns: 1fr;
     }
 }
+

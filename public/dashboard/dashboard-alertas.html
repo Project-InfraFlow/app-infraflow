@@ -30,7 +30,7 @@
                 </button>
                 <button data-view="cadastro" class="nav-item">
                     <i class="fas fa-pen-to-square"></i>
-                   <a href="./dashboard.html#view-cadastro"><span>Cadastro</span></a> 
+                    <a href="./dashboard.html#view-cadastro"><span>Cadastro</span></a>
                 </button>
                 <button data-view="historico" class="nav-item active">
                     <i class="fas fa-clock-rotate-left"></i>
@@ -54,7 +54,9 @@
         <sec class="content">
             <header class="topbar">
                 <div class="brand">
-                    <img src="../assets/infra-parafundobranco.png" alt="">
+                    <a href="dashboard.html" title="Voltar para o painel principal">
+                        <img src="../assets/infra-parafundobranco.png" alt="InfraFlow">
+                    </a>
                 </div>
                 <div class="topbar-left">
                     <div class="machine-select">
@@ -154,16 +156,16 @@
                             </div>
 
                             <div class="alertas-atencao" style="background-color: #ffd437;">
-                                <div class="dado"  id="alerta-atencao">
+                                <div class="dado" id="alerta-atencao">
                                     <p></p>
                                 </div>
                                 <div class="desc">
-                                    
+
                                     <p>Atenção</p>
                                 </div>
                             </div>
                             <div class="alertas-critico" style="background-color: #de2808;">
-                                <div class="dado"  id="alerta-critico">
+                                <div class="dado" id="alerta-critico">
                                     <p></p>
                                 </div>
                                 <div class="desc">
@@ -288,73 +290,73 @@
 
 <script>
     function kpiAlertasTotais() {
-  fetch('/alertas-route/kpiAlertasTotais', {
-    method: "GET"
-  }).then(res => res.json())
-    .then(function (resultado) {
-      console.log("oiiiiii")
-      var kpitotal = document.getElementById('total-alertas')
-      var alertasTotais = resultado[0].alertasTotais
-      kpitotal.innerHTML = `<p>${alertasTotais}<p>`
+        fetch('/alertas-route/kpiAlertasTotais', {
+            method: "GET"
+        }).then(res => res.json())
+            .then(function (resultado) {
+                console.log("oiiiiii")
+                var kpitotal = document.getElementById('total-alertas')
+                var alertasTotais = resultado[0].alertasTotais
+                kpitotal.innerHTML = `<p>${alertasTotais}<p>`
 
-    })
-    .catch(error => {
+            })
+            .catch(error => {
                 console.error('Erro ao buscar KPI Geral:', error);
                 // Opcional: exiba uma mensagem de erro na tela
                 document.getElementById('total-alertas').innerHTML = `<p>Erro</p>`;
             });
-}
+    }
 
-function kpiAtencao() {
-  fetch('/alertas-route/kpiAtencao', {
-    method: "GET"
-  }).then(res => res.json())
-    .then(function (resultado) {
-      console.log("vtnc")
-      var kpitotal = document.getElementById('alerta-atencao')
-      var atencao = resultado[0].atencao
-      kpitotal.innerHTML = `<p>${atencao}<p>`
+    function kpiAtencao() {
+        fetch('/alertas-route/kpiAtencao', {
+            method: "GET"
+        }).then(res => res.json())
+            .then(function (resultado) {
+                console.log("vtnc")
+                var kpitotal = document.getElementById('alerta-atencao')
+                var atencao = resultado[0].atencao
+                kpitotal.innerHTML = `<p>${atencao}<p>`
 
-    })
-    .catch(error => {
+            })
+            .catch(error => {
                 console.error('Erro ao buscar KPI atencao:', error);
                 // Opcional: exiba uma mensagem de erro na tela
                 document.getElementById('alerta-atencao').innerHTML = `<p>Erro</p>`;
             });
-}
+    }
 
 
-function kpiCritico() {
-  fetch('/alertas-route/kpiCritico', {
-    method: "GET"
-  }).then(res => res.json())
-    .then(function (resultado) {
-      console.log("vtnc")
-      var kpitotal = document.getElementById('alerta-critico')
-      var critico = resultado[0].critico
-      kpitotal.innerHTML = `<p>${critico}<p>`
+    function kpiCritico() {
+        fetch('/alertas-route/kpiCritico', {
+            method: "GET"
+        }).then(res => res.json())
+            .then(function (resultado) {
+                console.log("vtnc")
+                var kpitotal = document.getElementById('alerta-critico')
+                var critico = resultado[0].critico
+                kpitotal.innerHTML = `<p>${critico}<p>`
 
-    })
-    .catch(error => {
+            })
+            .catch(error => {
                 console.error('Erro ao buscar KPI critico:', error);
                 // Opcional: exiba uma mensagem de erro na tela
                 document.getElementById('alerta-critico').innerHTML = `<p>Erro</p>`;
             });
-}
+    }
 
 
-function listarAlertas() {
-    fetch('/alertas-route/listasAlertas' , {
-      method: "GET"
-    }).then(async resposta =>{
-      let usuariosGerais = await resposta.json()
-      
+    function listarAlertas() {
+        fetch('/alertas-route/listasAlertas', {
+            method: "GET"
+        }).then(async resposta => {
+            let usuariosGerais = await resposta.json()
 
-      var divUserInfos = document.getElementById('txt_users')
 
-      for (let i = usuariosGerais.length - 1; i >= 0; i--) {
-        
-        var txt_users = `
+            var divUserInfos = document.getElementById('txt_users')
+
+            for (let i = usuariosGerais.length - 1; i >= 0; i--) {
+
+                var txt_users = `
           <div class="informacoes">
             <div class="id-user">${usuariosGerais[i].idUsuario}</div>
             <div class="nome-user">${usuariosGerais[i].nome}</div>
@@ -364,14 +366,14 @@ function listarAlertas() {
           </div>
         `
 
-      divUserInfos.innerHTML += txt_users
-        
-      }
-    })
-  }
+                divUserInfos.innerHTML += txt_users
 
-kpiAlertasTotais();
-kpiAtencao(); 
-kpiCritico(); 
+            }
+        })
+    }
+
+    kpiAlertasTotais();
+    kpiAtencao();
+    kpiCritico();
 
 </script>

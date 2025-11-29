@@ -18,23 +18,23 @@
     <aside class="sidebar">
 
       <nav class="nav">
-                <button data-view="overview" class="nav-item active">
-                    <i class="fas fa-gauge"></i>
-                    <a href="./dashboard.html"><span>Painel</span></a>
-                </button>
-                <button data-view="monitor" class="nav-item">
-                    <i class="fas fa-chart-line"></i>
-                    <a href="./dashboard.html#view-monitor"><span>Monitoramento</span></a>
-                </button>
-                <button data-view="cadastro" class="nav-item">
-                    <i class="fas fa-pen-to-square"></i>
-                   <a href="./dashboard.html#view-cadastro"><span>Cadastro</span></a> 
-                </button>
-                <button data-view="historico" class="nav-item">
-                    <i class="fas fa-clock-rotate-left"></i>
-                    <a href="./dashboard-alertas.html"><span>Histórico de Alertas</span></a>
-                </button>
-            </nav>
+        <button data-view="overview" class="nav-item active">
+          <i class="fas fa-gauge"></i>
+          <a href="./dashboard.html"><span>Painel</span></a>
+        </button>
+        <button data-view="monitor" class="nav-item">
+          <i class="fas fa-chart-line"></i>
+          <a href="./dashboard.html#view-monitor"><span>Monitoramento</span></a>
+        </button>
+        <button data-view="cadastro" class="nav-item">
+          <i class="fas fa-pen-to-square"></i>
+          <a href="./dashboard.html#view-cadastro"><span>Cadastro</span></a>
+        </button>
+        <button data-view="historico" class="nav-item">
+          <i class="fas fa-clock-rotate-left"></i>
+          <a href="./dashboard-alertas.html"><span>Histórico de Alertas</span></a>
+        </button>
+      </nav>
 
       <div class="divider"></div>
 
@@ -52,7 +52,9 @@
     <main class="content">
       <header class="topbar">
         <div class="brand">
-          <img src="../assets/infra-parafundobranco.png" alt="">
+          <a href="dashboard.html" title="Voltar para o painel principal">
+            <img src="../assets/infra-parafundobranco.png" alt="InfraFlow">
+          </a>
         </div>
         <div class="topbar-left">
           <div class="machine-select">
@@ -88,7 +90,7 @@
       <section id="view-overview" class="view active">
         <div class="view-header">
           <h1 class="view-title">
-                <i class="fas fa-network-wired"></i>
+            <i class="fas fa-network-wired"></i>
             Painel de Monitoramento de Rede<!--  <span id="monitor-selecionado"></span> -->
           </h1>
         </div>
@@ -155,38 +157,43 @@
           </div>
         </div>
 
-        <div class="charts-grid two-charts"> <div class="chart-container chart-left"> <div class="chart-header">
-            <h3 class="chart-title">
+        <div class="charts-grid two-charts">
+          <div class="chart-container chart-left">
+            <div class="chart-header">
+              <h3 class="chart-title">
                 <i class="fas fa-network-wired"></i>
                 Tráfego de Rede ao Vivo
-            </h3>
-            <div class="filter-group">
-            <label for="componentSelector" style="font-size: 14px; margin-right: 10px;">
-                Métrica:
-            </label>
-            <select id="componentSelector" onchange="updateChart('chart1')">
-                <option value="latency" selected>Latência (ms)</option>
-                <option value="jitter">Jitter (ms)</option>
-                <option value="packetLoss">Perda de Pacote (%)</option>
-                <option value="speed">Velocidade (Mbps)</option>
-            </select>
-        </div>
-        </div>
-        <div class="chart-content">
-            <canvas id="chart1"></canvas> </div>
-    </div>
+              </h3>
+              <div class="filter-group">
+                <label for="componentSelector" style="font-size: 14px; margin-right: 10px;">
+                  Métrica:
+                </label>
+                <select id="componentSelector" onchange="updateChart('chart1')">
+                  <option value="latency" selected>Latência (ms)</option>
+                  <option value="jitter">Jitter (ms)</option>
+                  <option value="packetLoss">Perda de Pacote (%)</option>
+                  <option value="speed">Velocidade (Mbps)</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-content">
+              <canvas id="chart1"></canvas>
+            </div>
+          </div>
 
-    <div class="chart-container chart-right"> <div class="chart-header">
-            <h3 class="chart-title">
+          <div class="chart-container chart-right">
+            <div class="chart-header">
+              <h3 class="chart-title">
                 <i class="fas fa-network-wired"></i>
-                Comparação de redes 
-            </h3>
-        </div>
-        <div class="chart-content">
-            <canvas id="chart2"></canvas> </div>
-    </div>
+                Comparação de redes
+              </h3>
+            </div>
+            <div class="chart-content">
+              <canvas id="chart2"></canvas>
+            </div>
+          </div>
 
-</div>
+        </div>
 
         <div class="status-and-legend">
           <div class="status-card">
@@ -231,7 +238,7 @@
                     <td>Latência (ms)</td>
                     <td>≤ 50 ms</td>
                     <td><span class="pill warn">50 ms – 200 ms</span></td>
-                    <td><span class="pill crit">&gt;  200 ms</span></td>
+                    <td><span class="pill crit">&gt; 200 ms</span></td>
                   </tr>
                   <tr>
                     <td>Jitter (ms)</td>
@@ -656,161 +663,161 @@
   </div>
 
   <script src="../js/rede.js"></script>
-    <script src=""></script>
+  <script src=""></script>
 
   <script>
-    
+
 
     function createGroupedBarChart(canvasId, label1, data1, label2, data2) {
-    const ctx = document.getElementById(canvasId).getContext('2d');
-    new Chart(ctx, {
-        type: 'bar', 
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
         data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-            datasets: [
-                {
-                    label: label1,
-                    data: data1,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)', // Download
-                },
-                {
-                    label: label2,
-                    data: data2,
-                    backgroundColor: 'rgba(255, 99, 132, 0.7)', // Upload
-                }
-            ]
+          labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+          datasets: [
+            {
+              label: label1,
+              data: data1,
+              backgroundColor: 'rgba(54, 162, 235, 0.7)', // Download
+            },
+            {
+              label: label2,
+              data: data2,
+              backgroundColor: 'rgba(255, 99, 132, 0.7)', // Upload
+            }
+          ]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false, 
-            scales: {
-                x: {
-                    stacked: false 
-                },
-                y: {
-                    beginAtZero: true
-                }
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: false
+            },
+            y: {
+              beginAtZero: true
             }
+          }
         }
-    });
-}
+      });
+    }
 
-const downloadData = [35, 45, 60, 50, 70, 85];
-const uploadData = [15, 25, 30, 28, 40, 50]; 
+    const downloadData = [35, 45, 60, 50, 70, 85];
+    const uploadData = [15, 25, 30, 28, 40, 50];
 
-createGroupedBarChart('chart2', 'Média Download (Mbps)', downloadData, 'Média Upload (Mbps)', uploadData);
+    createGroupedBarChart('chart2', 'Média Download (Mbps)', downloadData, 'Média Upload (Mbps)', uploadData);
 
-let myChart = null; 
+    let myChart = null;
 
     const ALL_DATA = {
-        // Latência (ms)
-        latency: {
-            unit: 'ms',
-            title: 'Latência (ms)',
-            'INFRA-EDGE-01 (Itápolis)': [15, 17, 16, 18, 19, 20],
-            'INFRA-EDGE-02 (Jaboticabal)': [22, 20, 24, 25, 23, 21],
-            'INFRA-EDGE-03 (SJC)': [10, 11, 10, 12, 13, 14],
-            'INFRA-EDGE-04 (Itaguaí)': [30, 35, 33, 37, 39, 41]
-        },
-        // Jitter (ms)
-        jitter: {
-            unit: 'ms',
-            title: 'Jitter (ms)',
-            'INFRA-EDGE-01 (Itápolis)': [2, 1, 3, 2, 1, 1.5],
-            'INFRA-EDGE-02 (Jaboticabal)': [5, 4, 6, 5, 4, 4.5],
-            'INFRA-EDGE-03 (SJC)': [1, 0.5, 1, 1, 0.5, 0.8],
-            'INFRA-EDGE-04 (Itaguaí)': [10, 9, 12, 11, 10, 10.5]
-        },
-        // Perda de Pacote (%)
-        packetLoss: {
-            unit: '%',
-            title: 'Perda de Pacote (%)',
-            'INFRA-EDGE-01 (Itápolis)': [0, 0, 0, 0, 0, 0.5],
-            'INFRA-EDGE-02 (Jaboticabal)': [1, 2, 1, 3, 2, 2.5],
-            'INFRA-EDGE-03 (SJC)': [0, 0, 0, 0, 0, 0],
-            'INFRA-EDGE-04 (Itaguaí)': [5, 6, 4, 7, 5, 6.5]
-        },
-        // Velocidade (Mbps)
-        speed: {
-            unit: 'Mbps',
-            title: 'Velocidade (Mbps)',
-            'INFRA-EDGE-01 (Itápolis)': [80, 85, 90, 88, 92, 95],
-            'INFRA-EDGE-02 (Jaboticabal)': [50, 55, 60, 58, 62, 65],
-            'INFRA-EDGE-03 (SJC)': [95, 98, 99, 100, 98, 97],
-            'INFRA-EDGE-04 (Itaguaí)': [30, 35, 40, 38, 42, 45]
-        }
+      // Latência (ms)
+      latency: {
+        unit: 'ms',
+        title: 'Latência (ms)',
+        'INFRA-EDGE-01 (Itápolis)': [15, 17, 16, 18, 19, 20],
+        'INFRA-EDGE-02 (Jaboticabal)': [22, 20, 24, 25, 23, 21],
+        'INFRA-EDGE-03 (SJC)': [10, 11, 10, 12, 13, 14],
+        'INFRA-EDGE-04 (Itaguaí)': [30, 35, 33, 37, 39, 41]
+      },
+      // Jitter (ms)
+      jitter: {
+        unit: 'ms',
+        title: 'Jitter (ms)',
+        'INFRA-EDGE-01 (Itápolis)': [2, 1, 3, 2, 1, 1.5],
+        'INFRA-EDGE-02 (Jaboticabal)': [5, 4, 6, 5, 4, 4.5],
+        'INFRA-EDGE-03 (SJC)': [1, 0.5, 1, 1, 0.5, 0.8],
+        'INFRA-EDGE-04 (Itaguaí)': [10, 9, 12, 11, 10, 10.5]
+      },
+      // Perda de Pacote (%)
+      packetLoss: {
+        unit: '%',
+        title: 'Perda de Pacote (%)',
+        'INFRA-EDGE-01 (Itápolis)': [0, 0, 0, 0, 0, 0.5],
+        'INFRA-EDGE-02 (Jaboticabal)': [1, 2, 1, 3, 2, 2.5],
+        'INFRA-EDGE-03 (SJC)': [0, 0, 0, 0, 0, 0],
+        'INFRA-EDGE-04 (Itaguaí)': [5, 6, 4, 7, 5, 6.5]
+      },
+      // Velocidade (Mbps)
+      speed: {
+        unit: 'Mbps',
+        title: 'Velocidade (Mbps)',
+        'INFRA-EDGE-01 (Itápolis)': [80, 85, 90, 88, 92, 95],
+        'INFRA-EDGE-02 (Jaboticabal)': [50, 55, 60, 58, 62, 65],
+        'INFRA-EDGE-03 (SJC)': [95, 98, 99, 100, 98, 97],
+        'INFRA-EDGE-04 (Itaguaí)': [30, 35, 40, 38, 42, 45]
+      }
     };
 
     const MACHINE_COLORS = {
-        'INFRA-EDGE-01 (Itápolis)': 'rgb(255, 99, 132)', 
-        'INFRA-EDGE-02 (Jaboticabal)': 'rgb(54, 162, 235)', 
-        'INFRA-EDGE-03 (SJC)': 'rgb(75, 192, 192)', 
-        'INFRA-EDGE-04 (Itaguaí)': 'rgb(255, 159, 64)' 
+      'INFRA-EDGE-01 (Itápolis)': 'rgb(255, 99, 132)',
+      'INFRA-EDGE-02 (Jaboticabal)': 'rgb(54, 162, 235)',
+      'INFRA-EDGE-03 (SJC)': 'rgb(75, 192, 192)',
+      'INFRA-EDGE-04 (Itaguaí)': 'rgb(255, 159, 64)'
     };
 
     function updateChart(canvasId) {
-        const ctx = document.getElementById(canvasId).getContext('2d');
-        const selector = document.getElementById('componentSelector');
-        
-        const selectedMetricKey = selector.value;
-        const metricData = ALL_DATA[selectedMetricKey];
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      const selector = document.getElementById('componentSelector');
 
-        if (!metricData) return; 
+      const selectedMetricKey = selector.value;
+      const metricData = ALL_DATA[selectedMetricKey];
 
-        if (myChart) {
-            myChart.destroy();
-        }
+      if (!metricData) return;
 
-        const labels = ['-10s', '-8s', '-6s', '-4s', '-2s', 'Agora'];
-        
-        const datasets = Object.keys(MACHINE_COLORS).map(machineLabel => ({
-            label: machineLabel,
-            data: metricData[machineLabel], 
-            borderColor: MACHINE_COLORS[machineLabel],
-            backgroundColor: MACHINE_COLORS[machineLabel],
-            fill: false, 
-            tension: 0.2 
-        }));
+      if (myChart) {
+        myChart.destroy();
+      }
 
-        // Cria o novo gráfico
-        myChart = new Chart(ctx, {
-            type: 'line', 
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: metricData.title + ' em Tempo Real' 
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: metricData.title + ' (' + metricData.unit + ')' 
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Tempo'
-                        }
-                    }
-                }
+      const labels = ['-10s', '-8s', '-6s', '-4s', '-2s', 'Agora'];
+
+      const datasets = Object.keys(MACHINE_COLORS).map(machineLabel => ({
+        label: machineLabel,
+        data: metricData[machineLabel],
+        borderColor: MACHINE_COLORS[machineLabel],
+        backgroundColor: MACHINE_COLORS[machineLabel],
+        fill: false,
+        tension: 0.2
+      }));
+
+      // Cria o novo gráfico
+      myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: metricData.title + ' em Tempo Real'
             }
-        });
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: metricData.title + ' (' + metricData.unit + ')'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Tempo'
+              }
+            }
+          }
+        }
+      });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        updateChart('chart1'); 
+      updateChart('chart1');
     });
-  
+
   </script>
 </body>
 
