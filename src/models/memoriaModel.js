@@ -1,65 +1,74 @@
 var database = require("../database/config");
 
-function buscarUltimaLeituraMemoria(idMaquina) {
-    var query = `
-        SELECT l.dados_float as uso_percent, l.data_hora_captura
+function buscarDetalhes(idMaquina) {
+    return database.executar(`
+        SELECT dados_float AS uso_percent, 30 AS total_gb, 
+               ROUND(30 - (dados_float / 100) * 30, 2) AS livre_gb,
+               data_hora_captura
         FROM leitura l
-        JOIN componente c ON l.fk_id_componente = c.id_componente
-        WHERE c.nome_componente = 'Memória RAM'
-        AND l.fk_id_maquina = ?
-        ORDER BY l.data_hora_captura DESC
-        LIMIT 1
-    `;
-    return database.executar(query, [idMaquina]);
+        JOIN componente c ON c.id_componente = l.fk_id_componente
+        WHERE c.nome_componente = 'RAM'
+        AND l.fk_id_maquina = ${idMaquina}
+        ORDER BY data_hora_captura DESC LIMIT 1
+    `);
 }
 
-function buscarHistoricoMemoria(idMaquina, limite = 50) {
-    var query = `
-        SELECT l.dados_float as uso_percent, l.data_hora_captura, l.fk_id_maquina as id_maquina
+function buscarHistorico(idMaquina, limite) {
+    return database.executar(`
+        SELECT dados_float AS uso_percent, 30 AS total_gb, 
+               ROUND(30 - (dados_float / 100) * 30, 2) AS livre_gb,
+               data_hora_captura
         FROM leitura l
-        JOIN componente c ON l.fk_id_componente = c.id_componente
-        WHERE c.nome_componente = 'Memória RAM'
-        AND l.fk_id_maquina = ?
-        ORDER BY l.data_hora_captura DESC
-        LIMIT ?
-    `;
-    return database.executar(query, [idMaquina, limite]);
+        JOIN componente c ON c.id_componente = l.fk_id_componente
+        WHERE c.nome_componente = 'RAM'
+        AND l.fk_id_maquina = ${idMaquina}
+        ORDER BY data_hora_captura DESC LIMIT ${limite}
+    `);
 }
 
-function buscarAlertasMemoria(idMaquina, horas = 24) {
-    var query = `
-        SELECT a.id_alerta, a.descricao, a.status_alerta, l.dados_float as uso_percent,
-               l.data_hora_captura as data_hora, m.nome_maquina, c.nome_componente
+function buscarAlertas(idMaquina, horas) {
+    return database.executar(`
+        SELECT a.descricao, l.dados_float AS uso_percent, l.data_hora_captura as data_hora
         FROM alerta a
-        INNER JOIN leitura l ON a.fk_id_leitura = l.id_leitura
-        INNER JOIN componente c ON a.fk_id_componente = c.id_componente
-        INNER JOIN maquina m ON l.fk_id_maquina = m.id_maquina
-        WHERE c.nome_componente = 'Memória RAM'
-        AND l.fk_id_maquina = ?
-        AND l.data_hora_captura >= DATE_SUB(NOW(), INTERVAL ? HOUR)
-        AND a.status_alerta = 1
+        JOIN leitura l ON l.id_leitura = a.fk_id_leitura
+        JOIN componente c ON c.id_componente = a.fk_id_componente
+        WHERE c.nome_componente = 'RAM'
+        AND l.fk_id_maquina = ${idMaquina}
+        AND l.data_hora_captura >= DATE_SUB(NOW(), INTERVAL ${horas} HOUR)
         ORDER BY l.data_hora_captura DESC
-    `;
-    return database.executar(query, [idMaquina, horas]);
+    `);
 }
 
-// NOVA FUNÇÃO: Buscar processo com maior uso de memória
-function buscarProcessoMaiorMemoria(idMaquina) {
-    var query = `
-        SELECT l.dados_float as memoria_percent, l.dados_texto as processo_nome, l.data_hora_captura
-        FROM leitura l
-        JOIN componente c ON l.fk_id_componente = c.id_componente
-        WHERE c.nome_componente = 'Processo Maior Memória'
-        AND l.fk_id_maquina = ?
-        ORDER BY l.data_hora_captura DESC
-        LIMIT 1
-    `;
-    return database.executar(query, [idMaquina]);
+function buscarAlertasCriticos(idMaquina, horas) {
+    return database.executar(`
+        SELECT COUNT(*) as total_alertas_criticos
+        FROM alerta a
+        JOIN leitura l ON l.id_leitura = a.fk_id_leitura
+        JOIN componente c ON c.id_componente = a.fk_id_componente
+        WHERE c.nome_componente = 'RAM'
+        AND l.fk_id_maquina = ${idMaquina}
+        AND l.data_hora_captura >= DATE_SUB(NOW(), INTERVAL ${horas} HOUR)
+        AND l.dados_float >= 84
+    `);
 }
 
-module.exports = {
-    buscarUltimaLeituraMemoria,
-    buscarHistoricoMemoria,
-    buscarAlertasMemoria,
-    buscarProcessoMaiorMemoria  
+function buscarSomaAlertas(idMaquina, horas) {
+    return database.executar(`
+        SELECT COUNT(*) as total_alertas
+        FROM alerta a
+        JOIN leitura l ON l.id_leitura = a.fk_id_leitura
+        JOIN componente c ON c.id_componente = a.fk_id_componente
+        WHERE c.nome_componente = 'RAM'
+        AND l.fk_id_maquina = ${idMaquina}
+        AND l.data_hora_captura >= DATE_SUB(NOW(), INTERVAL ${horas} HOUR)
+        AND a.fk_parametro_alerta = 4
+    `);
+}
+
+module.exports = { 
+    buscarDetalhes, 
+    buscarHistorico, 
+    buscarAlertas,
+    buscarAlertasCriticos,
+    buscarSomaAlertas  
 };

@@ -2,9 +2,11 @@ var express = require("express");
 var router = express.Router();
 var memoriaController = require("../controllers/memoriaController");
 
-router.get("/detalhes/:idMaquina", memoriaController.getDetalhes);
-router.get("/historico/:idMaquina", memoriaController.getHistorico);
-router.get("/alertas/:idMaquina", memoriaController.getAlertas);
-router.get("/processo-maior-memoria/:idMaquina", memoriaController.getProcessoMaiorMemoria); 
+router.get("/detalhes/:idMaquina", memoriaController.detalhes);
+router.get("/historico/:idMaquina", memoriaController.historico);
+router.get("/alertas/:idMaquina", memoriaController.alertas);
+router.get("/alertas-criticos/:idMaquina", memoriaController.alertasCriticos);
+router.get("/total-processos/:idMaquina", memoriaController.totalProcessos);
+router.get("/soma-alertas/:idMaquina", memoriaController.somaAlertas);
 
 module.exports = router;
