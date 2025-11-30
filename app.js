@@ -24,9 +24,6 @@ var iaRouter = require("./src/routes/ia");
 var contatoRouter = require("./src/routes/contato");
 var maquinaRouter = require("./src/routes/maquinas");
 
-
-
-
 var app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -44,7 +41,7 @@ app.use("/api/memoria", memoriaRouter);
 app.use("/api/cpu", cpuRouter);
 app.use("/contato", contatoRouter);
 app.use("/alertas-route", alertaRouter);
-app.use("/rede", redeRouter);
+app.use("/redeRoute", redeRouter);
 app.use("/api", latenciaRouter);
 app.use("/maquinas", maquinaRouter);
 app.use("/api/leituras", leiturasRouter);
