@@ -660,19 +660,7 @@
 
   <script>
 
-const MAQUINAS = [
-    { id: 2, nome: "INFRA-EDGE-01 (Itápolis)" },
-    { id: 3, nome: "INFRA-EDGE-02 (Jaboticabal)" },
-    { id: 4, nome: "INFRA-EDGE-03 (SJC)" },
-    { id: 5, nome: "INFRA-EDGE-03 (Itaguaí)" }
-];
-
-const MACHINE_COLORS = {
-    2: "rgb(255, 99, 132)",  
-    3: "rgb(54, 162, 235)",  
-    4: "rgb(75, 192, 192)",  
-    5: "rgb(255, 159, 64)"  
-};
+let MAQUINA_ATUAL = 1; 
 
 let chart1 = null;
 let chart2 = null;
@@ -694,51 +682,43 @@ async function renderChart1() {
 
     if (chart1) chart1.destroy();
 
-    const datasets = [];
-    chart1_labels = [];
+    const historico = await getHistorico(MAQUINA_ATUAL, metric);
 
-    for (const maquina of MAQUINAS) {
-        const historico = await getHistorico(maquina.id, metric);
-
-        const valores = historico.map(item => item.valor);
-        const labels = historico.map(item => {
-            const dt = new Date(item.data_hora_captura);
-            return dt.toLocaleTimeString("pt-BR", {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            });
+    const valores = historico.map(item => item.valor);
+    const labels = historico.map(item => {
+        const dt = new Date(item.data_hora_captura);
+        return dt.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
         });
-
-        datasets.push({
-            label: maquina.nome,
-            data: valores,
-            borderColor: MACHINE_COLORS[maquina.id],
-            backgroundColor: MACHINE_COLORS[maquina.id],
-            fill: false,
-            tension: 0.2
-        });
-
-        if (datasets.length === 1) chart1_labels = labels;
-    }
+    });
 
     chart1 = new Chart(ctx, {
         type: "line",
         data: {
-            labels: chart1_labels,
-            datasets
+            labels: labels,
+            datasets: [{
+                label: `${metric.toUpperCase()} - Máquina ${MAQUINA_ATUAL}`,
+                data: valores,
+                borderColor: "rgb(75, 192, 192)",
+                backgroundColor: "rgba(75,192,192,0.2)",
+                fill: true,
+                tension: 0.3
+            }]
         },
         options: {
             responsive: true,
             plugins: {
                 title: {
                     display: true,
-                    text: metric.toUpperCase() + " (tempo real entre máquinas)"
+                    text: `${metric.toUpperCase()} - Histórico da máquina ${MAQUINA_ATUAL}`
                 }
             }
         }
     });
 }
+
 
 async function calcularMediaDownload(maquinaId) {
     const historico = await getHistorico(maquinaId, "velocidade");
@@ -749,26 +729,34 @@ async function calcularMediaDownload(maquinaId) {
 }
 
 async function renderChart2() {
+
     const ctx = document.getElementById("chart2").getContext("2d");
 
     if (chart2) chart2.destroy();
 
-    const labels = [];
-    const valores = [];
+    const lat = await getHistorico(MAQUINA_ATUAL, "latencia");
+    const jitter = await getHistorico(MAQUINA_ATUAL, "jitter");
+    const perda = await getHistorico(MAQUINA_ATUAL, "perda");
+    const vel = await getHistorico(MAQUINA_ATUAL, "velocidade");
 
-    for (const maquina of MAQUINAS) {
-        labels.push(maquina.nome);
-        valores.push(await calcularMediaDownload(maquina.id));
-    }
+    const mediaLat = calcularMedia(lat);
+    const mediaJit = calcularMedia(jitter);
+    const mediaPer = calcularMedia(perda);
+    const mediaVel = calcularMedia(vel);
 
     chart2 = new Chart(ctx, {
         type: "bar",
         data: {
-            labels,
+            labels: ["Latência", "Jitter", "Perda", "Download"],
             datasets: [{
-                label: "Média Download (Mbps)",
-                data: valores,
-                backgroundColor: Object.values(MACHINE_COLORS)
+                label: `Médias - Máquina ${MAQUINA_ATUAL}`,
+                data: [mediaLat, mediaJit, mediaPer, mediaVel],
+                backgroundColor: [
+                    "rgb(54, 162, 235)",
+                    "rgb(255, 206, 86)",
+                    "rgb(255, 99, 132)",
+                    "rgb(75, 192, 192)"
+                ]
             }]
         },
         options: {
@@ -779,10 +767,15 @@ async function renderChart2() {
         }
     });
 }
+function calcularMedia(dados){
+    if (!dados || dados.length === 0) return 0;
+    const soma = dados.reduce((acc, v) => acc + v.valor, 0);
+    return (soma / dados.length).toFixed(2);
+}
 
 
 async function atualizarDashboard() {
-    console.log("🔄 Atualizando dashboard...");
+    console.log("Atualizando dashboard...");  
 
     await renderChart1();
     await renderChart2();
@@ -790,7 +783,7 @@ async function atualizarDashboard() {
 }
 
 async function atualizarKPIs() {
-    const maquinaId = 2; 
+    const maquinaId = 1; 
 
     try {
         const res = await fetch(`/rede/latest/${maquinaId}`);
