@@ -10,7 +10,16 @@ function formatarHora(isoString) {
     });
 }
 
+function normalizarNumero(valor) {
+    const n = Number(valor);
+    return isNaN(n) ? 0 : n;
+}
+
 function gerarAlertaBackend(cpu, idle, proc) {
+    cpu = normalizarNumero(cpu);
+    idle = normalizarNumero(idle);
+    proc = normalizarNumero(proc);
+
     if (cpu > 85) return "CPU ALTO";
     if (cpu > 70) return "CPU MÉDIA";
     if (idle < 30) return "IDLE BAIXO";
@@ -31,7 +40,7 @@ function criarGraficoCpuLatencia() {
             labels: [],
             datasets: [
                 { label: "CPU (%)", data: [], borderColor: "#3b82f6", borderWidth: 3, tension: 0.4 },
-                { label: "CPU Idle (%)", data: [], borderColor: "#f59e0b", borderWidth: 3, tension: 0.4 }
+                { label: "CPU_Idle (%)", data: [], borderColor: "#f59e0b", borderWidth: 3, tension: 0.4 }
             ]
         },
         options: { responsive: true, scales: { y: { beginAtZero: true } } }
@@ -45,7 +54,15 @@ function criarGraficoProcessos() {
         data: {
             labels: [],
             datasets: [
-                { label: "Processos em Execução", data: [], borderColor: "#0ea5e9", backgroundColor: "rgba(14,165,233,0.35)", borderWidth: 2, tension: 0.35, fill: true }
+                {
+                    label: "Processos em Execução",
+                    data: [],
+                    borderColor: "#0ea5e9",
+                    backgroundColor: "rgba(14,165,233,0.35)",
+                    borderWidth: 2,
+                    tension: 0.35,
+                    fill: true
+                }
             ]
         },
         options: { responsive: true, scales: { y: { beginAtZero: true } } }
@@ -57,7 +74,7 @@ function carregarAlertasSlack(dados) {
     painel.innerHTML = "";
 
     dados.forEach(linha => {
-        const alerta = gerarAlertaBackend(linha.cpu, linha.cpuIdle, linha.processos);
+        const alerta = gerarAlertaBackend(linha.cpu, linha.cpuIdle, 0); // processos da API nova não entram aqui
         if (!alerta) return;
 
         let classe = alerta.includes("ALTO") || alerta.includes("BAIXO") ? "alerta-vermelho" : "alerta-amarelo";
@@ -66,9 +83,8 @@ function carregarAlertasSlack(dados) {
             <div class="alerta-item ${classe}">
                 <strong>${alerta}</strong><br>
                 ------------------------
-                - CPU: ${linha.cpu.toFixed(1)}% <br>
-                - Idle: ${linha.cpuIdle.toFixed(1)}% <br>
-                - Proc: ${linha.processos.toFixed(0)}<br>
+                - CPU: ${normalizarNumero(linha.cpu).toFixed(1)}% <br>
+                - Idle: ${normalizarNumero(linha.cpuIdle).toFixed(1)}% <br>
                 <small>${formatarHora(linha.horario)}</small>
             </div>
         `;
@@ -84,17 +100,33 @@ async function getCpuData() {
     return await response.json();
 }
 
+// NOVO: pega processos em tempo real, SEM banco
+async function getProcessosData() {
+    const response = await fetch("/api/processos");
+    return await response.json(); // { total: <numero> }
+}
 
 async function atualizarDashboard() {
+    // 1) CPU + IDLE continuam vindo do backend / banco
     const response = await getCpuData();
     if (!response || !response.kpi) return;
-    console.log(response)
-    document.getElementById("kpiCpuValue").textContent = `${response.kpi.cpuMedia.toFixed(1)}%`;
-    document.getElementById("KpiProcessosValue").textContent = response.kpi.processos;
-    document.getElementById("KpiTempoValue").textContent = `${response.kpi.cpuIdle.toFixed(1)}%`;
+    console.log(response);
 
-    const totalAlertas = response.grafico.filter(linha =>
-        gerarAlertaBackend(linha.cpu, linha.cpuIdle, linha.processos) !== null
+    const cpuMedia = normalizarNumero(response.kpi.cpuMedia);
+    const cpuIdle = normalizarNumero(response.kpi.cpuIdle);
+
+    document.getElementById("kpiCpuValue").textContent = `${cpuMedia.toFixed(1)}%`;
+    document.getElementById("KpiTempoValue").textContent = `${cpuIdle.toFixed(1)}%`;
+
+    const dados = response.grafico || [];
+
+    // KPI de alertas continua calculada com CPU/Idle
+    const totalAlertas = dados.filter(linha =>
+        gerarAlertaBackend(
+            normalizarNumero(linha.cpu),
+            normalizarNumero(linha.cpuIdle),
+            0
+        ) !== null
     ).length;
 
     const kpiRedeValue = document.getElementById("kpiRedeValue");
@@ -114,18 +146,44 @@ async function atualizarDashboard() {
         progressBar.classList.remove("progress-bar-vermelho");
     }
 
-    const dados = response.grafico;
-
+    // Gráfico CPU x Tempo Ocioso
     cpuLatenciaChart.data.labels = dados.map(d => formatarHora(d.horario));
-    cpuLatenciaChart.data.datasets[0].data = dados.map(d => d.cpu);
-    cpuLatenciaChart.data.datasets[1].data = dados.map(d => d.cpuIdle);
+    cpuLatenciaChart.data.datasets[0].data = dados.map(d => normalizarNumero(d.cpu));
+    cpuLatenciaChart.data.datasets[1].data = dados.map(d => normalizarNumero(d.cpuIdle));
     cpuLatenciaChart.update();
 
-    processosChart.data.labels = dados.map(d => formatarHora(d.horario));
-    processosChart.data.datasets[0].data = dados.map(d => d.processos);
-    processosChart.update();
-
     carregarAlertasSlack(dados);
+
+    // 2) PROCESSOS: somentE leitura, direto da API /api/processos
+    try {
+        const procResp = await getProcessosData();
+        const processosAtual = normalizarNumero(procResp.total);
+
+        // KPI de Processos
+        document.getElementById("KpiProcessosValue").textContent = processosAtual.toFixed(0);
+
+        // Gráfico de Processos em Execução (somente em memória, sem banco)
+        const agora = new Date();
+        const labelHora = agora.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false
+        });
+
+        processosChart.data.labels.push(labelHora);
+        processosChart.data.datasets[0].data.push(processosAtual);
+
+        // mantém no máximo 30 pontos pra não explodir
+        if (processosChart.data.labels.length > 30) {
+            processosChart.data.labels.shift();
+            processosChart.data.datasets[0].data.shift();
+        }
+
+        processosChart.update();
+    } catch (e) {
+        console.error("Erro ao buscar processos em execução:", e);
+    }
 
     document.getElementById("lastUpdateTime").textContent =
         new Date().toLocaleTimeString("pt-BR");

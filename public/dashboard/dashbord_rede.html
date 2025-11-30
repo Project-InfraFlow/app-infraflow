@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>InfraFlow - Sistema de Monitoramento</title>
+  <title>InfraFlow - Monitoramento de Rede</title>
   <link rel="stylesheet" href="../css/dashbord_rede.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,28 +13,26 @@
 </head>
 
 <body>
-
   <div id="dashboard" class="dashboard">
     <aside class="sidebar">
-
       <nav class="nav">
-                <button data-view="overview" class="nav-item active">
-                    <i class="fas fa-gauge"></i>
-                    <a href="./dashboard.html"><span>Painel</span></a>
-                </button>
-                <button data-view="monitor" class="nav-item">
-                    <i class="fas fa-chart-line"></i>
-                    <a href="./dashboard.html#view-monitor"><span>Monitoramento</span></a>
-                </button>
-                <button data-view="cadastro" class="nav-item">
-                    <i class="fas fa-pen-to-square"></i>
-                   <a href="./dashboard.html#view-cadastro"><span>Cadastro</span></a> 
-                </button>
-                <button data-view="historico" class="nav-item">
-                    <i class="fas fa-clock-rotate-left"></i>
-                    <a href="./dashboard-alertas.html"><span>Histórico de Alertas</span></a>
-                </button>
-            </nav>
+        <button data-view="overview" class="nav-item active">
+          <i class="fas fa-gauge"></i>
+          <a href="./dashboard.html"><span>Painel</span></a>
+        </button>
+        <button data-view="monitor" class="nav-item">
+          <i class="fas fa-chart-line"></i>
+          <a href="./dashboard.html#view-monitor"><span>Monitoramento</span></a>
+        </button>
+        <button data-view="cadastro" class="nav-item">
+          <i class="fas fa-pen-to-square"></i>
+          <a href="./dashboard.html#view-cadastro"><span>Cadastro</span></a>
+        </button>
+        <button data-view="historico" class="nav-item">
+          <i class="fas fa-clock-rotate-left"></i>
+          <a href="./dashboard-alertas.html"><span>Histórico de Alertas</span></a>
+        </button>
+      </nav>
 
       <div class="divider"></div>
 
@@ -88,13 +86,13 @@
       <section id="view-overview" class="view active">
         <div class="view-header">
           <h1 class="view-title">
-                <i class="fas fa-network-wired"></i>
-            Painel de Monitoramento de Rede<!--  <span id="monitor-selecionado"></span> -->
+            <i class="fas fa-network-wired"></i>
+            Painel de Monitoramento de Rede
           </h1>
         </div>
 
         <div class="kpis-grid">
-          <div class="kpi-card" id="kpiCpu">
+          <div class="kpi-card">
             <div class="kpi-header">
               <div class="kpi-icon cpu">
                 <i class="fas fa-microchip"></i>
@@ -105,11 +103,11 @@
             </div>
             <div class="kpi-value" id="kpiLatenciaValue">0 ms</div>
             <div class="kpi-progress">
-              <div class="progress-bar rede" id="redeProgress"></div>
+              <div class="progress-bar rede" id="latenciaProgress"></div>
             </div>
           </div>
 
-          <div class="kpi-card" id="kpiRede">
+          <div class="kpi-card">
             <div class="kpi-header">
               <div class="kpi-icon memoria">
                 <i class="fas fa-memory"></i>
@@ -120,11 +118,11 @@
             </div>
             <div class="kpi-value" id="kpiJitterValue">0 ms</div>
             <div class="kpi-progress">
-              <div class="progress-bar rede" id="redeProgress"></div>
+              <div class="progress-bar rede" id="jitterProgress"></div>
             </div>
           </div>
 
-          <div class="kpi-card" id="kpiRede">
+          <div class="kpi-card">
             <div class="kpi-header">
               <div class="kpi-icon disco">
                 <i class="fas fa-hdd"></i>
@@ -133,60 +131,64 @@
                 <span class="kpi-label">Perda de pacotes</span>
               </div>
             </div>
-            <div class="kpi-value" id="kpiPacoteValue">0%</div>
+            <div class="kpi-value" id="kpiPerdaValue">0%</div>
             <div class="kpi-progress">
-              <div class="progress-bar rede" id="redeProgress"></div>
+              <div class="progress-bar rede" id="perdaProgress"></div>
             </div>
           </div>
 
-          <div class="kpi-card" id="kpiRede">
+          <div class="kpi-card">
             <div class="kpi-header">
               <div class="kpi-icon rede">
                 <i class="fas fa-network-wired"></i>
               </div>
               <div class="kpi-info">
-                <span class="kpi-label">Velocidade de download e upload</span>
+                <span class="kpi-label">Velocidade de download</span>
               </div>
             </div>
             <div class="kpi-value" id="kpiDownloadValue">0 Mbps</div>
             <div class="kpi-progress">
-              <div class="progress-bar rede" id="redeProgress"></div>
+              <div class="progress-bar rede" id="downloadProgress"></div>
             </div>
           </div>
         </div>
 
-        <div class="charts-grid two-charts"> <div class="chart-container chart-left"> <div class="chart-header">
-            <h3 class="chart-title">
+        <div class="charts-grid two-charts">
+          <div class="chart-container chart-left">
+            <div class="chart-header">
+              <h3 class="chart-title">
                 <i class="fas fa-network-wired"></i>
                 Tráfego de Rede ao Vivo
-            </h3>
-            <div class="filter-group">
-            <label for="componentSelector" style="font-size: 14px; margin-right: 10px;">
-                Métrica:
-            </label>
-            <select id="componentSelector" onchange="updateChart('chart1')">
-                <option value="latencia" selected>Latência (ms)</option>
-                <option value="jitter">Jitter (ms)</option>
-                <option value="perda">Perda de Pacote (%)</option>
-                <option value="velocidade">Velocidade (Mbps)</option>
-            </select>
-        </div>
-        </div>
-        <div class="chart-content">
-            <canvas id="chart1"></canvas> </div>
-    </div>
+              </h3>
+              <div class="filter-group">
+                <label for="componentSelector" style="font-size: 14px; margin-right: 10px;">
+                  Métrica:
+                </label>
+                <select id="componentSelector">
+                  <option value="latencia" selected>Latência (ms)</option>
+                  <option value="jitter">Jitter (ms)</option>
+                  <option value="perda">Perda de Pacote (%)</option>
+                  <option value="velocidade">Velocidade (Mbps)</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-content">
+              <canvas id="chart1"></canvas>
+            </div>
+          </div>
 
-    <div class="chart-container chart-right"> <div class="chart-header">
-            <h3 class="chart-title">
+          <div class="chart-container chart-right">
+            <div class="chart-header">
+              <h3 class="chart-title">
                 <i class="fas fa-network-wired"></i>
-                Comparação de redes 
-            </h3>
+                Comparação de redes
+              </h3>
+            </div>
+            <div class="chart-content">
+              <canvas id="chart2"></canvas>
+            </div>
+          </div>
         </div>
-        <div class="chart-content">
-            <canvas id="chart2"></canvas> </div>
-    </div>
-
-</div>
 
         <div class="status-and-legend">
           <div class="status-card">
@@ -215,7 +217,6 @@
               <i class="fas fa-info-circle"></i>
               Legenda (Níveis de Monitoramento)
             </h3>
-
             <div class="legend-table-wrap">
               <table class="legend-table">
                 <thead>
@@ -231,7 +232,7 @@
                     <td>Latência (ms)</td>
                     <td>≤ 50 ms</td>
                     <td><span class="pill warn">50 ms – 200 ms</span></td>
-                    <td><span class="pill crit">&gt;  200 ms</span></td>
+                    <td><span class="pill crit">&gt; 200 ms</span></td>
                   </tr>
                   <tr>
                     <td>Jitter (ms)</td>
@@ -254,576 +255,649 @@
                 </tbody>
               </table>
               <div class="legend-note">
-                * a partir de “Alta utilização” os alertas são ativados.
+                * a partir de "Alta utilização" os alertas são ativados.
               </div>
             </div>
-          </div>
-        </div>
-
-      </section>
-
-      <section id="view-monitor" class="view">
-        <div class="view-header">
-          <h1 class="view-title">
-            <i class="fas fa-chart-line"></i>
-            Monitoramento (Histórico de Registros)
-          </h1>
-        </div>
-
-        <div class="table-section">
-          <div class="table-header">
-            <h3 class="table-title">
-              <i class="fas fa-table"></i>
-              Últimas Leituras
-            </h3>
-            <div class="table-actions">
-              <button id="exportMonitorCsv" class="btn btn-export">
-                <i class="fas fa-download"></i>
-                Exportar CSV
-              </button>
-            </div>
-          </div>
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th><i class="fas fa-server"></i> Pórtico</th>
-                  <th><i class="fas fa-clock"></i> Horário</th>
-                  <th><i class="fas fa-microchip"></i> CPU (%)</th>
-                  <th><i class="fas fa-memory"></i> Memória (%)</th>
-                  <th><i class="fas fa-hdd"></i> Disco (%)</th>
-                  <th><i class="fas fa-network-wired"></i> Rede (Mbps)</th>
-                </tr>
-              </thead>
-              <tbody id="monitorTableBody">
-              </tbody>
-            </table>
-          </div>
-          <div class="table-pagination">
-            <div class="pagination-info">
-              <span id="monitorPaginationInfo">Mostrando 0 de 0 registros</span>
-            </div>
-            <div class="pagination-controls">
-              <button id="monitorPrevPage" class="btn btn-pagination" disabled>
-                <i class="fas fa-chevron-left"></i>
-                Anterior
-              </button>
-              <span id="monitorPageInfo">Página 0 de 0</span>
-              <button id="monitorNextPage" class="btn btn-pagination" disabled>
-                Próxima
-                <i class="fas fa-chevron-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="view-cadastro" class="view">
-        <div class="view-header">
-          <h1 class="view-title">
-            <i class="fas fa-pen-to-square"></i>
-            Cadastro
-          </h1>
-        </div>
-
-        <div class="cadastro-tabs">
-          <button class="tab-btn active" data-tab="usuario">
-            <i class="fas fa-user"></i>
-            Usuário
-          </button>
-          <button class="tab-btn" data-tab="maquina">
-            <i class="fas fa-server"></i>
-            Máquina
-          </button>
-        </div>
-
-        <div class="cadastro-content">
-          <div id="tab-usuario" class="tab-content active">
-            <form class="cadastro-form" id="usuarioForm">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="usuarioNome">Nome</label>
-                  <input type="text" id="usuarioNome" required>
-                </div>
-                <div class="form-group">
-                  <label for="usuarioEmail">E-mail</label>
-                  <input type="email" id="usuarioEmail" required>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="usuarioTipo">Tipo</label>
-                  <select id="tipo_permissao" required>
-                    <option value="0">Selecione uma opção</option>
-                    <option value="1">Administrador</option>
-                    <option value="2">Comum</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="usuarioSenha">Senha</label>
-                  <input type="password" id="usuarioSenha" required>
-                </div>
-              </div>
-              <div class="form-actions">
-                <button type="submit" onclick="cadastrarUser()" class="btn btn-primary">
-                  <i class="fas fa-save"></i>
-                  Salvar
-                </button>
-                <button type="reset" class="btn btn-secondary">
-                  <i class="fas fa-times"></i>
-                  Cancelar
-                </button>
-              </div>
-            </form>
-
-            <div class="listar-users">
-              <div class="titulo">
-                <i class="bi bi-person-fill-add controlador"></i>
-                <h1>Usuários Cadastrados</h1>
-              </div>
-
-              <div class="barra-infos">
-                <p>ID</p>
-                <p>Nome</p>
-                <p>Email</p>
-                <p>Acesso</p>
-                <p>Ações</p>
-              </div>
-
-              <div class="infos-user">
-                <p>1</p>
-                <p>Vinicius Melo</p>
-                <p>viniciusmelo@ecorodovias.com</p>
-                <p>Comum</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-user">
-                <p>2</p>
-                <p>Rafael Brandão</p>
-                <p>rafaelbrandão@ecorodovias.com</p>
-                <p>Comum</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-user">
-                <p>3</p>
-                <p>Mariana Silva</p>
-                <p>marianasilva@ecorodovias.com</p>
-                <p>Comum</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-user">
-                <p>4</p>
-                <p>Marcelo Noronha</p>
-                <p>marcelonoronha@ecorodovias.com</p>
-                <p>Comum</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-user">
-                <p>5</p>
-                <p>Vivian Silva</p>
-                <p>viviansilva@ecorodovias.com</p>
-                <p>Comum</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-
-          <div id="tab-maquina" class="tab-content">
-            <form class="cadastro-form" id="maquinaForm">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="maquinaNome">Nome</label>
-                  <input type="text" id="maquinaNome" required>
-                </div>
-                <div class="form-group">
-                  <label for="maquinaSo">Sistema Operacional</label>
-                  <input type="text" id="maquinaSo" required>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="maquinaLocalizacao">Localização</label>
-                  <input type="text" id="maquinaLocalizacao" required>
-                </div>
-                <div class="form-group">
-                  <label for="maquinaKm">KM</label>
-                  <input type="number" id="maquinaKm" step="0.1">
-                </div>
-              </div>
-
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save"></i>
-                  Salvar
-                </button>
-                <button type="reset" class="btn btn-secondary">
-                  <i class="fas fa-times"></i>
-                  Cancelar
-                </button>
-              </div>
-            </form>
-
-            <div class="listar-maquinas">
-              <div class="titulo">
-                <i class="bi bi-hdd-stack controlador"></i>
-                <h1>Pórticos Cadastrados</h1>
-              </div>
-
-              <div class="barra-infos-maq">
-                <p>ID</p>
-                <p>Nome</p>
-                <p>Sistema Op.</p>
-                <p>Localização</p>
-                <p>KM</p>
-                <p>Ações</p>
-              </div>
-
-              <div class="infos-maquina">
-                <p>1</p>
-                <p>INFRA-EDGE-01-Itápolis</p>
-                <p>Ubuntu 22.04</p>
-                <p>SP-333</p>
-                <p>101</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-maquina">
-                <p>2</p>
-                <p>INFRA-EDGE-02-Jaboticabal</p>
-                <p>Ubuntu 22.04</p>
-                <p>SP-099</p>
-                <p>15</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-maquina">
-                <p>3</p>
-                <p>INFRA-EDGE-03-São José dos Santos</p>
-                <p>Ubuntu 22.04</p>
-                <p>KM-414</p>
-                <p>414</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-              <div class="infos-maquina">
-                <p>4</p>
-                <p>INFRA-EDGE-04-Itaguaí</p>
-                <p>Ubuntu 22.04</p>
-                <p>SP-050</p>
-                <p>221</p>
-                <div class="acoes">
-                  <button onclick="edit_user()" class="btn_actions"><i class="bi bi-pencil-square"></i></button>
-                  <button onclick="delete_user()" class="btn_actions"><i class="bi bi-trash3-fill"></i></button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <section id="view-historico" class="view">
-        <div class="view-header">
-          <h1 class="view-title">
-            <i class="fas fa-clock-rotate-left"></i>
-            Histórico de Alertas
-          </h1>
-        </div>
-
-        <div class="filters-section">
-          <div class="filter-group">
-            <label for="historicoPeriodo">Período</label>
-            <select id="historicoPeriodo">
-              <option value="5min">Últimos 5 minutos</option>
-              <option value="1h" selected>Última 1 hora</option>
-              <option value="24h">Últimas 24 horas</option>
-              <option value="custom">Personalizado</option>
-            </select>
-          </div>
-          <div class="filter-group custom-period" id="customPeriodInputs" style="display: none;">
-            <div class="period-inputs">
-              <div class="period-input">
-                <label for="historicoInicio">Início</label>
-                <input type="datetime-local" id="historicoInicio">
-              </div>
-              <div class="period-input">
-                <label for="historicoFim">Fim</label>
-                <input type="datetime-local" id="historicoFim">
-              </div>
-            </div>
-          </div>
-          <button id="aplicarFiltroHistorico" class="btn btn-primary">
-            <i class="fas fa-filter"></i>
-            Aplicar Filtro
-          </button>
-        </div>
-
-        <div class="kpis-historico">
-          <div class="kpi-card">
-            <h4>Alertas no Período</h4>
-            <p>36</p>
-          </div>
-          <div class="kpi-card">
-            <h4>Horário de Pico de Utilização</h4>
-            <p>17h às 18h • Maior carga simultânea registrada</p>
-            <small style="display:block;font-size:12px;color:#64748b;margin-top:4px">
-              CPU média 82% • Rede 96 Mbps - Tráfego intenso em 2 pórticos
-            </small>
-          </div>
-          <div class="kpi-card">
-            <h4>Pórticos Afetados</h4>
-            <p>2 de 4</p>
-          </div>
-        </div>
-
-        <div class="chart-container">
-          <div class="chart-header">
-            <h3 class="chart-title">
-              <i class="fas fa-chart-area"></i>
-              Alertas
-            </h3>
-          </div>
-          <div class="chart-content">
-            <canvas id="historicalChart"></canvas>
-          </div>
-        </div>
-
-        <div class="table-section">
-          <div class="table-header">
-            <h3 class="table-title">
-              <i class="fas fa-list"></i>
-              Ocorrências
-            </h3>
-            <div class="table-actions">
-              <button id="exportHistoricoCsv" class="btn btn-export">
-                <i class="fas fa-download"></i>
-                Exportar CSV
-              </button>
-            </div>
-          </div>
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th><i class="fas fa-server"></i> Pórtico</th>
-                  <th><i class="fas fa-clock"></i> Período</th>
-                  <th><i class="fas fa-microchip"></i> CPU (%)</th>
-                  <th><i class="fas fa-memory"></i> Memória (%)</th>
-                  <th><i class="fas fa-hdd"></i> Disco (%)</th>
-                  <th><i class="fas fa-network-wired"></i> Rede (Mbps)</th>
-                  <th><i class="fas fa-clipboard-check"></i> Ação/Laudo</th>
-                </tr>
-              </thead>
-              <tbody id="historicoTableBody">
-              </tbody>
-            </table>
           </div>
         </div>
       </section>
     </main>
   </div>
 
-  <script src="../js/rede.js"></script>
-    <script src=""></script>
+  <script>
+    let MAQUINA_ATUAL = 1;
+    let chart1 = null;
+    let chart2 = null;
+
+    async function getHistorico(maquinaId, metric) {
+      try {
+        const res = await fetch(`/redeRoute/historico/${maquinaId}/${metric}`);
+        const data = await res.json();
+        return data.reverse();
+      } catch (err) {
+        console.error("Erro ao carregar histórico:", err);
+        return [];
+      }
+    }
+
+    async function renderChart1() {
+      const metric = document.getElementById("componentSelector").value;
+      const ctx = document.getElementById("chart1").getContext("2d");
+
+      if (chart1) chart1.destroy();
+
+      const historico = await getHistorico(MAQUINA_ATUAL, metric);
+
+      if (historico.length === 0) {
+        chart1 = new Chart(ctx, {
+          type: "line",
+          data: { labels: [], datasets: [] },
+          options: { responsive: true }
+        });
+        return;
+      }
+
+      const valores = historico.map(item => item.valor);
+      const labels = historico.map(item => {
+        const dt = new Date(item.data_hora_captura);
+        return dt.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        });
+      });
+
+      chart1 = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: metric.toUpperCase(),
+            data: valores,
+            borderColor: "rgb(75, 192, 192)",
+            backgroundColor: "rgba(75,192,192,0.2)",
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: `${metric.toUpperCase()} - Histórico`
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Tempo'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: metric === 'velocidade' ? 'Mbps' :
+                  metric === 'latencia' || metric === 'jitter' ? 'ms' : '%'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    async function renderChart2() {
+      const ctx = document.getElementById("chart2").getContext("2d");
+
+      if (chart2) chart2.destroy();
+
+      const lat = await getHistorico(MAQUINA_ATUAL, "latencia");
+      const jitter = await getHistorico(MAQUINA_ATUAL, "jitter");
+      const perda = await getHistorico(MAQUINA_ATUAL, "perda");
+      const vel = await getHistorico(MAQUINA_ATUAL, "velocidade");
+
+      const mediaLat = calcularMedia(lat);
+      const mediaJit = calcularMedia(jitter);
+      const mediaPer = calcularMedia(perda);
+      const mediaVel = calcularMedia(vel);
+
+      chart2 = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Latência", "Jitter", "Perda", "Download"],
+          datasets: [{
+            label: `Médias`,
+            data: [mediaLat, mediaJit, mediaPer, mediaVel],
+            backgroundColor: [
+              "rgb(54, 162, 235)",
+              "rgb(255, 206, 86)",
+              "rgb(255, 99, 132)",
+              "rgb(75, 192, 192)"
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Valor'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function calcularMedia(dados) {
+      if (!dados || dados.length === 0) return 0;
+      const soma = dados.reduce((acc, v) => acc + v.valor, 0);
+      return (soma / dados.length).toFixed(2);
+    }
+
+    async function atualizarKPIs() {
+      const maquinaId = 1;
+
+      try {
+        const res = await fetch(`/redeRoute/ultimas/${maquinaId}`);
+        const data = await res.json();
+
+        if (data.length === 0) return;
+
+        const valores = {
+          latencia: null,
+          jitter: null,
+          perda: null,
+          velocidade: null
+        };
+
+        const metricas = {};
+
+        data.forEach(item => {
+          const tipo = item.dados_texto;
+          if (!metricas[tipo] || new Date(item.data_hora_captura) > new Date(metricas[tipo].data_hora_captura)) {
+            metricas[tipo] = item;
+          }
+        });
+
+        if (metricas['Latencia Media (ms)']) valores.latencia = metricas['Latencia Media (ms)'].dados_float;
+        if (metricas['Jitter (ms)']) valores.jitter = metricas['Jitter (ms)'].dados_float;
+        if (metricas['Perda de Pacotes (%)']) valores.perda = metricas['Perda de Pacotes (%)'].dados_float;
+        if (metricas['Velocidade Download (Mbps)']) valores.velocidade = metricas['Velocidade Download (Mbps)'].dados_float;
+
+        document.getElementById("kpiLatenciaValue").textContent = valores.latencia !== null ? `${valores.latencia} ms` : "--";
+        document.getElementById("kpiJitterValue").textContent = valores.jitter !== null ? `${valores.jitter} ms` : "--";
+        document.getElementById("kpiPerdaValue").textContent = valores.perda !== null ? `${valores.perda}%` : "--";
+        document.getElementById("kpiDownloadValue").textContent = valores.velocidade !== null ? `${valores.velocidade} Mbps` : "--";
+
+      } catch (err) {
+        console.error("Erro ao atualizar KPIs:", err);
+      }
+    }
+
+    async function atualizarAlertas() {
+      try {
+        const res = await fetch('/alertas-route/kpiAlertasTotais');
+        const data = await res.json();
+        const quantidadeAlertas = data.total || data[0]?.total || 0;
+        document.getElementById('alertCount').textContent = quantidadeAlertas;
+      } catch (err) {
+        console.error("Erro ao buscar alertas:", err);
+        document.getElementById('alertCount').textContent = '0';
+      }
+    }
+
+    async function atualizarDashboard() {
+      await atualizarKPIs();
+      await atualizarAlertas();
+      await renderChart1();
+      await renderChart2();
+      atualizarTempo();
+    }
+
+    function atualizarTempo() {
+      const agora = new Date();
+      const tempoFormatado = agora.toLocaleTimeString('pt-BR');
+      document.getElementById('lastUpdateTime').textContent = tempoFormatado;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      atualizarDashboard();
+      setInterval(atualizarDashboard, 5000);
+    });
+
+    document.getElementById("componentSelector").addEventListener("change", renderChart1);
+  </script>
 
   <script>
 
-let MAQUINA_ATUAL = 1; 
+    const MAX_REDE_Mbps = 200;
+    const normalidade = {
+      cpu: 70,
+      memoria: 75,
+      disco: 60,
+      rede: 70
+    };
 
-let chart1 = null;
-let chart2 = null;
-let chart1_labels = [];
+    const uptimeMock = { dias: 3, horas: 4, minutos: 12 };
 
-async function getHistorico(maquinaId, metric) {
-    try {
-        const res = await fetch(`/rede/historico/${maquinaId}/${metric}`);
-        return await res.json();
-    } catch (err) {
-        console.error("Erro ao carregar histórico:", err);
-        return [];
-    }
-}
+    const toRedePct = (mbps) => Math.max(0, Math.min(100, (mbps / MAX_REDE_Mbps) * 100));
 
-async function renderChart1() {
-    const metric = document.getElementById("componentSelector").value;
-    const ctx = document.getElementById("chart1").getContext("2d");
+    let estadoApp = {
+      tempoRealAtivo: true,
+      dadosCompletos: [],
+      usuarioLogado: false,
+      ultimosValoresTrend: {
+        cpu: [],
+        memoria: [],
+        disco: [],
+        rede: []
+      }
+    };
 
-    if (chart1) chart1.destroy();
+    let dadosTempoReal = [];
+    let graficos = {};
+    let timerDB = null;
+    let timerLatencia = null;
+    let dadosLatencia = [];
 
-    const historico = await getHistorico(MAQUINA_ATUAL, metric);
+    // ... (todo o resto do código JavaScript original do sidebar)
+    // MANTER TODO O CÓDIGO ORIGINAL DO SIDEBAR AQUI
 
-    const valores = historico.map(item => item.valor);
-    const labels = historico.map(item => {
-        const dt = new Date(item.data_hora_captura);
-        return dt.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
+    (function () {
+      const SIDEBAR_WIDTH = 360;
+      const FEED_MAX = 400;
+      const ENDPOINT_ACAO = '/api/incidentes/acao';
+
+      const style = document.createElement('style');
+      style.textContent = `
+    .topbar{position:fixed;top:0;left:0;right:0;height:64px;background:#fff;border-bottom:1px solid #e5e7eb;z-index:10000;display:flex;align-items:center}
+    body.has-fixed-topbar{padding-top:64px}
+    #alertsSidebar{position:fixed;right:0;width:${SIDEBAR_WIDTH}px;height:calc(100vh - 64px);z-index:9990;background:#ffffff;border-left:1px solid #e5e7eb;box-shadow:-8px 0 24px rgba(2,6,23,.06);display:flex;flex-direction:column;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    #alertsSidebarHeader{padding:12px 14px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff}
+    #alertsSidebarHeader .title{font-size:14px;font-weight:700;color:#0f172a}
+    #alertsSidebarHeader .subtitle{font-size:12px;color:#64748b;font-weight:500}
+    #alertsSidebarFilterWrap{padding:8px 12px;border-bottom:1px solid #eef2f7}
+    #alertsSidebarFilter{width:100%;height:36px;border:1px solid #e5e7eb;border-radius:8px;padding:0 10px;font-size:14px}
+    #alertsSidebarList{overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .a-card{border-radius:10px;padding:10px 12px;border:1px solid #eef2f7;box-shadow:0 1px 2px rgba(2,6,23,.04)}
+    .a-card.CRITICO{background:#ef4444;color:#fff}
+    .a-card.ATENCAO{background:#facc15;color:#0f172a}
+    .a-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .a-time{font-size:12px;color:inherit}
+    .a-source{font-weight:700;margin-top:4px}
+    .a-msg{margin-top:2px}
+    .a-action{margin-top:8px}
+    .a-action>button{padding:.38rem .6rem;border:0;border-radius:8px;background:#2563eb;color:#fff;font-weight:700;font-size:12px;cursor:pointer}
+    .a-done{font-size:12px;color:#fff;margin-top:6px}
+    @media(min-width:1100px){body.with-alerts-sidebar{margin-right:${SIDEBAR_WIDTH}px}}
+    @media(max-width:1099px){#alertsSidebar{display:none}body.with-alerts-sidebar{margin-right:0}}
+    `;
+      document.head.appendChild(style);
+
+      const sidebar = document.createElement('aside');
+      sidebar.id = 'alertsSidebar';
+      sidebar.innerHTML = `
+      <div id="alertsSidebarHeader">
+        <div>
+          <div class="title">Alertas Ativos (Todos os Pórticos)</div>
+          <div class="subtitle">Feed de Ocorrências</div>
+        </div>
+        <button id="alertsSidebarToggle" title="Ocultar/mostrar feed" style="border:0;background:#f1f5f9;color:#0f172a;font-weight:700;border-radius:8px;padding:.38rem .6rem;cursor:pointer">
+          <i class="fab fa-slack"></i>
+        </button>
+      </div>
+      <div style="padding:8px 12px;">
+        <input id="alertsSidebarFilter" type="text" placeholder="Filtrar por texto" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none;">
+      </div>
+      <div id="alertsSidebarList" aria-live="polite"></div>
+    `;
+
+      function mountSidebar() {
+        if (!document.body.contains(sidebar)) document.body.appendChild(sidebar);
+        document.body.classList.add('with-alerts-sidebar', 'has-fixed-topbar');
+        fixPositions();
+      }
+
+      function fixPositions() {
+        const tb = document.querySelector('.topbar') || document.getElementById('topbar');
+        const h = tb ? tb.offsetHeight : 64;
+        sidebar.style.top = h + 'px';
+        sidebar.style.height = `calc(100vh - ${h}px)`;
+        document.body.style.paddingTop = h + 'px';
+      }
+
+      window.addEventListener('resize', fixPositions);
+      document.addEventListener('DOMContentLoaded', () => {
+        mountSidebar();
+        setTimeout(fixPositions, 0);
+      });
+
+      const state = { feed: [], filterText: '' };
+
+      function normalizeLevel(l) {
+        const v = String(l || '').toUpperCase();
+        if (v === 'CRITICAL' || v === 'CRITICO' || v === 'CRÍTICO') return 'CRITICO';
+        return 'ATENCAO';
+      }
+
+      function setAlertCountFromDOM() {
+        const c = document.querySelectorAll('#alertsSidebarList .a-card:not([data-hidden="1"])').length;
+        const lbl = document.getElementById('alertCount');
+        if (lbl) lbl.textContent = String(c);
+      }
+
+      function applyFilter() {
+        const q = state.filterText.trim().toLowerCase();
+        const list = document.getElementById('alertsSidebarList');
+        if (!list) return;
+        const cards = list.querySelectorAll('.a-card');
+        cards.forEach(card => {
+          const txt = card.textContent.toLowerCase();
+          const match = q === '' ? true : txt.includes(q);
+          card.style.display = match ? '' : 'none';
+          card.dataset.hidden = match ? '' : '1';
         });
-    });
+        setAlertCountFromDOM();
+      }
 
-    chart1 = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: `${metric.toUpperCase()} - Máquina ${MAQUINA_ATUAL}`,
-                data: valores,
-                borderColor: "rgb(75, 192, 192)",
-                backgroundColor: "rgba(75,192,192,0.2)",
-                fill: true,
-                tension: 0.3
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: `${metric.toUpperCase()} - Histórico da máquina ${MAQUINA_ATUAL}`
-                }
-            }
+      function prependAlertCard(item) {
+        const list = document.getElementById('alertsSidebarList');
+        if (!list) return;
+        const level = normalizeLevel(item.level);
+        const obj = { id: item.id || (Date.now() + ''), level, source: item.source, msg: item.msg, time: item.time || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) };
+        state.feed.unshift(obj);
+        if (state.feed.length > FEED_MAX) state.feed.pop();
+        const card = document.createElement('div');
+        card.className = 'a-card ' + obj.level;
+        card.dataset.alertId = obj.id;
+        card.innerHTML = `
+      <div class="a-head">
+        <span class="a-time">${obj.time}</span>
+        <span class="a-level" style="font-size:12px; font-weight:800; color:#0f172a">${obj.level === 'CRITICO' ? 'CRÍTICO' : 'ATENÇÃO'}</span>
+      </div>
+      <div class="a-source">${obj.source}</div>
+      <div class="a-msg">${obj.msg}</div>
+      <div class="a-action">
+        <button class="btn-action" data-id="${card.dataset.alertId}">Ação</button>
+      </div>
+    `;
+        list.prepend(card);
+        list.scrollTop = 0;
+        applyAlertsFilter();
+        syncAlertCount();
+      }
+
+      document.addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'alertsSidebarClear') {
+          state.feed = [];
+          const list = document.getElementById('alertsSidebarList');
+          if (list) list.innerHTML = '';
+          setAlertCountFromDOM();
         }
-    });
-}
+      });
 
-
-async function calcularMediaDownload(maquinaId) {
-    const historico = await getHistorico(maquinaId, "velocidade");
-    if (historico.length === 0) return 0;
-
-    const soma = historico.reduce((acc, obj) => acc + obj.valor, 0);
-    return (soma / historico.length).toFixed(2);
-}
-
-async function renderChart2() {
-
-    const ctx = document.getElementById("chart2").getContext("2d");
-
-    if (chart2) chart2.destroy();
-
-    const lat = await getHistorico(MAQUINA_ATUAL, "latencia");
-    const jitter = await getHistorico(MAQUINA_ATUAL, "jitter");
-    const perda = await getHistorico(MAQUINA_ATUAL, "perda");
-    const vel = await getHistorico(MAQUINA_ATUAL, "velocidade");
-
-    const mediaLat = calcularMedia(lat);
-    const mediaJit = calcularMedia(jitter);
-    const mediaPer = calcularMedia(perda);
-    const mediaVel = calcularMedia(vel);
-
-    chart2 = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: ["Latência", "Jitter", "Perda", "Download"],
-            datasets: [{
-                label: `Médias - Máquina ${MAQUINA_ATUAL}`,
-                data: [mediaLat, mediaJit, mediaPer, mediaVel],
-                backgroundColor: [
-                    "rgb(54, 162, 235)",
-                    "rgb(255, 206, 86)",
-                    "rgb(255, 99, 132)",
-                    "rgb(75, 192, 192)"
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true }
-            }
+      document.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.btn-action');
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const card = btn.closest('.a-card');
+        const item = state.feed.find(x => String(x.id) === String(id));
+        if (!item) return;
+        const acao = window.prompt('Descreva a ação tomada para este incidente:', '');
+        if (acao === null) return;
+        const payload = { alertId: id, source: item.source, level: item.level, message: item.msg, time: item.time, action: acao };
+        try {
+          const resp = await fetch(ENDPOINT_ACAO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          if (!resp.ok) throw new Error('Falha ao salvar ação');
+          item.action = acao;
+          item.actionTime = new Date().toLocaleString('pt-BR');
+          btn.textContent = 'Registrado';
+          btn.disabled = true;
+          btn.style.background = '#0ea5e9';
+          btn.style.cursor = 'default';
+          const done = document.createElement('div');
+          done.className = 'a-done';
+          done.textContent = `Ação: ${item.action} • ${item.actionTime}`;
+          card.appendChild(done);
+        } catch (err) {
+          alert('Erro ao registrar ação: ' + err.message);
         }
+      });
+
+      window.pushAlert = function ({ level = 'INFO', source = 'Pórtico', msg = '', time = null, id = null }) {
+        prependAlertCard({ id: id || Date.now() + Math.random().toString(16).slice(2), level, source, msg, time: time || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) });
+      };
+
+      function seedMany(qtd = 36) {
+        const fontes = ['INFRA-EDGE-01 (SP-333)', 'INFRA-EDGE-02 (SP-333)', 'INFRA-EDGE-03 (SP-099)', 'INFRA-EDGE-04 (Km 414)'];
+        const levels = ['ATENÇÃO', 'CRITICO'];
+        const msgs = [
+          'Latência ultrapassou 70% de uso, iniciar monitoramento intensivo.',
+          'Latência acima de 85%, risco de saturação iminente.',
+          'Jitter acima de 75%, desempenho pode ser afetado.',
+          'Jitter em 85%, limite crítico atingido.',
+          'Perda de pacote acima de 80%, espaço disponível em nível de atenção.',
+          'Perda de pacote acima de 90%, risco de saturação do armazenamento.',
+          'Velocidade do download com uso acima de 70%, tráfego em nível de atenção.',
+          'Velocidade do download acima de 85%, possível saturação no enlace.',
+          'Latência e Jitter simultaneamente em alta utilização.'
+        ];
+        const now = new Date();
+        for (let i = qtd - 1; i >= 0; i--) {
+          const t = new Date(now.getTime() - i * 90 * 1000);
+          prependAlertCard({ id: 'seed-' + i, level: levels[Math.floor(Math.random() * levels.length)], source: fontes[Math.floor(Math.random() * fontes.length)], msg: msgs[Math.floor(Math.random() * msgs.length)], time: t.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) });
+        }
+      }
+
+      const lastCross = { cpu: false, memoria: false, disco: false, rede: false };
+      function evaluatePoint(ponto, fonte = "Sistema") {
+        if (!ponto) return;
+
+        const hora = new Date().toLocaleTimeString("pt-BR");
+        const last = window._lastCrossState || {};
+        window._lastCrossState = last;
+
+        function cross(key, cond, level, msg) {
+          if (cond && !last[key]) {
+            pushAlert({
+              id: Date.now() + "-" + key,
+              time: hora,
+              level: level,
+              source: fonte,
+              msg: msg
+            });
+          }
+          last[key] = cond;
+        }
+
+
+        cross(
+          "cpu_crit",
+          ponto.cpu >= 85,
+          "CRITICO",
+          `Latência em ${ponto.cpu.toFixed(1)} ms — Acima do limite crítico`
+        );
+
+        cross(
+          "cpu_warn",
+          ponto.cpu >= 70 && ponto.cpu < 85,
+          "ATENCAO",
+          `Latência em ${ponto.cpu.toFixed(1)} ms — Utilização elevada`
+        );
+
+        cross(
+          "mem_crit",
+          ponto.memoria >= 85,
+          "CRITICO",
+          `Jitter em ${ponto.memoria.toFixed(1)} ms — Acima do limite crítico`
+        );
+
+        cross(
+          "mem_warn",
+          ponto.memoria >= 70 && ponto.memoria < 85,
+          "ATENCAO",
+          `Jitter em ${ponto.memoria.toFixed(1)} ms — Utilização elevada`
+        );
+
+        cross(
+          "disk_crit",
+          ponto.disco >= 90,
+          "CRITICO",
+          `Perda de pacote em ${ponto.disco.toFixed(1)}% — Acima do limite crítico (risco de travamento)`
+        );
+
+        cross(
+          "disk_warn",
+          ponto.disco >= 80 && ponto.disco < 90,
+          "ATENCAO",
+          `Perda de pacote em ${ponto.disco.toFixed(1)}% — Utilização elevada`
+        );
+
+        // REDE (exemplo: acima de 180 Mbps saturação)
+        cross(
+          "network_crit",
+          ponto.rede >= 180,
+          "CRITICO",
+          `Velocidade de download em ${ponto.rede.toFixed(1)} Mbps — Saturação crítica detectada`
+        );
+
+        cross(
+          "network_warn",
+          ponto.rede >= 120 && ponto.rede < 180,
+          "ATENCAO",
+          `Velocidade de download em ${ponto.rede.toFixed(1)} Mbps — Tráfego muito alto`
+        );
+      }
+      window.evaluatePoint = evaluatePoint;
+
+      const patchAlerts = () => {
+        if (!window.gerenciadorInterface) return;
+        const original = gerenciadorInterface.atualizarAlertas?.bind(gerenciadorInterface);
+        gerenciadorInterface.atualizarAlertas = () => {
+          if (!window.dadosTempoReal || !dadosTempoReal.length) return;
+          const u = dadosTempoReal[dadosTempoReal.length - 1];
+          const fonte = document.getElementById('edgeSelector')?.value || (window.maquina && maquina.nome) || 'Pórtico';
+          evaluatePoint(u, fonte);
+          if (original) original();
+          setAlertCountFromDOM();
+        };
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', patchAlerts);
+      } else {
+        patchAlerts();
+      }
+
+      const filterInputHandler = (e) => {
+        state.filterText = e.target.value || '';
+        applyFilter();
+      };
+      document.addEventListener('input', (e) => {
+        if (e.target && e.target.id === 'alertsSidebarFilter') filterInputHandler(e);
+      });
+
+      window.SIDEBAR_WIDTH = SIDEBAR_WIDTH;
+
+      function applyAlertsFilter() {
+        const q = (document.getElementById('alertsSidebarFilter')?.value || '').trim().toLowerCase();
+        const list = document.getElementById('alertsSidebarList');
+        if (!list) return;
+        const nodes = Array.from(list.children);
+        nodes.forEach(card => {
+          const txt = card.textContent.toLowerCase();
+          card.style.display = q && !txt.includes(q) ? 'none' : '';
+        });
+      }
+      function syncAlertCount() {
+        const list = document.getElementById('alertsSidebarList');
+        const visible = list ? Array.from(list.children).filter(c => c.style.display !== 'none').length : 0;
+        const el = document.getElementById('alertCount');
+        if (el) el.textContent = String(visible);
+      }
+      document.addEventListener('input', (e) => {
+        if (e.target && e.target.id === 'alertsSidebarFilter') {
+          applyAlertsFilter();
+          syncAlertCount();
+        }
+      });
+
+    })();
+
+    let sidebarVisible = true;
+    let floatingBtn = null;
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#alertsSidebarToggle');
+      if (!btn) return;
+
+      const sidebar = document.getElementById('alertsSidebar');
+      if (!sidebar) return;
+
+      sidebarVisible = !sidebarVisible;
+
+      if (!sidebarVisible) {
+        sidebar.style.transform = `translateX(${window.SIDEBAR_WIDTH || 360}px)`;
+        document.body.classList.remove('with-alerts-sidebar');
+
+        if (!floatingBtn) {
+          floatingBtn = document.createElement('button');
+          floatingBtn.id = 'floatingSlackBtn';
+          floatingBtn.innerHTML = `<img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" 
+  alt="Slack" width="24" height="24">`;
+          floatingBtn.title = 'Mostrar alertas';
+          floatingBtn.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: none;
+        background-color: #f1f5f9;
+        color: #0f172a;
+        font-size: 20px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        cursor: pointer;
+        z-index: 10001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s, transform 0.2s;
+      `;
+          floatingBtn.addEventListener('mouseenter', () => {
+            floatingBtn.style.backgroundColor = '#e2e8f0';
+            floatingBtn.style.transform = 'scale(1.05)';
+          });
+          floatingBtn.addEventListener('mouseleave', () => {
+            floatingBtn.style.backgroundColor = '#f1f5f9';
+            floatingBtn.style.transform = 'scale(1)';
+          });
+          floatingBtn.addEventListener('click', () => {
+            sidebar.style.transform = 'translateX(0)';
+            document.body.classList.add('with-alerts-sidebar');
+            sidebarVisible = true;
+            floatingBtn.remove();
+            floatingBtn = null;
+          });
+          document.body.appendChild(floatingBtn);
+        }
+      }
+
+      else {
+        sidebar.style.transform = 'translateX(0)';
+        document.body.classList.add('with-alerts-sidebar');
+        if (floatingBtn) {
+          floatingBtn.remove();
+          floatingBtn = null;
+        }
+      }
     });
-}
-function calcularMedia(dados){
-    if (!dados || dados.length === 0) return 0;
-    const soma = dados.reduce((acc, v) => acc + v.valor, 0);
-    return (soma / dados.length).toFixed(2);
-}
 
-
-async function atualizarDashboard() {
-    console.log("Atualizando dashboard...");  
-
-    await renderChart1();
-    await renderChart2();
-    await atualizarKPIs();  
-}
-
-async function atualizarKPIs() {
-    const maquinaId = 1; 
-
-    try {
-        const res = await fetch(`/rede/latest/${maquinaId}`);
-        const data = await res.json();
-
-        document.getElementById("kpiLatenciaValue").textContent =
-            data.latencia !== null ? `${data.latencia} ms` : "--";
-
-        document.getElementById("kpiJitterValue").textContent =
-            data.jitter !== null ? `${data.jitter} ms` : "--";
-
-        document.getElementById("kpiPacoteValue").textContent =
-            data.perda !== null ? `${data.perda}%` : "--";
-
-        document.getElementById("kpiDownloadValue").textContent =
-            data.velocidade !== null ? `${data.velocidade} Mbps` : "--";
-
-    } catch (err) {
-        console.error("Erro ao atualizar KPIs:", err);
-    }
-}
-
-
-
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("📄 DOM carregado, iniciando dashboard...");
-    atualizarDashboard();
-});
-
-setInterval(() => {
-    renderChart1();
-    renderChart2();
-    atualizarKPIs();
-}, 5000);
-document.getElementById("componentSelector").addEventListener("change", renderChart1);
-
-</script>
-
+  </script>
 </body>
 
 </html>

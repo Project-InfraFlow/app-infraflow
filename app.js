@@ -23,6 +23,7 @@ var latenciaRouter = require("./src/routes/latencia");
 var iaRouter = require("./src/routes/ia");
 var contatoRouter = require("./src/routes/contato");
 var maquinaRouter = require("./src/routes/maquinas");
+var processosRouter = require('./src/routes/processos');
 
 var app = express();
 app.use(express.json());
@@ -46,7 +47,7 @@ app.use("/api", latenciaRouter);
 app.use("/maquinas", maquinaRouter);
 app.use("/api/leituras", leiturasRouter);
 app.use("/ia", iaRouter); 
-
+app.use('/api/processos', processosRouter);
 app.get("/dashboard/dashboard_CPU", function(req, res) {
     res.sendFile(path.join(__dirname, "public/dashboard_CPU.html"));
 });
