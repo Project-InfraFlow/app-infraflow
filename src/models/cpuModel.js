@@ -2,29 +2,25 @@ var database = require("../database/config");
 
 function buscarDados(maquinaId, limite) {
     const sql = `
-        SELECT 
-            l.data_hora_captura AS horario,
+    SELECT 
+        l.data_hora_captura AS horario,
 
-            MAX(CASE WHEN c.nome_componente = 'CPU' THEN l.dados_float END) AS cpu,
-            MAX(CASE WHEN c.nome_componente = 'CPU_Idle' THEN l.dados_float END) AS cpuIdle,
-            MAX(CASE WHEN c.nome_componente = 'Processos' THEN l.dados_float END) AS processos
+        AVG(CASE WHEN c.nome_componente = 'CPU' THEN l.dados_float END) AS cpu,
+        MAX(CASE WHEN c.nome_componente = 'CPU_Idle' THEN l.dados_float END) AS cpuIdle,
+        MAX(CASE WHEN c.nome_componente = 'Processos' THEN l.dados_float END) AS processos
 
-        FROM leitura l
-        JOIN componente c 
-            ON c.id_componente = l.fk_id_componente
+    FROM leitura l
+    JOIN componente c 
+        ON c.id_componente = l.fk_id_componente
 
-        WHERE 
-            l.fk_id_maquina = ${maquinaId}
-            AND c.nome_componente IN ('CPU', 'CPU_Idle', 'Processos')
+    WHERE 
+        l.fk_id_maquina = ${maquinaId}
+        AND c.nome_componente IN ('CPU','CPU_Idle','Processos')
 
-        GROUP BY 
-            l.data_hora_captura
-
-        ORDER BY 
-            l.data_hora_captura DESC
-
-        LIMIT ${limite};
-    `;
+    GROUP BY l.data_hora_captura
+    ORDER BY l.data_hora_captura DESC
+    LIMIT ${limite};
+`;
 
     return database.executar(sql);
 }

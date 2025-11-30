@@ -49,6 +49,7 @@ function criarGraficoCpuLatencia() {
 
 function criarGraficoProcessos() {
     const ctx = document.getElementById("processosChart").getContext("2d");
+
     window.processosChart = new Chart(ctx, {
         type: "line",
         data: {
@@ -61,20 +62,51 @@ function criarGraficoProcessos() {
                     backgroundColor: "rgba(14,165,233,0.35)",
                     borderWidth: 2,
                     tension: 0.35,
-                    fill: true
+                    fill: true,
+                    pointRadius: 4   
                 }
             ]
         },
-        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        options: {
+            responsive: true,
+            animation: false,
+
+            interaction: {
+                mode: "index",
+                intersect: false
+            },
+
+            plugins: {
+                tooltip: {
+                    enabled: true,
+                    callbacks: {
+                        title: items => items[0].label,          
+                        label: item => `Processos: ${item.parsed.y}`
+                    }
+                },
+                legend: {
+                    display: true
+                }
+            },
+
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: 500
+                }
+            }
+        }
     });
 }
+
+
 
 function carregarAlertasSlack(dados) {
     const painel = document.querySelector(".slack-painel-body");
     painel.innerHTML = "";
 
     dados.forEach(linha => {
-        const alerta = gerarAlertaBackend(linha.cpu, linha.cpuIdle, 0); // processos da API nova não entram aqui
+        const alerta = gerarAlertaBackend(linha.cpu, linha.cpuIdle, 0);
         if (!alerta) return;
 
         let classe = alerta.includes("ALTO") || alerta.includes("BAIXO") ? "alerta-vermelho" : "alerta-amarelo";
@@ -100,14 +132,12 @@ async function getCpuData() {
     return await response.json();
 }
 
-// NOVO: pega processos em tempo real, SEM banco
 async function getProcessosData() {
     const response = await fetch("/api/processos");
-    return await response.json(); // { total: <numero> }
+    return await response.json();
 }
 
 async function atualizarDashboard() {
-    // 1) CPU + IDLE continuam vindo do backend / banco
     const response = await getCpuData();
     if (!response || !response.kpi) return;
     console.log(response);
@@ -120,7 +150,6 @@ async function atualizarDashboard() {
 
     const dados = response.grafico || [];
 
-    // KPI de alertas continua calculada com CPU/Idle
     const totalAlertas = dados.filter(linha =>
         gerarAlertaBackend(
             normalizarNumero(linha.cpu),
@@ -146,7 +175,6 @@ async function atualizarDashboard() {
         progressBar.classList.remove("progress-bar-vermelho");
     }
 
-    // Gráfico CPU x Tempo Ocioso
     cpuLatenciaChart.data.labels = dados.map(d => formatarHora(d.horario));
     cpuLatenciaChart.data.datasets[0].data = dados.map(d => normalizarNumero(d.cpu));
     cpuLatenciaChart.data.datasets[1].data = dados.map(d => normalizarNumero(d.cpuIdle));
@@ -154,15 +182,12 @@ async function atualizarDashboard() {
 
     carregarAlertasSlack(dados);
 
-    // 2) PROCESSOS: somentE leitura, direto da API /api/processos
     try {
         const procResp = await getProcessosData();
         const processosAtual = normalizarNumero(procResp.total);
 
-        // KPI de Processos
         document.getElementById("KpiProcessosValue").textContent = processosAtual.toFixed(0);
 
-        // Gráfico de Processos em Execução (somente em memória, sem banco)
         const agora = new Date();
         const labelHora = agora.toLocaleTimeString("pt-BR", {
             hour: "2-digit",
@@ -174,7 +199,6 @@ async function atualizarDashboard() {
         processosChart.data.labels.push(labelHora);
         processosChart.data.datasets[0].data.push(processosAtual);
 
-        // mantém no máximo 30 pontos pra não explodir
         if (processosChart.data.labels.length > 30) {
             processosChart.data.labels.shift();
             processosChart.data.datasets[0].data.shift();
