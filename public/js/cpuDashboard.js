@@ -80,9 +80,10 @@ function carregarAlertasSlack(dados) {
 }
 
 async function getCpuData() {
-    const response = await fetch("http://localhost:3333/api/cpu?maquinaId=1&limite=30");
+    const response = await fetch("/api/cpu?maquinaId=1&limite=30");
     return await response.json();
 }
+
 
 async function atualizarDashboard() {
     const response = await getCpuData();
