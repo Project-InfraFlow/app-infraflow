@@ -196,8 +196,8 @@
                     <div class="chart-container full-bleed">
                         <div class="chart-header">
                             <h3 class="chart-title">
-                                <i class="fas fa-pulse"></i>
-                                Atividade ao Vivo
+                                <i class="bi bi-calendar3"></i>
+                                Distribuição de alertas por Hora x Componente
                             </h3>
                         </div>
                         <div class="chart-content">
@@ -313,6 +313,19 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 
+    <div id="modalOcorrencia" class="modal-ocorrencia hidden">
+    <div class="modal-content">
+        <h3>Registrar Ocorrência</h3>
+
+        <textarea id="descricaoOcorrencia" 
+            placeholder="Descreva o que ocasionou o alerta..." rows="5"></textarea>
+
+        <div class="modal-actions">
+            <button onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+            <button onclick="salvarOcorrencia()" class="btn-salvar">Salvar</button>
+        </div>
+    </div>
+</div>
 
 
 </body>
@@ -483,7 +496,7 @@ function carregarAlertasRecentes() {
                     : "atencao";
 
                 const html = `
-                    <div class="ocorrencia-item ${classe}">
+                    <div class="ocorrencia-item ${classe}" style="margin-bottom: 2%;">
                         <div class="col">${item.portico}</div>
 
                         <div class="col">
@@ -499,7 +512,7 @@ function carregarAlertasRecentes() {
                         </div>
 
                         <div class="col acao">
-                            <button class="btn-registrar">
+                            <button class="btn-registrar"  onclick="abrirModalRegistrar(${item.id_alerta})">
                                 Registrar <i class="bi bi-pencil-square"></i>
                             </button>
                         </div>
@@ -512,12 +525,40 @@ function carregarAlertasRecentes() {
         .catch(err => console.error("Erro ao carregar alertas:", err));
 }
 
+function salvarOcorrencia() {
+    const descricao = document.getElementById("descricaoOcorrencia").value.trim();
+
+    if (descricao.length < 3) {
+        alert("Escreva uma descrição válida.");
+        return;
+    }
+
+    fetch("/alertas-route/registrarOcorrencia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            id_alerta: alertaSelecionado,
+            descricao: descricao
+        })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Erro ao salvar");
+        return res.text();
+    })
+    .then(msg => {
+        console.log(msg);
+        fecharModal();
+        carregarAlertasRecentes(); 
+    })
+    .catch(err => console.error(err));
+}
 
 function iniciar() {
     kpiAlertasPorComponente(), 
     kpiAlertasTotais(), 
     kpiAlertasPorTipo(), 
-    carregarAlertasRecentes()
+    carregarAlertasRecentes(),
+    salvarOcorrencia()
 }
 
     

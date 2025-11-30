@@ -1237,55 +1237,91 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // ---------------- HEATMAP ----------------
+function carregarHeatmap() {
+    fetch("/alertas-route/heatmapAlertasHoraComponente")
+        .then(res => res.status === 204 ? [] : res.json())
+        .then(dados => {
 
-var horas = [
-    "00:00", "01:00", "02:00", "03:00", "04:00",
-    "05:00", "06:00", "07:00", "08:00", "09:00",
-    "10:00", "11:00", "12:00", "13:00", "14:00",
-    "15:00", "16:00", "17:00", "18:00", "19:00",
-    "20:00", "21:00", "22:00", "23:00"
-];
+            const horas = [
+                "00:00", "01:00", "02:00", "03:00", "04:00",
+                "05:00", "06:00", "07:00", "08:00", "09:00",
+                "10:00", "11:00", "12:00", "13:00", "14:00",
+                "15:00", "16:00", "17:00", "18:00", "19:00",
+                "20:00", "21:00", "22:00", "23:00"
+            ];
 
-function gerarSerieAleatoria() {
-    return horas.map(h => ({ x: h, y: Math.floor(Math.random() * 12) }));
+            // Estrutura: { CPU: { "00": 3, "01": 0, ... } }
+            const componentesMap = {};
+
+            dados.forEach(item => {
+                if (!componentesMap[item.componente]) {
+                    componentesMap[item.componente] = {};
+                }
+                componentesMap[item.componente][item.hora] = item.total_alertas;
+            });
+
+            // Converter para series do ApexCharts
+            const series = Object.keys(componentesMap).map(componente => {
+                const horasFormatadas = horas.map((label, index) => {
+                    return {
+                        x: label,
+                        y: componentesMap[componente][index] || 0
+                    };
+                });
+
+                return {
+                    name: componente.toUpperCase(),
+                    data: horasFormatadas
+                };
+            });
+
+            atualizarHeatmap(series);
+        })
+        .catch(err => console.error("Erro no Heatmap:", err));
 }
 
-var optionsHeatmap = {
-    chart: {
-        height: 350,
-        type: "heatmap"
-    },
-    dataLabels: { enabled: false },
+var chartHeatmap;
 
-    plotOptions: {
-        heatmap: {
-            shadeIntensity: 0,
-            radius: 0,
-            colorScale: {
-                ranges: [
-                    { from: 0, to: 1, color: "#CFCFCF", name: "baixo" },
-                    { from: 2, to: 4, color: "#FFE066", name: "medio" },
-                    { from: 5, to: 8, color: "#F5A3A3", name: "alto" },
-                    { from: 9, to: 999, color: "#B53628", name: "pico" }
-                ]
+function atualizarHeatmap(seriesHeatmap) {
+    if (chartHeatmap) {
+        chartHeatmap.updateSeries(seriesHeatmap);
+        return;
+    }
+
+    var optionsHeatmap = {
+        chart: {
+            height: 350,
+            type: "heatmap"
+        },
+        dataLabels: { enabled: false },
+        plotOptions: {
+            heatmap: {
+                shadeIntensity: 0,
+                radius: 0,
+                colorScale: {
+                    ranges: [
+                        { from: 0, to: 1, color: "#CFCFCF", name: "baixo" },
+                        { from: 2, to: 4, color: "#FFE066", name: "medio" },
+                        { from: 5, to: 8, color: "#F5A3A3", name: "alto" },
+                        { from: 9, to: 999, color: "#B53628", name: "pico" }
+                    ]
+                }
             }
-        }
-    },
+        },
+        series: seriesHeatmap
+    };
 
-    series: [
-        { name: "CPU", data: gerarSerieAleatoria() },
-        { name: "RAM", data: gerarSerieAleatoria() },
-        { name: "REDE", data: gerarSerieAleatoria() },
-        { name: "DISCO", data: gerarSerieAleatoria() }
-    ]
-};
+    chartHeatmap = new ApexCharts(
+        document.querySelector("#heatmap-chart"),
+        optionsHeatmap
+    );
+
+    chartHeatmap.render();
+}
 
 document.addEventListener("DOMContentLoaded", () => {
-    var chartHeatmap = new ApexCharts(document.querySelector("#heatmap-chart"), optionsHeatmap);
-    chartHeatmap.render();
+    carregarHeatmap();
 });
-
-
 
 
 
@@ -1384,3 +1420,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     
 });
+
+
+let alertaSelecionado = null;
+
+function abrirModalRegistrar(id_alerta) {
+    alertaSelecionado = id_alerta;
+    document.getElementById("descricaoOcorrencia").value = "";
+    document.getElementById("modalOcorrencia").classList.remove("hidden");
+}
+
+function fecharModal() {
+    document.getElementById("modalOcorrencia").classList.add("hidden");
+}

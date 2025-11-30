@@ -70,6 +70,7 @@ ORDER BY
 function listarAlertasRecentes() {
     const sql = `
         SELECT 
+            a.id_alerta,
             m.nome_maquina AS portico,
             l.data_hora_captura AS dataHora,
             c.nome_componente AS componente,
@@ -84,9 +85,35 @@ function listarAlertasRecentes() {
     return database.executar(sql);
 }
 
+function heatmapAlertasHoraComponente() {
+    const sql = `
+        SELECT 
+            c.nome_componente AS componente,
+            HOUR(l.data_hora_captura) AS hora,
+            COUNT(*) AS total_alertas
+        FROM alerta AS a
+        JOIN leitura AS l ON a.fk_id_leitura = l.id_leitura
+        JOIN componente AS c ON a.fk_id_componente = c.id_componente
+        GROUP BY c.nome_componente, HOUR(l.data_hora_captura)
+        ORDER BY c.nome_componente, hora;
+    `;
+    return database.executar(sql);
+}
+
+function registrarOcorrencia(id_alerta, descricao) {
+    const sql = `
+        UPDATE alerta
+        SET descricao = '${descricao}'
+        WHERE id_alerta = ${id_alerta};
+    `;
+    return database.executar(sql);
+}
+
 module.exports = {
     kpiAlertasTotais, 
     kpiAlertasPorTipo, 
     kpiAlertasPorComponente, 
-    listarAlertasRecentes
+    listarAlertasRecentes, 
+    heatmapAlertasHoraComponente, 
+    registrarOcorrencia
 }

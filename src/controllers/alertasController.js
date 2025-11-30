@@ -67,9 +67,40 @@ function listarAlertasRecentes(req, res) {
         });
 }
 
+function heatmapAlertasHoraComponente(req, res) {
+    alertasModel.heatmapAlertasHoraComponente()
+        .then(resultado => {
+            if (resultado.length === 0) {
+                return res.status(204).send("Nenhum dado para heatmap.");
+            }
+            res.status(200).json(resultado);
+        })
+        .catch(erro => {
+            console.error("Erro no Heatmap:", erro);
+            res.status(500).json(erro.sqlMessage || "Erro interno no servidor.");
+        });
+}
+
+function registrarOcorrencia(req, res) {
+    const { id_alerta, descricao } = req.body;
+
+    if (!id_alerta || !descricao) {
+        return res.status(400).send("Campos inválidos.");
+    }
+
+    alertasModel.registrarOcorrencia(id_alerta, descricao)
+        .then(() => res.status(200).send("Ocorrência registrada com sucesso."))
+        .catch(erro => {
+            console.error("Erro ao registrar ocorrência:", erro);
+            res.status(500).json(erro.sqlMessage || erro.message);
+        });
+}
+
 module.exports = {
     kpiAlertasTotais, 
     kpiAlertasPorTipo, 
     kpiAlertasPorComponente, 
-    listarAlertasRecentes
+    listarAlertasRecentes, 
+    heatmapAlertasHoraComponente, 
+    registrarOcorrencia
 }
