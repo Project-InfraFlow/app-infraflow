@@ -1164,9 +1164,9 @@ body {
 
 /* LISTA */
 .list-ocorrencias {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    max-height: 350px; 
+    overflow-y: auto;
+    padding-right: 5px;
 }
 
 /* CABEÇALHO DAS COLUNAS */
@@ -2372,4 +2372,12 @@ input:checked+.slider:before {
 a {
     text-decoration: none;
     color: white;
+}
+
+.ocorrencia-item.critico {
+    background-color: #ffd5d5;
+}
+
+.ocorrencia-item.atencao {
+    background-color: #fff5c7;
 }

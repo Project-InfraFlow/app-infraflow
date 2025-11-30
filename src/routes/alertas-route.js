@@ -16,5 +16,8 @@ router.get("/kpiAlertasPorComponente", function (req, res) {
      alertasController.kpiAlertasPorComponente(req, res); 
 })
 
+router.get("/listarAlertasRecentes", (req, res) => {
+    alertasController.listarAlertasRecentes(req, res);
+}); 
 
 module.exports = router;

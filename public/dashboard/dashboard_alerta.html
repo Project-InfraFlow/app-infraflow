@@ -48,37 +48,6 @@
 
             <div class="divider"></div>
 
-            <!-- <div class="filters">
-        <div class="filters-title">
-          <i class="fas fa-filter"></i>
-          <span>Componentes</span>
-        </div>
-        <label class="filter-item">
-          <input type="checkbox" class="flt-comp" value="cpu" checked>
-          <span class="checkmark"></span>
-          <i class="fas fa-microchip"></i>
-          <span>CPU</span>
-        </label>
-        <label class="filter-item">
-          <input type="checkbox" class="flt-comp" value="memoria" checked>
-          <span class="checkmark"></span>
-          <i class="fas fa-memory"></i>
-          <span>Memória</span>
-        </label>
-        <label class="filter-item">
-          <input type="checkbox" class="flt-comp" value="disco" checked>
-          <span class="checkmark"></span>
-          <i class="fas fa-hdd"></i>
-          <span>Disco</span>
-        </label>
-        <label class="filter-item">
-          <input type="checkbox" class="flt-comp" value="rede" checked>
-          <span class="checkmark"></span>
-          <i class="fas fa-network-wired"></i>
-          <span>Rede</span>
-        </label>
-      </div> -->
-
             <div class="user-section">
                 <div class="user-info">
                     <i class="fas fa-user-circle"></i>
@@ -281,7 +250,7 @@
 
                             <div class="list-ocorrencias" id="listaOcorrencias">
 
-                                <div class="ocorrencia-item critico">
+                                <!-- <div class="ocorrencia-item critico">
                                     <div class="col">SSP-001</div>
                                     <div class="col">
                                         17/11/2025<br>
@@ -311,7 +280,7 @@
                                             Registrar <i class="bi bi-pencil-square"></i>
                                         </button>
                                     </div>
-                                </div>
+                                </div> -->
 
                             </div>
 
@@ -494,13 +463,61 @@
         });
 }
 
+function carregarAlertasRecentes() {
+    fetch("/alertas-route/listarAlertasRecentes")
+        .then(res => res.status === 204 ? [] : res.json())
+        .then(lista => {
+            const div = document.getElementById("listaOcorrencias");
+            div.innerHTML = ""; // limpa
 
+            if (!lista || lista.length === 0) {
+                div.innerHTML = `<p style="text-align: center">Nenhum alerta encontrado.</p>`;
+                return;
+            }
+
+            lista.forEach(item => {
+                const data = new Date(item.dataHora);
+
+                const classe = item.tipo_alerta == 2 
+                    ? "critico"
+                    : "atencao";
+
+                const html = `
+                    <div class="ocorrencia-item ${classe}">
+                        <div class="col">${item.portico}</div>
+
+                        <div class="col">
+                            ${data.toLocaleDateString("pt-BR")}<br>
+                            <span class="sub">${data.toLocaleTimeString("pt-BR", {hour: '2-digit', minute: '2-digit'})}</span>
+                        </div>
+
+                        <div class="col">${item.componente}</div>
+                        <div class="col">${item.valor}%</div>
+
+                        <div class="col tipo">
+                            ${classe === "critico" ? "Crítico" : "Atenção"}
+                        </div>
+
+                        <div class="col acao">
+                            <button class="btn-registrar">
+                                Registrar <i class="bi bi-pencil-square"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                div.innerHTML += html;
+            });
+        })
+        .catch(err => console.error("Erro ao carregar alertas:", err));
+}
 
 
 function iniciar() {
     kpiAlertasPorComponente(), 
     kpiAlertasTotais(), 
-    kpiAlertasPorTipo()
+    kpiAlertasPorTipo(), 
+    carregarAlertasRecentes()
 }
 
     

@@ -37,11 +37,11 @@ function kpiAlertasPorTipo(req, res){
 }
 
 function kpiAlertasPorComponente(req, res){
-    // Renomeei para refletir o novo Model
+    
     alertasModel.kpiAlertasPorComponente() 
     .then(resultado => {
         if(resultado.length > 0) {
-            // O resultado será um array de objetos, pronto para ser enviado ao JS
+          
             res.status(200).json(resultado); 
         } else {
             res.status(204).send("Nenhum resultado encontrado."); 
@@ -53,9 +53,23 @@ function kpiAlertasPorComponente(req, res){
     });
 }
 
+function listarAlertasRecentes(req, res) {
+    alertasModel.listarAlertasRecentes()
+        .then(resultado => {
+            if (resultado.length === 0) {
+                return res.status(204).send("Nenhum alerta encontrado.");
+            }
+            res.status(200).json(resultado);
+        })
+        .catch(erro => {
+            console.error("Erro ao listar alertas: ", erro);
+            res.status(500).json(erro.sqlMessage || "Erro interno no servidor.");
+        });
+}
 
 module.exports = {
     kpiAlertasTotais, 
     kpiAlertasPorTipo, 
-    kpiAlertasPorComponente
+    kpiAlertasPorComponente, 
+    listarAlertasRecentes
 }

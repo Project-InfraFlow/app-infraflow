@@ -67,9 +67,26 @@ ORDER BY
     return database.executar(instrucaoSql);
 }
 
+function listarAlertasRecentes() {
+    const sql = `
+        SELECT 
+            m.nome_maquina AS portico,
+            l.data_hora_captura AS dataHora,
+            c.nome_componente AS componente,
+            l.dados_float AS valor,
+            a.status_alerta AS tipo_alerta  -- 1 = atenção, 2 = crítico
+        FROM alerta AS a
+        JOIN leitura AS l ON a.fk_id_leitura = l.id_leitura
+        JOIN componente AS c ON a.fk_id_componente = c.id_componente
+        JOIN maquina AS m ON c.fk_id_maquina = m.id_maquina
+        ORDER BY l.data_hora_captura DESC;
+    `;
+    return database.executar(sql);
+}
 
 module.exports = {
     kpiAlertasTotais, 
     kpiAlertasPorTipo, 
-    kpiAlertasPorComponente
+    kpiAlertasPorComponente, 
+    listarAlertasRecentes
 }
