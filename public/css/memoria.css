@@ -741,3 +741,34 @@ header.topbar .brand img {
     }
 }
 
+.kpi-card {
+    position: relative;
+}
+
+.kpi-tooltip {
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.kpi-card:hover .kpi-tooltip {
+    opacity: 1;
+}
+
+#processoInfo {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
