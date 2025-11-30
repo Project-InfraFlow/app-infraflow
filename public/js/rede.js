@@ -28,148 +28,57 @@ let timerDB = null;
 let timerLatencia = null;
 let dadosLatencia = [];
 
-async function buscarLatenciaDB() {
+async function loadKPIs() {
     try {
-        const dados = await fetchLatenciaDB({ maquinaId: 1, limite: 1 });
-        
-        if (dados) {
-            dadosLatencia = dados;
-            atualizarKPILatencia(dados);
-            
-            if (graficos.tempoReal && document.getElementById('componentSelector')?.value === 'latency') {
-                atualizarGraficoTempoReal();
-            }
-        }
-    } catch (error) {
-        console.error('Erro no polling de latência:', error);
-    }
-}
+        const res = await fetch(`/rede/ultimas/1`);
+        const data = await res.json();
 
-// Iniciar polling de latência
-function iniciarPollingLatencia() {
-    pararPollingLatencia();
-    buscarLatenciaDB();
-    timerLatencia = setInterval(buscarLatenciaDB, 2000);
-}
+        let metrics = {
+            latencia: null,
+            jitter: null,
+            perda: null,
+            download: null
+        };
 
-// Parar polling de latência
-function pararPollingLatencia() {
-    if (timerLatencia) {
-        clearInterval(timerLatencia);
-        timerLatencia = null;
-    }
-}
-
-
-async function fetchLeiturasDB(params = { maquinaId: 1, limite: 50 }) {
-    try {
-        const qs = new URLSearchParams(params).toString();
-        const resp = await fetch(`/api/leituras?${qs}`);
-
-        if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
-        }
-
-        const arr = await resp.json();
-        console.log("API /api/leituras → exemplo recebido:", arr[0]);
-
-
-        if (!Array.isArray(arr)) {
-            throw new Error('Resposta da API não é um array');
-        }
-
-        if (arr.length) {
-            console.log('Exemplo de leitura da API:', arr[0]);
-        }
-
-        const parsed = arr.map(r => {
-            const tsBruto = r.horario || r.data_hora_captura || r.timestamp;
-
-            const cpu = Number(
-                r.cpu ??
-                r.cpu_percent ??
-                r.cpuPercent ??
-                0
-            );
-
-            const memoria = Number(
-                r.memoria ??
-                r.memoria_percent ??
-                r.ram ??              // mantém compat com a versão antiga
-                r.memoriaPercent ??
-                0
-            );
-
-            const disco = Number(
-                r.disco ??
-                r.disco_percent ??
-                r.discoPercent ??
-                0
-            );
-
-            const rede = Number(
-                r.rede ??
-                r.rede_mbps ??
-                r.rede_percent ??
-                r.redePercent ??
-                0
-            );
-
-            return {
-                ts: tsBruto,
-                timestamp: tsBruto ? new Date(tsBruto) : new Date(),
-                cpu,
-                memoria,
-                disco,
-                rede,
-                nucleos: r.nucleos || []
-            };
+        data.forEach(item => {
+            if (item.dados_texto.includes("Latencia")) metrics.latencia = item.dados_float;
+            if (item.dados_texto.includes("Jitter")) metrics.jitter = item.dados_float;
+            if (item.dados_texto.includes("Perda")) metrics.perda = item.dados_float;
+            if (item.dados_texto.includes("Velocidade")) metrics.download = item.dados_float;
         });
 
+        kpiLatenciaValue.innerText = metrics.latencia?.toFixed(2) + " ms";
+        kpiJitterValue.innerText = metrics.jitter?.toFixed(2) + " ms";
+        kpiPerdaValue.innerText = metrics.perda?.toFixed(2) + " %";
+        kpiDownloadValue.innerText = metrics.download?.toFixed(2) + " Mbps";
 
-        return parsed;
-    } catch (error) {
-        console.error('Erro ao buscar leituras:', error);
-        throw error;
+        applyStatusColor(kpiLatenciaValue.parentElement, metrics.latencia, [50, 100]);
+        applyStatusColor(kpiJitterValue.parentElement, metrics.jitter, [20, 50]);
+        applyStatusColor(kpiPerdaValue.parentElement, metrics.perda, [2, 10]);
+        applyStatusColor(kpiDownloadValue.parentElement, metrics.download, [50, 20], true);
+
+    } catch (err) {
+        console.error("Erro KPI rede:", err);
     }
 }
 
-function iniciarPollingDB() {
-    pararPollingDB();
+function applyStatusColor(card, valor, limiares, invertido = false) {
+    if (valor === null) return;
 
-    buscarDadosDB();
+    let [warn, danger] = limiares;
 
-    timerDB = setInterval(buscarDadosDB, 2000);
-}
+    let estado = "normal";
 
-async function buscarDadosDB() {
-    try {
-        const dados = await fetchLeiturasDB({ maquinaId: 1, limite: 50 });
-
-        if (dados && dados.length > 0) {
-            dadosTempoReal = dados.slice(-50);
-            estadoApp.dadosCompletos = dados;
-
-            gerenciadorInterface.atualizarInformacoesSistema();
-            gerenciadorInterface.atualizarKPIs();
-
-            if (graficos.tempoReal) {
-                atualizarGraficoTempoReal();
-            }
-
-            atualizarTabelaMonitoramento();
-
-            try {
-                const ultimo = dadosTempoReal[dadosTempoReal.length - 1];
-                const fonte = document.getElementById('edgeSelector')?.value || 'Pórtico';
-                window.evaluatePoint(ultimo, fonte);
-            } catch (err) {
-                console.error("Erro ao avaliar alertas:", err);
-            }
-        }
-    } catch (error) {
-        console.error('Erro no polling:', error);
+    if (!invertido) {
+        if (valor >= danger) estado = "danger";
+        else if (valor >= warn) estado = "warning";
+    } else {
+        if (valor <= danger) estado = "danger";
+        else if (valor <= warn) estado = "warning";
     }
+
+    card.classList.remove("normal", "warning", "danger");
+    card.classList.add(estado);
 }
 
 function pararPollingDB() {
@@ -208,8 +117,8 @@ class GerenciadorInterface {
             {
                 key: 'cpu',
                 valor: ultimoDado.cpu,
-                maxSaudavel: 45,
-                maxCritico: 85,
+                maxSaudavel: 50,
+                maxCritico: 200,
                 cardId: 'kpiCpu',
                 valueId: 'kpiCpuValue',
                 progressId: 'cpuProgress'
@@ -217,8 +126,8 @@ class GerenciadorInterface {
             {
                 key: 'memoria',
                 valor: ultimoDado.memoria,
-                maxSaudavel: 53,
-                maxCritico: 84,
+                maxSaudavel: 10,
+                maxCritico: 30,
                 cardId: 'kpiMemoria',
                 valueId: 'kpiMemoriaValue',
                 progressId: 'memoriaProgress'
@@ -226,8 +135,8 @@ class GerenciadorInterface {
             {
                 key: 'disco',
                 valor: ultimoDado.disco,
-                maxSaudavel: 60,
-                maxCritico: 90,
+                maxSaudavel: 1,
+                maxCritico: 10,
                 cardId: 'kpiDisco',
                 valueId: 'kpiDiscoValue',
                 progressId: 'discoProgress'
@@ -235,8 +144,8 @@ class GerenciadorInterface {
             {
                 key: 'rede',
                 valor: redePct,
-                maxSaudavel: 50,
-                maxCritico: 75,
+                maxSaudavel: 60,
+                maxCritico: 90,
                 cardId: 'kpiRede',
                 valueId: 'kpiRedeValue',
                 progressId: 'redeProgress'
@@ -483,24 +392,49 @@ function inicializarGraficos() {
     console.log('Gráfico tempo real inicializado');
 }
 
-function atualizarGraficoTempoReal() {
-    if (!graficos.tempoReal || !dadosTempoReal || dadosTempoReal.length === 0) {
-        return;
+async function loadChart() {
+    const metric = selectMetric.value;
+
+    try {
+        const res = await fetch(`/rede/historico/1/${metric}`);
+        const data = await res.json();
+
+        const labels = data.map(item => formatTime(item.data_hora_captura));
+        const valores = data.map(item => item.valor);
+
+        if (redeChart) redeChart.destroy();
+
+        const ctx = document.getElementById("chartRede").getContext("2d");
+
+        redeChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels,
+                datasets: [{
+                    label: metric.toUpperCase(),
+                    data: valores,
+                    borderWidth: 2,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true } },
+                scales: {
+                    x: { display: true },
+                    y: { display: true }
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error("Erro gráfico:", err);
     }
+}
 
-    const maxPontos = 50;
-    const dadosLimitados = dadosTempoReal.slice(-maxPontos);
-
-    graficos.tempoReal.data.labels = dadosLimitados.map(d =>
-        new Date(d.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    );
-
-    graficos.tempoReal.data.datasets[0].data = dadosLimitados.map(d => d.cpu);
-    graficos.tempoReal.data.datasets[1].data = dadosLimitados.map(d => d.memoria);
-    graficos.tempoReal.data.datasets[2].data = dadosLimitados.map(d => d.disco);
-    graficos.tempoReal.data.datasets[3].data = dadosLimitados.map(d => toRedePct(d.rede));
-
-    graficos.tempoReal.update('none');
+function formatTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
 function atualizarTabelaMonitoramento() {
@@ -631,7 +565,15 @@ function configurarCadastro() {
     });
 }
 
+const IS_DASHBOARD_REDE = window.location.pathname.includes("dashbord_rede");
+
 function inicializarDashboard() {
+
+    if (IS_DASHBOARD_REDE) {
+        console.log("Dashboard REDE detectado → ignorando inicialização do InfraFlow.");
+        return;
+    }
+
     console.log('🚀 Inicializando Dashboard InfraFlow...');
 
     const elementosCriticos = [
@@ -656,8 +598,6 @@ function inicializarDashboard() {
     iniciarPollingDB();
     iniciarPollingLatencia();
 
-    iniciarPollingDB();
-
     const selectMonitor = document.getElementById("edgeSelector");
     const monitorSpan = document.getElementById("monitor-selecionado");
 
@@ -677,10 +617,6 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(inicializarDashboard, 100);
 });
 
-window.addEventListener('beforeunload', function () {
-    pararPollingDB();
-    pararPollingLatencia();
-});
 
 function exportarCSV(dados, nomeArquivo) {
     if (!dados || dados.length === 0) {
@@ -890,15 +826,15 @@ body.has-fixed-topbar{padding-top:64px}
         const fontes = ['INFRA-EDGE-01 (SP-333)', 'INFRA-EDGE-02 (SP-333)', 'INFRA-EDGE-03 (SP-099)', 'INFRA-EDGE-04 (Km 414)'];
         const levels = ['ATENÇÃO', 'CRITICO'];
         const msgs = [
-            'CPU ultrapassou 70% de uso, iniciar monitoramento intensivo.',
-            'CPU acima de 85%, risco de saturação iminente.',
-            'Memória RAM acima de 75%, desempenho pode ser afetado.',
-            'Memória RAM em 85%, limite crítico atingido.',
-            'Disco acima de 80%, espaço disponível em nível de atenção.',
-            'Disco acima de 90%, risco de saturação do armazenamento.',
-            'Rede com uso acima de 70%, tráfego em nível de atenção.',
-            'Rede acima de 85%, possível saturação no enlace.',
-            'CPU e Memória simultaneamente em alta utilização.'
+            'Latência ultrapassou 70% de uso, iniciar monitoramento intensivo.',
+            'Latência acima de 85%, risco de saturação iminente.',
+            'Jitter acima de 75%, desempenho pode ser afetado.',
+            'Jitter em 85%, limite crítico atingido.',
+            'Perda de pacote acima de 80%, espaço disponível em nível de atenção.',
+            'Perda de pacote acima de 90%, risco de saturação do armazenamento.',
+            'Velocidade do download com uso acima de 70%, tráfego em nível de atenção.',
+            'Velocidade do download acima de 85%, possível saturação no enlace.',
+            'Latência e Jitter simultaneamente em alta utilização.'
         ];
         const now = new Date();
         for (let i = qtd - 1; i >= 0; i--) {
@@ -928,49 +864,47 @@ body.has-fixed-topbar{padding-top:64px}
             last[key] = cond;
         }
 
-        // CPU
+        
         cross(
             "cpu_crit",
             ponto.cpu >= 85,
             "CRITICO",
-            `CPU em ${ponto.cpu.toFixed(1)}% — Acima do limite crítico`
+            `Latência em ${ponto.cpu.toFixed(1)} ms — Acima do limite crítico`
         );
 
         cross(
             "cpu_warn",
             ponto.cpu >= 70 && ponto.cpu < 85,
             "ATENCAO",
-            `CPU em ${ponto.cpu.toFixed(1)}% — Utilização elevada`
+            `Latência em ${ponto.cpu.toFixed(1)} ms — Utilização elevada`
         );
 
-        // MEMÓRIA
         cross(
             "mem_crit",
             ponto.memoria >= 85,
             "CRITICO",
-            `Memória em ${ponto.memoria.toFixed(1)}% — Acima do limite crítico`
+            `Jitter em ${ponto.memoria.toFixed(1)} ms — Acima do limite crítico`
         );
 
         cross(
             "mem_warn",
             ponto.memoria >= 70 && ponto.memoria < 85,
             "ATENCAO",
-            `Memória em ${ponto.memoria.toFixed(1)}% — Utilização elevada`
+            `Jitter em ${ponto.memoria.toFixed(1)} ms — Utilização elevada`
         );
 
-        // DISCO
         cross(
             "disk_crit",
             ponto.disco >= 90,
             "CRITICO",
-            `Disco em ${ponto.disco.toFixed(1)}% — Acima do limite crítico (risco de travamento)`
+            `Perda de pacote em ${ponto.disco.toFixed(1)}% — Acima do limite crítico (risco de travamento)`
         );
 
         cross(
             "disk_warn",
             ponto.disco >= 80 && ponto.disco < 90,
             "ATENCAO",
-            `Disco em ${ponto.disco.toFixed(1)}% — Utilização elevada`
+            `Perda de pacote em ${ponto.disco.toFixed(1)}% — Utilização elevada`
         );
 
         // REDE (exemplo: acima de 180 Mbps saturação)
@@ -978,14 +912,14 @@ body.has-fixed-topbar{padding-top:64px}
             "network_crit",
             ponto.rede >= 180,
             "CRITICO",
-            `Rede em ${ponto.rede.toFixed(1)} Mbps — Saturação crítica detectada`
+            `Velocidade de download em ${ponto.rede.toFixed(1)} Mbps — Saturação crítica detectada`
         );
 
         cross(
             "network_warn",
             ponto.rede >= 120 && ponto.rede < 180,
             "ATENCAO",
-            `Rede em ${ponto.rede.toFixed(1)} Mbps — Tráfego muito alto`
+            `Velocidade de download em ${ponto.rede.toFixed(1)} Mbps — Tráfego muito alto`
         );
     }
     window.evaluatePoint = evaluatePoint;
@@ -1113,9 +1047,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// === STATUS DO SISTEMA (UPTIME + ALERTAS) ===
-
-// Armazena o início do uptime
 let uptimeStart = new Date();
 
 // Contador para a tela
@@ -1127,16 +1058,14 @@ function formatarUptime(ms) {
     return `${dias}d ${horas}h ${min}m`;
 }
 
-// Checa se algum valor está crítico
 function componenteCritico(cpu, ram, disco, rede) {
-    if (cpu > 85) return true;
-    if (ram > 84) return true;
-    if (disco > 90) return true;
-    if (rede >= 75) return true;
+    if (cpu > 200) return true;
+    if (ram > 30) return true;
+    if (disco > 1) return true;
+    if (rede >= 90) return true;
     return false;
 }
 
-// Pega alertas ativos do dia
 async function contarAlertasHoje() {
     try {
         const resp = await fetch("/api/alertas/dia");
@@ -1148,7 +1077,6 @@ async function contarAlertasHoje() {
     }
 }
 
-// Atualiza Status do Sistema
 async function atualizarStatusSistema(leitura) {
     const { cpu, ram, disco, rede } = leitura;
 
@@ -1158,7 +1086,7 @@ async function atualizarStatusSistema(leitura) {
     const houveCritico = componenteCritico(cpu, ram, disco, rede);
 
     if (houveCritico) {
-        uptimeStart = new Date(); // zera uptime
+        uptimeStart = new Date(); 
         document.getElementById("systemStatus").innerText = "Crítico";
         document.getElementById("systemStatus").classList.add("critico");
         document.getElementById("statusDescription").innerText = "Um ou mais componentes estão acima do limite seguro";
@@ -1174,16 +1102,12 @@ async function atualizarStatusSistema(leitura) {
     document.getElementById("systemUptime").innerText = formatarUptime(uptimeMs);
 }
 
-// ajustes
+let systemStartTime = new Date(); 
+let lastAlertTime = null; 
+let currentUptime = 0; 
+let isSystemNormal = true; 
+let alertCount = 0; 
 
-// Adicione estas variáveis globais no início do seu script
-let systemStartTime = new Date(); // Tempo de início do serviço
-let lastAlertTime = null; // Último tempo em que houve alerta
-let currentUptime = 0; // Uptime acumulado em segundos
-let isSystemNormal = true; // Status atual do sistema
-let alertCount = 0; // Contador de alertas ativos
-
-// Função para formatar o tempo em dias, horas e minutos
 function formatUptime(seconds) {
     const days = Math.floor(seconds / (24 * 60 * 60));
     const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
@@ -1192,39 +1116,32 @@ function formatUptime(seconds) {
     return `${days}d ${hours}h ${minutes}m`;
 }
 
-// Função para atualizar o status do sistema
 function updateSystemStatus() {
     const systemStatusElement = document.getElementById('systemStatus');
     const statusDescriptionElement = document.getElementById('statusDescription');
     const systemUptimeElement = document.getElementById('systemUptime');
     const alertCountElement = document.getElementById('alertCount');
 
-    // Atualiza o uptime apenas se o sistema estiver normal
     if (isSystemNormal) {
         currentUptime++;
         systemUptimeElement.textContent = formatUptime(currentUptime);
     }
 
-    // Atualiza contador de alertas
     alertCountElement.textContent = alertCount;
 }
 
-// Função para verificar se há alertas críticos
 function checkForCriticalAlerts() {
-    // Esta função deve ser integrada com sua lógica de monitoramento
-    // Por enquanto, vamos simular a verificação
 
-    const cpuValue = parseInt(document.getElementById('kpiCpuValue').textContent) || 0;
-    const memoriaValue = parseInt(document.getElementById('kpiMemoriaValue').textContent) || 0;
-    const discoValue = parseInt(document.getElementById('kpiDiscoValue').textContent) || 0;
-    const redeValue = parseInt(document.getElementById('kpiRedeValue').textContent) || 0;
+    const cpuValue = parseInt(document.getElementById('kpiLatenciaValue').textContent) || 0;
+    const memoriaValue = parseInt(document.getElementById('kpiJitterValue').textContent) || 0;
+    const discoValue = parseInt(document.getElementById('kpiPacoteValue').textContent) || 0;
+    const redeValue = parseInt(document.getElementById('kpiDownloadValue').textContent) || 0;
 
-    // Verifica se algum componente está em estado crítico (baseado na sua legenda)
     const hasCriticalAlert =
-        cpuValue > 85 ||
-        memoriaValue > 84 ||
-        discoValue > 90 ||
-        redeValue > 74;
+        cpuValue > 200 ||
+        memoriaValue > 30 ||
+        discoValue > 1 ||
+        redeValue >= 90;
 
     return hasCriticalAlert;
 }
@@ -1412,8 +1329,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Adicione esta função ao seu arquivo rede.js
-
 async function fetchLatenciaDB(params = { maquinaId: 1, limite: 1 }) {
     try {
         const qs = new URLSearchParams(params).toString();
@@ -1425,11 +1340,9 @@ async function fetchLatenciaDB(params = { maquinaId: 1, limite: 1 }) {
 
         const data = await resp.json();
         
-        // Supondo que a API retorne um array com o último registro de latência
         if (Array.isArray(data) && data.length > 0) {
             const ultimoRegistro = data[0];
             
-            // Extrai o valor de latência - ajuste conforme a estrutura do seu banco
             const latencia = Number(
                 ultimoRegistro.latencia ??
                 ultimoRegistro.latency ??

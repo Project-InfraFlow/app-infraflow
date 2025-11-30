@@ -44,7 +44,7 @@ app.use("/api/memoria", memoriaRouter);
 app.use("/api/cpu", cpuRouter);
 app.use("/contato", contatoRouter);
 app.use("/alertas-route", alertaRouter);
-app.use("/redeRoute", redeRouter);
+app.use("/rede", redeRouter);
 app.use("/api", latenciaRouter);
 app.use("/maquinas", maquinaRouter);
 app.use("/api/leituras", leiturasRouter);
