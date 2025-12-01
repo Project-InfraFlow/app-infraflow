@@ -1229,9 +1229,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-
-
- 
+document.addEventListener('DOMContentLoaded', function () {
+    const btnToggle = document.getElementById('alertsSidebarToggle');
+    if (btnToggle) btnToggle.click();
+}); 
  
  // alertas
 
