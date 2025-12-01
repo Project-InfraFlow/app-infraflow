@@ -14,7 +14,7 @@ const COOLDOWN_MS = 20 * 60 * 1000;
 async function gerarResposta(mensagem) {
   const modeloIA = await chatIA.models.generateContent({
     model: "gemini-2.0-flash",
-    contents: `Responda em uma única frase curta (máx. 100 caracteres), em português, sobre o risco e a recomendação principal com base nesses eventos de segurança do pórtico Free-Flow: ${mensagem}`
+    contents: `Responda em uma única frase curta (máx. 200 caracteres), em português, sobre o risco e a recomendação principal com base nesses eventos de segurança do pórtico Free-Flow: ${mensagem}`
   });
 
   const resposta = modeloIA.text;
