@@ -17,30 +17,31 @@ WHERE
 function kpiAlertasPorTipo() {
     var instrucaoSql = `
     SELECT
-        IFNULL(SUM(
-            CASE 
-                WHEN c.nome_componente = 'CPU' AND l.dados_float BETWEEN 45 AND 85 THEN 1
-                WHEN c.nome_componente = 'RAM' AND l.dados_float BETWEEN 54 AND 83 THEN 1
-                WHEN c.nome_componente = 'Disco' AND l.dados_float BETWEEN 80 AND 90 THEN 1
-                WHEN c.nome_componente = 'Rede' AND l.dados_float BETWEEN 50 AND 74 THEN 1
-                ELSE 0
-            END
-        ), 0) AS total_atencao,
+    SUM(
+        CASE 
+            WHEN c.nome_componente = 'CPU' AND l.dados_float >= 45 AND l.dados_float <= 85 THEN 1
+            WHEN c.nome_componente = 'Memória RAM'   AND l.dados_float >= 54 AND l.dados_float <= 83 THEN 1
+            WHEN c.nome_componente = 'Disco' AND l.dados_float >= 80 AND l.dados_float <= 90 THEN 1
+            WHEN c.nome_componente = 'Rede'  AND l.dados_float >= 50 AND l.dados_float <= 74 THEN 1
+            ELSE 0
+        END
+    ) AS total_atencao,
 
-        IFNULL(SUM(
-            CASE 
-                WHEN c.nome_componente = 'CPU' AND l.dados_float > 85 THEN 1
-                WHEN c.nome_componente = 'RAM' AND l.dados_float > 84 THEN 1
-                WHEN c.nome_componente = 'Disco' AND l.dados_float > 90 THEN 1
-                WHEN c.nome_componente = 'Rede' AND l.dados_float >= 75 THEN 1
-                ELSE 0
-            END
-        ), 0) AS total_critico
-    FROM alerta AS a
-    JOIN leitura AS l ON a.fk_id_leitura = l.id_leitura
-    JOIN componente AS c ON a.fk_id_componente = c.id_componente
-    WHERE 
-        l.data_hora_captura >= NOW() - INTERVAL 24 HOUR;
+    SUM(
+        CASE 
+            WHEN c.nome_componente = 'CPU' AND l.dados_float > 85 THEN 1
+            WHEN c.nome_componente = 'Memória RAM'   AND l.dados_float > 83 THEN 1
+            WHEN c.nome_componente = 'Disco' AND l.dados_float > 90 THEN 1
+            WHEN c.nome_componente = 'Rede'  AND l.dados_float >= 75 THEN 1
+            ELSE 0
+        END
+    ) AS total_critico
+
+FROM alerta AS a
+JOIN leitura AS l ON a.fk_id_leitura = l.id_leitura
+JOIN componente AS c ON a.fk_id_componente = c.id_componente
+WHERE 
+    l.data_hora_captura >= NOW() - INTERVAL 24 HOUR;
     `;
     
     return database.executar(instrucaoSql);
@@ -75,7 +76,23 @@ function listarAlertasRecentes() {
             l.data_hora_captura AS dataHora,
             c.nome_componente AS componente,
             l.dados_float AS valor,
-            a.status_alerta AS tipo_alerta  -- 1 = atenção, 2 = crítico
+
+            CASE
+                WHEN c.nome_componente = 'CPU Idle' AND l.dados_float < 30 THEN 2
+                WHEN c.nome_componente = 'CPU' AND l.dados_float > 85 THEN 2
+                WHEN c.nome_componente = 'Memória RAM' AND l.dados_float > 84 THEN 2
+                WHEN c.nome_componente = 'Disco' AND l.dados_float > 90 THEN 2
+                WHEN c.nome_componente = 'Rede'  AND l.dados_float >= 75 THEN 2
+
+                WHEN c.nome_componente = 'CPU Idle' AND l.dados_float BETWEEN 30 AND 70 THEN 1
+                WHEN c.nome_componente = 'CPU'   AND l.dados_float BETWEEN 45 AND 85 THEN 1
+                WHEN c.nome_componente = 'Memória RAM' AND l.dados_float BETWEEN 54 AND 84 THEN 1
+                WHEN c.nome_componente = 'Disco' AND l.dados_float BETWEEN 80 AND 90 THEN 1
+                WHEN c.nome_componente = 'Rede'  AND l.dados_float BETWEEN 50 AND 75 THEN 1
+
+                ELSE 0
+            END AS tipo_alerta
+
         FROM alerta AS a
         JOIN leitura AS l ON a.fk_id_leitura = l.id_leitura
         JOIN componente AS c ON a.fk_id_componente = c.id_componente
@@ -148,6 +165,25 @@ function kpiAlertasSemRegistro() {
     return database.executar(sql);
 }
 
+function alertasComRegistroLista() {
+    const sql = `
+        SELECT 
+            a.id_alerta,
+            c.nome_componente,
+            l.dados_float,
+            l.data_hora_captura,
+            a.descricao AS descricao_alerta
+        FROM alerta a
+        JOIN leitura l ON a.fk_id_leitura = l.id_leitura
+        JOIN componente c ON a.fk_id_componente = c.id_componente
+        WHERE a.descricao IS NOT NULL 
+          AND a.descricao <> ''
+        ORDER BY l.data_hora_captura DESC;
+    `;
+    
+    return database.executar(sql);
+}
+
 module.exports = {
     kpiAlertasTotais, 
     kpiAlertasPorTipo, 
@@ -156,5 +192,6 @@ module.exports = {
     heatmapAlertasHoraComponente, 
     registrarOcorrencia, 
     kpiAlertasCriticos, 
-    kpiAlertasSemRegistro
+    kpiAlertasSemRegistro, 
+    alertasComRegistroLista
 }

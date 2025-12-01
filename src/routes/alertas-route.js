@@ -34,4 +34,9 @@ router.get("/kpiAlertasCriticos", function(req, res) {
 router.get("/kpiAlertasSemRegistro", function (req, res) {
     alertasController.kpiAlertasSemRegistro(req, res);
 });
+
+router.get("/alertasComRegistroLista", function(req, res) {
+    alertasController.alertasComRegistroLista(req, res);
+});
+
 module.exports = router;

@@ -179,6 +179,21 @@ function kpiAlertasSemRegistro(req, res) {
         });
 }
 
+function alertasComRegistroLista(req, res) {
+    alertasModel.alertasComRegistroLista()
+        .then(resultado => {
+            if (resultado.length > 0) {
+                res.status(200).json(resultado);
+            } else {
+                res.status(204).send("Nenhum alerta com registro encontrado.");
+            }
+        })
+        .catch(erro => {
+            console.error("ERRO ao buscar alertas com registro: ", erro);
+            res.status(500).json(erro.sqlMessage || erro.message);
+        });
+}
+
 module.exports = {
     kpiAlertasTotais,
     kpiAlertasPorTipo,
@@ -187,5 +202,6 @@ module.exports = {
     heatmapAlertasHoraComponente,
     registrarOcorrencia,
     kpiAlertasCriticos, 
-    kpiAlertasSemRegistro
+    kpiAlertasSemRegistro, 
+    alertasComRegistroLista
 }

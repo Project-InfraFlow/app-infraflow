@@ -1327,7 +1327,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // ---------------- BARRAS (ALERTAS POR COMPONENTE) ----------------
-
 var chartBarras;
 
 var optionsBarras = {
@@ -1341,7 +1340,7 @@ var optionsBarras = {
         height: 280,
         toolbar: { show: false }
     },
-    colors: ['#C7C7C7'],
+    colors: ['#0d4c53ff'],
     plotOptions: {
         bar: {
             borderRadius: 4,
@@ -1354,7 +1353,7 @@ var optionsBarras = {
         categories: [], 
         labels: {
             style: {
-                colors: ['#555', '#555', '#555', '#555'],
+                colors: ['#0d4c53ff', '#0d4c53ff', '#0d4c53ff', '#0d4c53ff'],
                 fontSize: '12px'
             }
         },
@@ -1363,8 +1362,13 @@ var optionsBarras = {
     },
     yaxis: {
         labels: {
-            style: { colors: '#777' }
-        }
+            formatter: function (value) {
+                return Number.isInteger(value) ? value : "";
+            },
+            style: { colors: '#0d4c53ff' }
+        },
+        tickAmount: 6,
+        forceNiceScale: true
     },
     grid: {
         borderColor: '#e6e6e6',
@@ -1387,14 +1391,13 @@ function kpiAlertasPorComponente() {
     })
     .then(resultado => {
 
-        // Se não veio nada, plota gráfico vazio
         if (!resultado || resultado.length === 0) {
             chartBarras.updateOptions({ xaxis: { categories: [] } });
             chartBarras.updateSeries([{ data: [] }]);
             return;
         }
 
-        // Montagem dinâmica
+        
         const categorias = resultado.map(item => item.nome_componente.toUpperCase());
         const dados = resultado.map(item => item.total_alertas);
 
@@ -1417,10 +1420,8 @@ document.addEventListener("DOMContentLoaded", () => {
   
     chartBarras = new ApexCharts(document.querySelector("#componentes-chart"), optionsBarras);
     chartBarras.render(); 
-
     
 });
-
 
 let alertaSelecionado = null;
 
@@ -1433,3 +1434,6 @@ function abrirModalRegistrar(id_alerta) {
 function fecharModal() {
     document.getElementById("modalOcorrencia").classList.add("hidden");
 }
+
+
+
