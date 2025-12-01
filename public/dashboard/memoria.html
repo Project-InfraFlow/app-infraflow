@@ -179,6 +179,153 @@
                 </div>
             </div>
 
+            <!-- NOVA VIEW: ESPECIFICAÇÃO TÉCNICA -->
+            <div class="view-content hidden" data-view-content="especificacao">
+                <div class="view-header">
+                    <h1 class="view-title">
+                        <i class="fas fa-cogs"></i>
+                        Especificação Técnica - Pórticos FreeFlow
+                    </h1>
+                </div>
+
+                <div class="specs-grid">
+                    <div class="specs-card">
+                        <div class="specs-header">
+                            <i class="fas fa-microchip"></i>
+                            <h3>Hardware - Controlador de Pórtico</h3>
+                        </div>
+                        <div class="specs-content">
+                            <div class="spec-item">
+                                <span class="spec-label">Processador:</span>
+                                <span class="spec-value">Intel Xeon E-2336 (6 cores, 12 threads)</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Memória RAM:</span>
+                                <span class="spec-value">32GB DDR4 ECC 3200MHz</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Armazenamento:</span>
+                                <span class="spec-value">SSD NVMe 1TB + HDD 4TB</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Rede:</span>
+                                <span class="spec-value">Dual 10GbE SFP+ + Quad Gigabit</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Conectividade:</span>
+                                <span class="spec-value">4G/LTE + Wi-Fi 6 + GPS RTK</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="specs-card">
+                        <div class="specs-header">
+                            <i class="fas fa-satellite-dish"></i>
+                            <h3>Sensores & Dispositivos</h3>
+                        </div>
+                        <div class="specs-content">
+                            <div class="spec-item">
+                                <span class="spec-label">Câmeras ANPR:</span>
+                                <span class="spec-value">8MP com IR @ 60fps</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">RFID/DSRC:</span>
+                                <span class="spec-value">Antenas 5.8GHz DSRC</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Sensores:</span>
+                                <span class="spec-value">LiDAR + Loops Indutivos</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Processamento IA:</span>
+                                <span class="spec-value">NVIDIA Jetson Orin</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="specs-card">
+                        <div class="specs-header">
+                            <i class="fas fa-desktop"></i>
+                            <h3>Software & Sistemas</h3>
+                        </div>
+                        <div class="specs-content">
+                            <div class="spec-item">
+                                <span class="spec-label">Sistema Operacional:</span>
+                                <span class="spec-value">Ubuntu Server 22.04 LTS</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Containerização:</span>
+                                <span class="spec-value">Docker + Kubernetes</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Banco de Dados:</span>
+                                <span class="spec-value">PostgreSQL + Redis</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Monitoramento:</span>
+                                <span class="spec-value">Prometheus + Grafana</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="specs-card">
+                        <div class="specs-header">
+                            <i class="fas fa-chart-bar"></i>
+                            <h3>Performance</h3>
+                        </div>
+                        <div class="specs-content">
+                            <div class="spec-item">
+                                <span class="spec-label">Veículos/Hora:</span>
+                                <span class="spec-value">Até 4.000 por faixa</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Reconhecimento:</span>
+                                <span class="spec-value">&lt; 80ms por placa</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Uptime:</span>
+                                <span class="spec-value">99.99% (52min/ano)</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Temperatura:</span>
+                                <span class="spec-value">-25°C a 55°C</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="specs-card full-width">
+                        <div class="specs-header">
+                            <i class="fas fa-memory"></i>
+                            <h3>Gestão de Memória RAM</h3>
+                        </div>
+                        <div class="specs-content">
+                            <div class="memory-usage-info">
+                                <div class="usage-category">
+                                    <h4>Alocação de Memória:</h4>
+                                    <ul>
+                                        <li><strong>Motor ANPR/OCR:</strong> 8-10GB - Processamento com IA</li>
+                                        <li><strong>Banco em Memória:</strong> 6-8GB - Cache de transações</li>
+                                        <li><strong>Buffer de Vídeo:</strong> 4-6GB - Frames HD</li>
+                                        <li><strong>Serviços DSRC:</strong> 2-3GB - Comunicação</li>
+                                        <li><strong>Sistema Operacional:</strong> 3-4GB - Kernel RT</li>
+                                    </ul>
+                                </div>
+                                <div class="usage-category">
+                                    <h4>Otimizações:</h4>
+                                    <ul>
+                                        <li><strong>Alocação Dinâmica:</strong> Ajuste por fluxo veicular</li>
+                                        <li><strong>Cache Inteligente:</strong> 2GB para placas frequentes</li>
+                                        <li><strong>Compressão LZ4:</strong> 70% redução em buffers</li>
+                                        <li><strong>Swap Otimizado:</strong> ZRAM + SSD NVMe</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- FIM ESPECIFICAÇÃO TÉCNICA -->
+
             <div class="view-content hidden" data-view-content="historico">
                 <div class="view-header">
                     <h1 class="view-title"><i class="fas fa-clock-rotate-left"></i>Histórico de Alertas de Memória RAM
