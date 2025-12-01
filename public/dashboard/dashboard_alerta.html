@@ -130,7 +130,15 @@
                                 <i class="bi bi-exclamation-triangle-fill"></i>
                             </div>
                             <div class="kpi-info">
-                                <span class="kpi-label">Quantidade de alertas (Geral)</span>
+                                <span class="kpi-label">Quantidade de alertas (Geral) <div class="tooltip-icon">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                        <span class="tooltip-text">
+                                            Este gráfico mostra a distribuição dos alertas por hora e por componente,
+                                            permitindo
+                                            identificar períodos de maior atividade.
+                                        </span>
+                                    </div></span>
+
                             </div>
                         </div>
                         <div class="kpi-value" id="total-alertas">
@@ -142,7 +150,16 @@
                     <div class="kpi-card" id="kpiDisco">
                         <div class="kpi-header">
                             <div class="kpi-info">
-                                <span class="kpi-label">Tipos dos alertas</span>
+                                <span class="kpi-label">Tipos dos alertas
+                                    <div class="tooltip-icon">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                        <span class="tooltip-text">
+                                            Este gráfico mostra a distribuição dos alertas por hora e por componente,
+                                            permitindo
+                                            identificar períodos de maior atividade.
+                                        </span>
+                                    </div>
+                                </span>
                             </div>
                         </div>
 
@@ -162,30 +179,49 @@
 
                     </div>
 
-                    <div class="kpi-card" id="kpiDisco">
+                    <div class="kpi-card" id="kpiAlertasPoisson">
                         <div class="kpi-header">
                             <div class="kpi-icon disco">
-                                <i class="bi bi-alarm-fill"></i>
+                                <i class="bi bi-graph-up"></i>
                             </div>
                             <div class="kpi-info">
-                                <span class="kpi-label">Atendimentos dentro da SLA</span>
+                                <span class="kpi-label">Alertas fora da curva
+                                    <div class="tooltip-icon">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                        <span class="tooltip-text">
+                                            Este gráfico mostra a distribuição dos alertas por hora e por componente,
+                                            permitindo identificar períodos de maior atividade.
+                                        </span>
+                                    </div>
+                                </span>
                             </div>
                         </div>
-                        <div class="kpi-value" id="kpiDiscoValue">0%</div>
 
-
+                        <div class="kpi-value" id="kpialertapoisson"></div>
+                        <div class="kpi-desc" id="kpidescpoisson"></div>
                     </div>
 
                     <div class="kpi-card" id="kpiRede">
                         <div class="kpi-header">
                             <div class="kpi-icon rede">
-                                <i class="bi bi-collection-fill"></i>
+                                <i class="bi bi-card-checklist"></i>
                             </div>
                             <div class="kpi-info">
-                                <span class="kpi-label">Status de andamento dos alertas</span>
+                                <span class="kpi-label">Alertas sem registro
+
+                                    <div class="tooltip-icon">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                        <span class="tooltip-text">
+                                            Este gráfico mostra a distribuição dos alertas por hora e por componente,
+                                            permitindo
+                                            identificar períodos de maior atividade.
+                                        </span>
+                                    </div>
+
+                                </span>
                             </div>
                         </div>
-                        <div class="kpi-value" id="kpiRedeValue">0 Mbps</div>
+                        <div class="kpi-value" id="kpiRedeValue"></div>
 
 
                     </div>
@@ -199,6 +235,14 @@
                                 <i class="bi bi-calendar3"></i>
                                 Distribuição de alertas por Hora x Componente
                             </h3>
+                            <!-- Ícone com tooltip -->
+                            <div class="tooltip-icon">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <span class="tooltip-text">
+                                    Este gráfico mostra a distribuição dos alertas por hora e por componente, permitindo
+                                    identificar períodos de maior atividade.
+                                </span>
+                            </div>
                         </div>
                         <div class="chart-content">
                             <div id="heatmap-chart"></div>
@@ -214,6 +258,14 @@
                                     <i class="bi bi-cpu-fill"></i>
                                     Alertas por componentes
                                 </h3>
+                                <div class="tooltip-icon">
+                                    <i class="bi bi-info-circle-fill"></i>
+                                    <span class="tooltip-text">
+                                        Este gráfico mostra a distribuição dos alertas por hora e por componente,
+                                        permitindo
+                                        identificar períodos de maior atividade.
+                                    </span>
+                                </div>
                             </div>
                             <div class="chart-content-componente">
                                 <div id="componentes-chart"></div>
@@ -250,37 +302,6 @@
 
                             <div class="list-ocorrencias" id="listaOcorrencias">
 
-                                <!-- <div class="ocorrencia-item critico">
-                                    <div class="col">SSP-001</div>
-                                    <div class="col">
-                                        17/11/2025<br>
-                                        <span class="sub">12:29 – 13:29</span>
-                                    </div>
-                                    <div class="col">CPU</div>
-                                    <div class="col">85%</div>
-                                    <div class="col tipo">Crítico</div>
-                                    <div class="col acao">
-                                        <button class="btn-registrar">
-                                            Registrar <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="ocorrencia-item atencao">
-                                    <div class="col">SSP-001</div>
-                                    <div class="col">
-                                        17/11/2025<br>
-                                        <span class="sub">12:29 – 13:29</span>
-                                    </div>
-                                    <div class="col">RAM</div>
-                                    <div class="col">34%</div>
-                                    <div class="col tipo">Atenção</div>
-                                    <div class="col acao">
-                                        <button class="btn-registrar" >
-                                            Registrar <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                    </div>
-                                </div> -->
 
                             </div>
 
@@ -314,18 +335,17 @@
 
 
     <div id="modalOcorrencia" class="modal-ocorrencia hidden">
-    <div class="modal-content">
-        <h3>Registrar Ocorrência</h3>
+        <div class="modal-content">
+            <h3>Registrar Ocorrência</h3>
 
-        <textarea id="descricaoOcorrencia" 
-            placeholder="Descreva o que ocasionou o alerta..." rows="5"></textarea>
+            <textarea id="descricaoOcorrencia" placeholder="Descreva o que ocasionou o alerta..." rows="5"></textarea>
 
-        <div class="modal-actions">
-            <button onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
-            <button onclick="salvarOcorrencia()" class="btn-salvar">Salvar</button>
+            <div class="modal-actions">
+                <button onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+                <button onclick="salvarOcorrencia()" class="btn-salvar">Salvar</button>
+            </div>
         </div>
     </div>
-</div>
 
 
 </body>
@@ -441,67 +461,67 @@
             })
     }
 
-     function kpiAlertasPorTipo() {
-    fetch('/alertas-route/kpiAlertasPorTipo', {
-        method: "GET"
-    }).then(res => res.json())
-    
-        .then(function (resultado) {
-            
-        console.log("foi? alertas p tipo")
-            if (resultado && resultado.length > 0) {
-                
-                const alertasAtencao = resultado[0].total_atencao;
-                const alertasCriticos = resultado[0].total_critico;
-    
-                var kpiAtencao = document.getElementById('qtd_atencao');
-                if (kpiAtencao) {
-                    kpiAtencao.innerHTML = `<div id="qtd_atencao">${alertasAtencao}</div>`;
+    function kpiAlertasPorTipo() {
+        fetch('/alertas-route/kpiAlertasPorTipo', {
+            method: "GET"
+        }).then(res => res.json())
+
+            .then(function (resultado) {
+
+                console.log("foi? alertas p tipo")
+                if (resultado && resultado.length > 0) {
+
+                    const alertasAtencao = resultado[0].total_atencao;
+                    const alertasCriticos = resultado[0].total_critico;
+
+                    var kpiAtencao = document.getElementById('qtd_atencao');
+                    if (kpiAtencao) {
+                        kpiAtencao.innerHTML = `<div id="qtd_atencao">${alertasAtencao}</div>`;
+                    }
+
+
+                    var kpiCritico = document.getElementById('qtd_critico');
+                    if (kpiCritico) {
+                        kpiCritico.innerHTML = `<div id="qtd_critico" style="color: white;">${alertasCriticos}</div>`;
+                    }
+
+
+                } else {
+                    console.warn("Nenhum resultado encontrado.");
                 }
 
-                
-                var kpiCritico = document.getElementById('qtd_critico');
-                if (kpiCritico) {
-                    kpiCritico.innerHTML = `<div id="qtd_critico" style="color: white;">${alertasCriticos}</div>`;
+            })
+            .catch(erro => {
+                console.error("ERRO no fetch kpiAlertasPorTipo: ", erro);
+            });
+    }
+
+    function carregarAlertasRecentes() {
+        fetch("/alertas-route/listarAlertasRecentes")
+            .then(res => res.status === 204 ? [] : res.json())
+            .then(lista => {
+                const div = document.getElementById("listaOcorrencias");
+                div.innerHTML = ""; // limpa
+
+                if (!lista || lista.length === 0) {
+                    div.innerHTML = `<p style="text-align: center">Nenhum alerta encontrado.</p>`;
+                    return;
                 }
-            
 
-            } else {
-                console.warn("Nenhum resultado encontrado.");
-            }
+                lista.forEach(item => {
+                    const data = new Date(item.dataHora);
 
-        })
-        .catch(erro => {
-            console.error("ERRO no fetch kpiAlertasPorTipo: ", erro);
-        });
-}
+                    const classe = item.tipo_alerta == 2
+                        ? "critico"
+                        : "atencao";
 
-function carregarAlertasRecentes() {
-    fetch("/alertas-route/listarAlertasRecentes")
-        .then(res => res.status === 204 ? [] : res.json())
-        .then(lista => {
-            const div = document.getElementById("listaOcorrencias");
-            div.innerHTML = ""; // limpa
-
-            if (!lista || lista.length === 0) {
-                div.innerHTML = `<p style="text-align: center">Nenhum alerta encontrado.</p>`;
-                return;
-            }
-
-            lista.forEach(item => {
-                const data = new Date(item.dataHora);
-
-                const classe = item.tipo_alerta == 2 
-                    ? "critico"
-                    : "atencao";
-
-                const html = `
+                    const html = `
                     <div class="ocorrencia-item ${classe}" style="margin-bottom: 2%;">
                         <div class="col">${item.portico}</div>
 
                         <div class="col">
                             ${data.toLocaleDateString("pt-BR")}<br>
-                            <span class="sub">${data.toLocaleTimeString("pt-BR", {hour: '2-digit', minute: '2-digit'})}</span>
+                            <span class="sub">${data.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
 
                         <div class="col">${item.componente}</div>
@@ -519,47 +539,81 @@ function carregarAlertasRecentes() {
                     </div>
                 `;
 
-                div.innerHTML += html;
-            });
-        })
-        .catch(err => console.error("Erro ao carregar alertas:", err));
-}
-
-function salvarOcorrencia() {
-    const descricao = document.getElementById("descricaoOcorrencia").value.trim();
-
-    if (descricao.length < 3) {
-        alert("Escreva uma descrição válida.");
-        return;
+                    div.innerHTML += html;
+                });
+            })
+            .catch(err => console.error("Erro ao carregar alertas:", err));
     }
 
-    fetch("/alertas-route/registrarOcorrencia", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            id_alerta: alertaSelecionado,
-            descricao: descricao
+    function salvarOcorrencia() {
+        const descricao = document.getElementById("descricaoOcorrencia").value.trim();
+
+        if (descricao.length < 3) {
+            alert("Escreva uma descrição válida.");
+            return;
+        }
+
+        fetch("/alertas-route/registrarOcorrencia", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id_alerta: alertaSelecionado,
+                descricao: descricao
+            })
         })
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("Erro ao salvar");
-        return res.text();
-    })
-    .then(msg => {
-        console.log(msg);
-        fecharModal();
-        carregarAlertasRecentes(); 
-    })
-    .catch(err => console.error(err));
+            .then(res => {
+                if (!res.ok) throw new Error("Erro ao salvar");
+                return res.text();
+            })
+            .then(msg => {
+                console.log(msg);
+                fecharModal();
+                carregarAlertasRecentes();
+            })
+            .catch(err => console.error(err));
+    }
+
+    function kpiAlertasCriticos() {
+        fetch('/alertas-route/kpiAlertasCriticos')
+            .then(res => res.json())
+            .then(data => {
+
+                console.log("TESTE TESTE");
+
+                // preenche apenas os elementos internos
+                document.getElementById("kpialertapoisson").textContent = data.alertasHoje;
+                document.getElementById("kpidescpoisson").textContent = data.mensagem;
+
+            })
+            .catch(err => console.error("Erro no fetch KPI:", err));
+    }
+
+    function kpiAlertasSemRegistro() {
+    fetch('/alertas-route/kpiAlertasSemRegistro')
+        .then(res => res.json())
+        .then(data => {
+
+            const box = document.getElementById("kpiRedeValue");
+
+            box.innerHTML = `
+                <strong>${data.semRegistro}</strong><br>
+                <span style="font-size: 14px; opacity: 0.8;">
+                    ${data.mensagem}
+                </span>
+            `;
+        })
+        .catch(err => console.error("Erro no fetch KPI sem registro:", err));
 }
 
-function iniciar() {
-    kpiAlertasPorComponente(), 
-    kpiAlertasTotais(), 
-    kpiAlertasPorTipo(), 
-    carregarAlertasRecentes(),
-    salvarOcorrencia()
-}
+    function iniciar() {
+        kpiAlertasPorComponente(),
+            kpiAlertasTotais(),
+            kpiAlertasPorTipo(),
+            carregarAlertasRecentes(),
+            salvarOcorrencia(),
+            kpiAlertasCriticos(), 
+            kpiAlertasSemRegistro()
+    }
 
-    
+
 </script>

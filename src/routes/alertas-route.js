@@ -27,5 +27,11 @@ router.post("/registrarOcorrencia", (req, res) => {
     alertasController.registrarOcorrencia(req, res);
 });
 
+router.get("/kpiAlertasCriticos", function(req, res) {
+    alertasController.kpiAlertasCriticos(req, res);
+});
 
+router.get("/kpiAlertasSemRegistro", function (req, res) {
+    alertasController.kpiAlertasSemRegistro(req, res);
+});
 module.exports = router;

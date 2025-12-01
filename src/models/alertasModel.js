@@ -109,11 +109,52 @@ function registrarOcorrencia(id_alerta, descricao) {
     return database.executar(sql);
 }
 
+function kpiAlertasCriticos() {
+    var sql = `
+    WITH media AS (
+        SELECT AVG(alertas_por_dia) AS lambda
+        FROM (
+            SELECT DATE(l.data_hora_captura) AS dia,
+                   COUNT(a.id_alerta) AS alertas_por_dia
+            FROM alerta a
+            JOIN leitura l ON a.fk_id_leitura = l.id_leitura
+            WHERE l.data_hora_captura >= CURDATE() - INTERVAL 30 DAY
+              AND l.data_hora_captura < CURDATE()
+            GROUP BY dia
+        ) t
+    ),
+    hoje AS (
+        SELECT COUNT(*) AS alertasHoje
+        FROM alerta a
+        JOIN leitura l ON a.fk_id_leitura = l.id_leitura
+        WHERE DATE(l.data_hora_captura) = CURDATE()
+    )
+    SELECT 
+        hoje.alertasHoje,
+        media.lambda
+    FROM hoje, media;
+    `;
+
+    return database.executar(sql);
+}
+
+function kpiAlertasSemRegistro() {
+    const sql = `
+        SELECT COUNT(*) AS alertasSemRegistro
+        FROM alerta
+        WHERE descricao IS NULL
+           OR TRIM(descricao) = '';
+    `;
+    return database.executar(sql);
+}
+
 module.exports = {
     kpiAlertasTotais, 
     kpiAlertasPorTipo, 
     kpiAlertasPorComponente, 
     listarAlertasRecentes, 
     heatmapAlertasHoraComponente, 
-    registrarOcorrencia
+    registrarOcorrencia, 
+    kpiAlertasCriticos, 
+    kpiAlertasSemRegistro
 }

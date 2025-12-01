@@ -1,56 +1,56 @@
 var alertasModel = require("../models/alertasModel"); // Mantém a importação
 
-function kpiAlertasTotais (req, res){
- 
-    alertasModel.kpiAlertasTotais() 
-    .then(resultado => {
-        if(resultado.length > 0) {
-            
-            res.status(200).json(resultado); 
-        } else {
-            
-            res.status(204).send("Nenhum resultado encontrado."); 
-        }
-    })
-    .catch(erro => {
-        console.error("ERRO no controller kpiAlertasTotais: ", erro);
-        res.status(500).json(erro.sqlMessage || erro.message || "Erro interno do servidor.");
-    });
+function kpiAlertasTotais(req, res) {
+
+    alertasModel.kpiAlertasTotais()
+        .then(resultado => {
+            if (resultado.length > 0) {
+
+                res.status(200).json(resultado);
+            } else {
+
+                res.status(204).send("Nenhum resultado encontrado.");
+            }
+        })
+        .catch(erro => {
+            console.error("ERRO no controller kpiAlertasTotais: ", erro);
+            res.status(500).json(erro.sqlMessage || erro.message || "Erro interno do servidor.");
+        });
 }
 
-function kpiAlertasPorTipo(req, res){
- 
-    alertasModel.kpiAlertasPorTipo() 
-    .then(resultado => {
-        if(resultado.length > 0) {
-            
-            res.status(200).json(resultado); 
-        } else {
-            
-            res.status(204).send("Nenhum resultado encontrado."); 
-        }
-    })
-    .catch(erro => {
-        console.error("ERRO no controller kpiAlertasPorTipo: ", erro);
-        res.status(500).json(erro.sqlMessage || erro.message || "Erro interno do servidor.");
-    });
+function kpiAlertasPorTipo(req, res) {
+
+    alertasModel.kpiAlertasPorTipo()
+        .then(resultado => {
+            if (resultado.length > 0) {
+
+                res.status(200).json(resultado);
+            } else {
+
+                res.status(204).send("Nenhum resultado encontrado.");
+            }
+        })
+        .catch(erro => {
+            console.error("ERRO no controller kpiAlertasPorTipo: ", erro);
+            res.status(500).json(erro.sqlMessage || erro.message || "Erro interno do servidor.");
+        });
 }
 
-function kpiAlertasPorComponente(req, res){
-    
-    alertasModel.kpiAlertasPorComponente() 
-    .then(resultado => {
-        if(resultado.length > 0) {
-          
-            res.status(200).json(resultado); 
-        } else {
-            res.status(204).send("Nenhum resultado encontrado."); 
-        }
-    })
-    .catch(erro => {
-        console.error("ERRO no controller kpiAlertasPorComponente: ", erro);
-        res.status(500).json(erro.sqlMessage || erro.message || "Erro interno do servidor.");
-    });
+function kpiAlertasPorComponente(req, res) {
+
+    alertasModel.kpiAlertasPorComponente()
+        .then(resultado => {
+            if (resultado.length > 0) {
+
+                res.status(200).json(resultado);
+            } else {
+                res.status(204).send("Nenhum resultado encontrado.");
+            }
+        })
+        .catch(erro => {
+            console.error("ERRO no controller kpiAlertasPorComponente: ", erro);
+            res.status(500).json(erro.sqlMessage || erro.message || "Erro interno do servidor.");
+        });
 }
 
 function listarAlertasRecentes(req, res) {
@@ -96,11 +96,96 @@ function registrarOcorrencia(req, res) {
         });
 }
 
+function kpiAlertasCriticos(req, res) {
+
+    alertasModel.kpiAlertasCriticos()
+        .then(resultado => {
+
+            if (resultado.length === 0) {
+                return res.status(204).send("Nenhum dado encontrado.");
+            }
+
+            let { alertasHoje, lambda } = resultado[0];
+
+            if (!lambda || lambda <= 0) lambda = 1; // evita NaN caso não haja histórico
+
+            // Calcula probabilidade Poisson: P(X = k)
+            function poisson(k, lambda) {
+                return (Math.pow(lambda, k) * Math.exp(-lambda)) / factorial(k);
+            }
+
+            // fatorial simples
+            function factorial(n) {
+                return n <= 1 ? 1 : n * factorial(n - 1);
+            }
+
+            let prob = poisson(alertasHoje, lambda) * 100;
+
+            // Classificação
+            let mensagem = "";
+
+            if (prob > 15) {
+                mensagem = `${alertasHoje} alertas hoje. ${prob.toFixed(2)}% de chance. Normal.`;
+            } else if (prob > 1) {
+                mensagem = `${alertasHoje} alertas hoje. ${prob.toFixed(2)}% de chance. Raro.`;
+            } else {
+                mensagem = `${alertasHoje} alertas hoje. <1% de chance. Fora da curva.`;
+            }
+
+            res.json({
+                alertasHoje,
+                lambda,
+                probabilidade: prob.toFixed(2),
+                mensagem
+            });
+        })
+        .catch(erro => {
+            console.error("Erro no controller kpiAlertasCriticos:", erro);
+            res.status(500).json(erro.sqlMessage || erro);
+        });
+}
+
+function kpiAlertasSemRegistro(req, res) {
+
+    alertasModel.kpiAlertasSemRegistro()
+        .then(resultado => {
+
+            if (!resultado || resultado.length === 0) {
+                return res.status(204).send("Nenhum resultado.");
+            }
+
+            const total = resultado[0].alertasSemRegistro;
+            let mensagem = "";
+
+            if (total === 0) {
+                mensagem = "Nenhum alerta sem registro.";
+            } else if (total < 5) {
+                mensagem = `${total} alertas sem registro. Baixo volume.`;
+            } else if (total < 15) {
+                mensagem = `${total} alertas sem registro. Atenção.`;
+            } else {
+                mensagem = `${total} alertas sem registro. Crítico.`;
+            }
+
+            res.json({
+                alertasSemRegistro: total,
+                mensagem
+            });
+
+        })
+        .catch(erro => {
+            console.error("Erro na KPI Alertas Sem Registro:", erro);
+            res.status(500).json(erro.sqlMessage || erro);
+        });
+}
+
 module.exports = {
-    kpiAlertasTotais, 
-    kpiAlertasPorTipo, 
-    kpiAlertasPorComponente, 
-    listarAlertasRecentes, 
-    heatmapAlertasHoraComponente, 
-    registrarOcorrencia
+    kpiAlertasTotais,
+    kpiAlertasPorTipo,
+    kpiAlertasPorComponente,
+    listarAlertasRecentes,
+    heatmapAlertasHoraComponente,
+    registrarOcorrencia,
+    kpiAlertasCriticos, 
+    kpiAlertasSemRegistro
 }
